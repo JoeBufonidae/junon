@@ -3539,6 +3539,25 @@
       },
       "description": "Spread shot weapon. Each Deals Damage 12"
     },
+    "SubMachineGun": {
+      "parent": "Equipments.BaseEquipment",
+      "isWeapon": true,
+      "isFireArm": true,
+      "cost": {
+        "gold": 1000
+      },
+      "stats": {
+        "range": 500,
+        "damage": 10,
+        "health": 300,
+        "reload": 500
+      },
+      "requirements": {
+        "IronBar": 50,
+        "CopperBar": 50
+      },
+      "description": "Automatic Weapon. Damage 10"
+    },
     "PlasmaGun": {
       "parent": "Equipments.BaseEquipment",
       "isWeapon": true,
@@ -3652,7 +3671,7 @@
       "stats": {
         "range": 800,
         "damage": 10,
-        "health": 300,
+        "health": 600,
         "reload": 800
       },
       "requirements": {
