@@ -16,6 +16,10 @@ class Chat extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
   perform(caller, args) {
     let row
     let col

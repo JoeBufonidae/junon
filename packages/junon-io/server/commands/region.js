@@ -27,6 +27,12 @@ class RegionCommand extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
+
+
   perform(player, args) {
     let regionName
     let region

@@ -12,6 +12,12 @@ class Mute extends BaseCommand {
   allowOwnerOnly() {
     return true
   }
+  
+  isNonSandboxCommand() {
+    return true
+  }
+
+
 
   perform(caller, args) {
     const selector = args[0]

@@ -13,6 +13,12 @@ class SuitColor extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
+
+
   getAvailableSuitColors() {
     return ["gray", "red", "green", "blue", "orange", "purple", "yellow", "black"]
   }

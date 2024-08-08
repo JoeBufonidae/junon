@@ -20,6 +20,12 @@ class Name extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
+
+
   cleanName(text) {
     let newText = this.game.sanitize(text)
     return newText.substring(0,30)

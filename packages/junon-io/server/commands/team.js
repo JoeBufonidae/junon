@@ -30,6 +30,12 @@ class Team extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
+
+
   perform(player, args) {
     let name
     let playerName

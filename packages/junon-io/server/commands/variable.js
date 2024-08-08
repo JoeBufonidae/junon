@@ -21,6 +21,12 @@ class Variable extends BaseCommand {
     return true
   }
 
+  isNonSandboxCommand() {
+    return true
+  }
+
+
+
   getReservedVariableNames() {
     return {
       "player": true,

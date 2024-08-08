@@ -3390,6 +3390,7 @@
       "shouldShowUsage": true,
       "isUnbreakable": true,
       "shouldNotRemoveOnBreak": true,
+      "isStackable": true,
       "isAnimatable": true,
       "stats": {
         "range": 64,
