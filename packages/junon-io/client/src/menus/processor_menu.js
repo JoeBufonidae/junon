@@ -59,16 +59,44 @@ class ProcessorMenu extends BaseMenu {
 
   open(header, entity, description, shouldHideInput = false, footer = "", options = {}) {
     this.cleanup()
-
     this.storageId = entity.id
 
-    if (shouldHideInput) {
-      this.el.classList.add("processor_output_only")
-    } else {
-      this.el.classList.remove("processor_output_only")
+    const storageDiv = this.el.querySelector(".processor_storage")
+    storageDiv.innerHTML = ""
+
+    // Determine number of input slots
+    const slotCount = entity.slotCount || (entity.getStorageCount && entity.getStorageCount()) || 1
+
+    // Create input slots dynamically
+    if (!shouldHideInput) {
+      for (let i = 0; i < slotCount; i++) {
+        const slotDiv = document.createElement("div")
+        slotDiv.className = "input_inventory inventory_slot"
+        slotDiv.dataset.index = i
+        slotDiv.innerHTML = "<img src=''>"
+        storageDiv.appendChild(slotDiv)
+      }
     }
 
-    this.el.querySelector(".input_inventory").style.display = shouldHideInput ? "none" : "inline-block"
+    // Add progress bar and output slot
+    const progressBarDiv = document.createElement("div")
+    progressBarDiv.className = "processor_progress_bar"
+    progressBarDiv.innerHTML = `
+      <div class='processor_progress_bar_container'>
+        <div class='processor_progress_bar_fill'></div>
+      </div>
+      <div class='arrow-right'></div>
+    `
+    storageDiv.appendChild(progressBarDiv)
+
+    // Output slot (always index = slotCount)
+    const outputDiv = document.createElement("div")
+    outputDiv.className = "output_inventory inventory_slot"
+    outputDiv.dataset.index = slotCount
+    outputDiv.innerHTML = "<img src=''>"
+    storageDiv.appendChild(outputDiv)
+
+    // Set up rest of menu
     this.el.querySelector(".processor_storage").dataset.storageId = this.storageId
     this.el.querySelector(".menu_main_header").innerText = i18n.t(header)
     this.el.querySelector(".menu_description").innerText = i18n.t(description)

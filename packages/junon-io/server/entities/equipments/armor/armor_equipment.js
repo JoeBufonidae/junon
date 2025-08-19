@@ -1,7 +1,76 @@
 const BaseEquipment = require("./../base_equipment")
 const Protocol = require('../../../../common/util/protocol')
+const Attachments = require('./attachments')
 
 class ArmorEquipment extends BaseEquipment {
+  constructor(item, options) {
+    super(item, options);
+    this.attachments = []; // Store attachment objects here
+    this.combinedStats = null; // cache for merged stats
+  }
+
+  // -------- Attachment management --------
+
+  /**
+   * Add an attachment if not already installed
+   * @param {Object} attachment - { id: string, modifiers: { stat: number, ... } }
+   * @returns {boolean} true if added, false if already present
+   */
+  addAttachment(attachment) {
+    if (this.attachments.find(a => a.id === attachment.id)) {
+      return false; // already installed
+    }
+    this.attachments.push(attachment);
+    this.updateStatsFromAttachments();
+    return true;
+  }
+
+  /*
+   * Remove attachment by id
+   * @param {string} attachmentId
+   * @returns {boolean} true if removed, false if not found
+   */
+  removeAttachment(attachmentId) {
+    const index = this.attachments.findIndex(a => a.id === attachmentId);
+    if (index === -1) return false;
+    this.attachments.splice(index, 1);
+    this.updateStatsFromAttachments();
+    return true;
+  }
+
+  /**
+   * Calculate combined stats: base stats + attachment modifiers
+   */
+  updateStatsFromAttachments() {
+    // Clone base stats from constants
+    if (!Array.isArray(this.attachments)) this.attachments = [];
+    
+    let combined = { ...this.getConstants().stats };
+
+    for (const att of this.attachments) {
+      if (att.modifiers) {
+        for (const stat in att.modifiers) {
+          if (combined[stat] === undefined) combined[stat] = 0;
+          combined[stat] += att.modifiers[stat];
+        }
+      }
+    }
+
+    this.combinedStats = combined;
+  }
+
+  /**
+   * Override getStats to include attachment modifiers
+*/
+  getStats() {
+    if (!this.combinedStats) {
+      this.updateStatsFromAttachments();
+    }
+    return this.combinedStats || super.getStats();
+  }
+ 
+  // -------- Existing methods unchanged --------
+
   applyVelocity(player, velocity) {
     player.body.velocity = velocity // by default, set immediately
   }
@@ -80,7 +149,7 @@ class ArmorEquipment extends BaseEquipment {
       oxygen: oxygen
     }
 
-    this.getSocketUtil().emit(player.getSocket(), "UpdateStats", data)
+  //  this.getSocketUtil().emit(player.getSocket(), "UpdateStats", data)
   }
 
   getMaxOxygen() {
@@ -89,6 +158,7 @@ class ArmorEquipment extends BaseEquipment {
 
   onEquipmentConstructed() {
     this.oxygen = this.getMaxOxygen()
+ //   this.updateStatsFromAttachments()
   }
 
   onStorageChanged(storage) {

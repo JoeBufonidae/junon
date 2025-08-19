@@ -64,6 +64,7 @@ class ArmorEquipment extends BaseEquipment {
     // only if not worn by building
     if (this.user && this.user.isPlayer()) {
       this.user.redrawVisionLight()
+      
     }
   }
 

@@ -447,10 +447,12 @@ class EventManager {
     }
   }
 
-  getSpiderSpawnCount() {
+  getSpiderSpawnCount(team) {
     let dayCount = this.game.sector.getDayCount()
     if (dayCount < 6) return Math.floor(Math.random() * 2) + 1
-    if (dayCount < 12) return Math.floor(Math.random() * 3) + 2
+    if (dayCount < 12) {
+    let maxSpawn = Math.max(4, team.getMiningDrillCount() / 6);
+    return Math.floor(Math.random() * (maxSpawn - 2 + 1)) + 2;}
 
     return Math.floor(Math.random() * 2) + 3
   }
