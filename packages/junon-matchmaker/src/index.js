@@ -923,8 +923,8 @@ class MatchmakerServer {
 
       server.reserveSpot(sectorId)
 
-      let maxRowCount = 128
-      let maxColCount = 128
+      let maxRowCount = 256
+      let maxColCount = 256
 
       if (uid) {
         if (uid === "jEleFj7LAVhfv8FwLEKejEj6ESx2" ||
@@ -934,16 +934,16 @@ class MatchmakerServer {
         }
       } 
 
-      let allowedValues = [32, 64, 96, 128]
+      let allowedValues = [32, 64, 96, 128, 256]
                  
-      let rowCount = Math.min(maxRowCount, data.rowCount || 128)
-      let colCount = Math.min(maxColCount, data.colCount || 128)
+      let rowCount = Math.min(maxRowCount, data.rowCount || 256)
+      let colCount = Math.min(maxColCount, data.colCount || 256)
       if (allowedValues.indexOf(rowCount) === -1) {
-        rowCount = 128
+        rowCount = 256
       }
 
       if (allowedValues.indexOf(colCount) === -1) {
-        colCount = 128
+        colCount = 256
       }
 
       let gameParams = {
