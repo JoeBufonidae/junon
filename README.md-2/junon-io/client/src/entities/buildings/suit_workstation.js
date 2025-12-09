@@ -1,8 +1,8 @@
-// filepath: c:\Users\tmdjr\junon\packages\junon-io\client\src\entities\buildings\suit_alteration_station.js
+// filepath: c:\Users\tmdjr\junon\packages\junon-io\client\src\entities\buildings\SuitWorkstation.js
 const BaseBuilding = require("./base_building");
 const Protocol = require("./../../../../common/util/protocol");
 
-class SuitAlterationStation extends BaseBuilding {
+class SuitWorkstation extends BaseBuilding {
   constructor(game, data, isEquipDisplay) {
     super(game, data, isEquipDisplay);
     this.slots = {
@@ -13,7 +13,7 @@ class SuitAlterationStation extends BaseBuilding {
   }
 
   openMenu() {
-    this.game.processorMenu.open("Suit Alteration Station", this, this.getMenuDescription());
+    this.game.processorMenu.open("Suit Workstation", this, this.getMenuDescription());
   }
 
   setArmor(armor) {
@@ -56,8 +56,8 @@ class SuitAlterationStation extends BaseBuilding {
   }
 
   getType() {
-    return Protocol.definition().BuildingType.SuitAlterationStation;
+    return Protocol.definition().BuildingType.SuitWorkstation;
   }
 }
 
-module.exports = SuitAlterationStation;
+module.exports = SuitWorkstation;

@@ -1,4 +1,4 @@
-class SuitAlterationStation {
+class SuitWorkstation {
   constructor() {
     this.slots = {
       armor: null, // Slot for armor with open attachment slots
@@ -66,4 +66,4 @@ class SuitAlterationStation {
   }
 }
 
-module.exports = SuitAlterationStation;
+module.exports = SuitWorkstation;
