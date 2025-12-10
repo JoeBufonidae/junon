@@ -4141,6 +4141,28 @@
       },
       "description": "Good for melee combat. Reduces damage by 4."
     },
+      "FrameArmor": {
+      "parent": "Equipments.BaseEquipment",
+      "width": 64,
+      "height": 64,
+      "lightColor": "#850101",
+      "isLightPersistent": true,
+      "isCostIndependent": true,
+      "brightness": 100,
+      "cost": {
+        "gold": 50000
+      },
+      "stats": {
+        "range": 64,
+        "oxygen": 150,
+        "defense": 0
+      },
+      "requirements": {
+        "Meteorite": 40,
+        "SpaceSuit": 1
+      },
+      "description": "Framework armor that is customizable."
+    },
     "ImperialSpecialForcesArmor": {
       "parent": "Equipments.BaseEquipment",
       "width": 64,
@@ -6208,6 +6230,34 @@
       },
       "description": "Craft drugs and explosives"
     },
+    "SuitWorkstation": {
+      "parent": "Buildings.BaseProcessor",
+      "width": 64,
+      "height": 128,
+      "hasMenu": true,
+      "storageCount": 3,
+      "categories": {"producer": true},
+      "isInteractable": true,
+      "menuDescription": "Suit Workstation",
+      "requirements": {
+        "IronBar": 30,
+        "CircuitBoard": 10,
+        "Wire": 5
+      },
+      "cost": {
+        "gold": 500
+      },
+      "stats": {
+        "health": 150,
+        "count": 125,
+        "processingRate": 10
+      },
+      "upgrade": {
+        "health": "+25",
+        "count": "+25"
+      },
+      "description": "Suit Workstation"
+    },
     "Workshop": {
       "width": 64,
       "height": 64,
@@ -6709,7 +6759,7 @@
       "isInteractable": true,
       "showInteractTooltip": true,
       "stats": {
-        "reload": 3000,
+        "reload": 100,
         "damage": 12,
         "range": 320,
         "health": 300,

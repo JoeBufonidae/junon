@@ -87,6 +87,11 @@ class RemoteEventHandler {
       }
     }
   }
+  onInstallAttachment(player, data, socket) {
+  }
+
+  onRemoveAttachment(player, data, socket) {
+  }
   async onRequestGame(player, data, socket) {
     // check if available game exist, if not create one
     if (this.server.isServerFull(socket)) {
