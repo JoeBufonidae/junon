@@ -1,7 +1,6 @@
 module.exports = {
   "development": {
     "username": process.env['JUNON_DB_USER'] || "root",
-    "password": process.env['JUNON_DB_PASS'] || null,
     "database": "junon_development",
     "host": "127.0.0.1",
     "dialect": "mysql"

@@ -5,6 +5,7 @@ const Bars = require("./bars/index")
 const Foods = require("./foods/index")
 const Drinks = require("./drinks/index")
 const Ammos = require("./ammos/index")
+const Attachments = require("./equipments/armor/attachments/index")
 const Mobs = require("./mobs/index")
 const Item = require("./item")
 const Helper = require("./../../common/helper")
@@ -393,7 +394,8 @@ class TradeOrder {
       Foods: Foods,
       Drinks: Drinks,
       Ammos: Ammos,
-      Mobs: Mobs
+      Mobs: Mobs,
+      Attachments: Attachments
     }
   }
 }

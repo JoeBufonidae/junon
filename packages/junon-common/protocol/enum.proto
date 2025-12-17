@@ -268,6 +268,7 @@ enum BuildingType {
   Cabbage = 274;
   FrameArmor = 275;
   SuitWorkstation = 276;
+  SpeedAttachment = 277;
 }
 
 enum TerrainType {

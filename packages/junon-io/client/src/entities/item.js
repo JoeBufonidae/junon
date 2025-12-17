@@ -8,6 +8,7 @@ const Ammos = require("./ammos/index")
 const Terrains = require("./terrains/index")
 const Helper = require("./../../../common/helper")
 const Protocol = require("./../../../common/util/protocol")
+const Attachments = require("./equipments/armor/attachments/index")
 
 class Item {
 
@@ -75,6 +76,9 @@ class Item {
     klass = Terrains.forType(type)
     if (klass) return "terrain"
 
+    klass = Attachments.forType(type)
+    if (klass) return "attachment"
+
     throw new Error("no Buildings, Equipment, Ore, Bar, Food klass found for type " + type)
   }
 
@@ -108,6 +112,9 @@ class Item {
     klass = Terrains.forType(type)
     if (klass) return klass
 
+    klass = Attachments.forType(type)
+    if (klass) return klass
+    
     throw new Error("no Buildings, Equipment, Ore, Food found for type " + type)
   }
 

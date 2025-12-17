@@ -954,6 +954,10 @@ class Planner {
     return this.entity.getHandItem() && this.entity.getHandItem().isOre()
   }
 
+  hasAttachments() {
+    return this.entity.getHandItem() && this.entity.getHandItem().isAttachment()
+  }
+
   hasSeed(soilNetwork) {
     if (!this.entity.getHandItem()) return false
 

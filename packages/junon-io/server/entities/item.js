@@ -9,6 +9,7 @@ const Foods = require("./foods/index")
 const Drinks = require("./drinks/index")
 const Ammos = require("./ammos/index")
 const Terrains = require("./terrains/index")
+const Attachments = require('./equipments/armor/attachments/index')
 const BaseTransientEntity = require("./base_transient_entity")
 const ExceptionReporter = require('junon-common/exception_reporter')
 
@@ -221,6 +222,11 @@ class Item extends BaseTransientEntity {
   isArmor() {
     const klass = this.getKlass(this.type)
     return klass && klass.prototype.isArmor()
+  }
+  
+  isAttachment() {
+    const klassType = this.getKlassType(this.type)
+    return klassType === "attachment"
   }
 
   isDismantler() {
@@ -639,6 +645,9 @@ class Item extends BaseTransientEntity {
     klass = Terrains.forType(type)
     if (klass) return "terrains"
 
+    klass = Attachments.forType(type)
+    if (klass) return "attachment"
+
     return null
   }
 
@@ -667,6 +676,9 @@ class Item extends BaseTransientEntity {
       return this.isOre()
     }
 
+    if (itemType === 'attachment') {
+      return this.isAttachment()
+    }
     return this.type === itemType
   }
 
@@ -712,6 +724,9 @@ class Item extends BaseTransientEntity {
     if (klass) return klass
 
     klass = Terrains.forType(type)
+    if (klass) return klass
+
+    klass = Attachments.forType(type)
     if (klass) return klass
 
     return null

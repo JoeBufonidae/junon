@@ -10,10 +10,11 @@ class FrameArmor extends ArmorEquipment {
 
   repositionSprite() {
     super.repositionSprite()
-    this.sprite.position.x = -10
-    this.sprite.position.y = -1
+    this.sprite.position.x = -11
+    this.sprite.position.y = -7
+    this.sprite.width = 50
+    this.sprite.height = 55
   }
-
   hasOxygen() {
     return true
   }
