@@ -4105,6 +4105,7 @@
       "lightColor": "#ffffff",
       "isLightPersistent": true,
       "brightness": 0.8,
+      "attachmentSlots":1,
       "cost": {
         "gold": 200
       },
@@ -4127,6 +4128,7 @@
       "isLightPersistent": true,
       "isCostIndependent": true,
       "brightness": 0.8,
+      "attachmentSlots":2,
       "cost": {
         "gold": 8000
       },
@@ -4141,7 +4143,7 @@
       },
       "description": "Good for melee combat. Reduces damage by 4."
     },
-      "FrameArmor": {
+    "FrameArmor": {
       "parent": "Equipments.BaseEquipment",
       "width": 64,
       "height": 64,
@@ -4149,6 +4151,7 @@
       "isLightPersistent": true,
       "isCostIndependent": true,
       "brightness": 100,
+      "attachmentSlots":5,
       "cost": {
         "gold": 50000
       },
@@ -4171,6 +4174,7 @@
       "isLightPersistent": true,
       "isCostIndependent": true,
       "brightness": 0.8,
+      "attachmentSlots":3,
       "cost": {
         "gold": 50000
       },
@@ -4239,6 +4243,7 @@
       "lightColor": "#ffffff",
       "isLightPersistent": true,
       "brightness": 0.8,
+      "attachmentSlots":1,
       "stats": {
         "range": 64
       },
@@ -4255,6 +4260,7 @@
       "isLightPersistent": true,
       "isCostIndependent": true,
       "brightness": 0.8,
+      "attachmentSlots":1,
       "cost": {
         "gold": 25000
       },
@@ -4268,6 +4274,21 @@
         "SpaceSuit": 1
       },
       "description": "Protect against environmental hazards (miasma, poison)"
+    }
+  },
+  "Attachments": {
+    "SpeedAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 1000
+      },
+      "requirements": {
+        "IronBar": 50,
+        "Wire": 10,
+        "CircuitBoard": 5
+      },
+      "description": "Boosts speed" 
     }
   },
   "Transports": {

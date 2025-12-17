@@ -5,7 +5,7 @@ const Helper = require("./../helper")
 let FlatConstants = JSON.parse(JSON.stringify(Constants))
 
 let groups = ["Terrains", "Buildings", "Crops", "Equipments", "Mobs", 
-              "Projectiles", "Bars", "Ores", "Ammos", "Drinks", "Foods", "Walls", "Floors", "Effects", "Transports"]
+              "Projectiles", "Bars", "Ores", "Ammos", "Drinks", "Foods", "Walls", "Floors", "Effects", "Transports","Attachments"]
 
 groups.forEach((group) => {
   for (let key in FlatConstants[group]) {

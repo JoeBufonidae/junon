@@ -979,8 +979,8 @@ class MatchmakerServer {
 
       server.reserveSpot(sectorId)
 
-      let maxRowCount = 256
-      let maxColCount = 256
+      let maxRowCount = 64
+      let maxColCount = 64
 
       if (uid) {
         if (uid === "jEleFj7LAVhfv8FwLEKejEj6ESx2" ||

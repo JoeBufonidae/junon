@@ -1640,7 +1640,7 @@ class Game {
   }
 
   getSellableGroups() {
-    return ["Mobs", "Buildings", "Equipments", "Ores", "Bars", "Foods", "Ammos"]
+    return ["Mobs", "Buildings", "Equipments", "Ores", "Bars", "Foods", "Ammos","Attachments"]
   }
 
   getSellableKlass(group, type) {
