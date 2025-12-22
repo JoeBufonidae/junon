@@ -6256,7 +6256,7 @@
       "width": 64,
       "height": 128,
       "hasMenu": true,
-      "storageCount": 3,
+      "storageCount": 4,
       "categories": {"producer": true},
       "isInteractable": true,
       "menuDescription": "Suit Workstation",
@@ -6313,6 +6313,7 @@
       "categories": {"producer": true},
       "isInteractable": true,
       "menuDescription": "[Deprecated] No longer functional",
+      "storageCount": 3,
       "requirements": {
         "IronBar": 30,
         "CircuitBoard": 10,
@@ -6324,7 +6325,7 @@
       "stats": {
         "health": 150,
         "count": 125,
-        "processingRate": 10
+        "processingRate": 20
       },
       "upgrade": {
         "health": "+25",

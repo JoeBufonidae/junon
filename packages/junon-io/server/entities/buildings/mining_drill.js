@@ -151,9 +151,6 @@ class MiningDrill extends BaseProcessor {
       return false;
   } 
   
-  getOutputStorageIndex() {
-    return 0
-  }
 
 }
 
