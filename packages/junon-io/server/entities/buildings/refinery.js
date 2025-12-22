@@ -43,12 +43,6 @@ class Refinery extends BaseProcessor {
   isProcessable(inputItem) {
     return inputItem.isOre() || inputItem.isBar()
   }
-  executeTurn() {
-    const isFiveSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * 5) === 0
-    if (!isFiveSecondInterval) return
-
-    this.increaseProgress()
-  }
 
   createOutputItem(inputItem) {
     //comment out below to disable
