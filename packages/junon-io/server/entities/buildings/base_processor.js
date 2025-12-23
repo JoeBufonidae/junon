@@ -8,8 +8,8 @@ class BaseProcessor extends BaseBuilding {
     this.progress = 0
   }
 
-  getInputStorageIndex() {
-    return 0
+  getInputStorageIndices() {
+    return [0]
   }
 
   getOutputStorageIndex() {
@@ -29,8 +29,8 @@ class BaseProcessor extends BaseBuilding {
 
   canProceed() {
     if (this.isStorageFull()) return false
-    let inputItem = this.getInputItem()
-    return inputItem && this.isProcessable(inputItem)
+    let inputItems = this.getInputItems(this.getInputStorageIndices())
+    return inputItems && this.isProcessable(inputItems)
   }
 
   increaseProgress() {
@@ -70,7 +70,7 @@ class BaseProcessor extends BaseBuilding {
   onProgressChanged() {
     if (this.hasReachedFullProgress()) {
       this.progress = 0
-      let inputItem = this.getInputItem()
+      let inputItem = this.getInputItems(this.getInputStorageIndices())[0]
 
       let outputItem = this.createOutputItem(inputItem)
       if (outputItem) {
@@ -88,9 +88,23 @@ class BaseProcessor extends BaseBuilding {
     throw new Error("must implement BaseProcessor#createOutputItem")
   }
 
-  getInputItem() {
-    return this.get(this.getInputStorageIndex())
+  getInputItems(storageIndices) {
+    if (!Array.isArray(storageIndices)) {
+      storageIndices = [storageIndices]
+    }
+    
+    const inputItems = []
+
+    for (let i = 0; i < storageIndices.length; i++) {
+      const item = this.get(storageIndices[i])
+      if (item) {
+        inputItems.push(item)
+      }
+    }
+
+    return inputItems
   }
+
 
   getOutputItem() {
     return this.get(this.getOutputStorageIndex())
@@ -106,9 +120,9 @@ class BaseProcessor extends BaseBuilding {
   }
 
   processInputItem() {
-    let inputItem = this.getInputItem()
-    if (inputItem) {
-      if (this.isProcessable(inputItem)) {
+    let inputItems = this.getInputItems(this.getInputStorageIndices())
+    if (inputItems) {
+      if (this.isProcessable(inputItems)) {
         this.addProcessor()
       } else {
         this.removeProcessor()

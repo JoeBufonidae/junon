@@ -14,7 +14,6 @@ class Fridge extends BaseBuilding {
 
   canStoreInBuilding(index, item) {
     if (!item) return true // allow swap with blank space slot
-    
     return item.isFood() || item.isDrink()
   }
 
