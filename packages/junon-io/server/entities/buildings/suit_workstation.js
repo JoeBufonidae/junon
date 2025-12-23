@@ -35,26 +35,29 @@ class SuitWorkstation extends BaseProcessor {
 
   // Validation logic
   isProcessable() {
-    const armor = this.getInputSlot(0)
-    const attachment = this.getInputSlot(1)
+    console.log("isProcessable")
+    const inputItems = this.getInputItems(this.getInputStorageIndices())
+    const armor = inputItems[0] //this should work
+    const attachment = inputItems[1]
     //const magnet = this.getInputSlot(2)
-
+    console.log("hmmmm", armor.isArmor())
     if (!armor || !attachment) return false
-    if (!armor.isArmor || !armor.isArmor()) return false
-
+    console.log("items are there")
+    if (!armor.isArmor()) return false
+    console.log("first check")
     // Ensure attachments is initialized
     if (!Array.isArray(armor.attachments)) armor.attachments = []
 
-    const klass = item.getKlass(item.type)
+    const klass = armor.getKlass(armor.type)
     const constants = klass.prototype.getConstants()
     const maxSlots = constants.attachmentSlots
     if (armor.attachments.length >= maxSlots) return false
-
+    console.log("herrroooo")
     // Check attachment validity
     const attData = Attachments[attachment.id]
     if (!attData) return false
     if (armor.attachments.find(a => a.id === attachment.id)) return false
-
+    console.log("third check")
     /*
     // Magnet requirement for high tier
     const attTier = attData.tier || 1
@@ -97,11 +100,12 @@ class SuitWorkstation extends BaseProcessor {
     return 2
   }
 
-  getInputStorageIndex() {
-    return 0 || 1
+  getInputStorageIndices() {
+    return [0, 1, 2]
   }
 
   createOutputItem() {
+    console.log("createOutputItem",this.isProcessable())
     if (!this.isProcessable()) return null
 
     const armor = this.getInputSlot(0)

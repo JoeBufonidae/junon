@@ -729,6 +729,9 @@ class Item extends BaseTransientEntity {
     klass = Attachments.forType(type)
     if (klass) return klass
 
+    klass = Armors.forType(type)
+    if (klass) return klass
+
     return null
   }
 
