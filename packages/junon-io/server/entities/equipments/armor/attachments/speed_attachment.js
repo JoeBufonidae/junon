@@ -10,6 +10,16 @@ class SpeedAttachment extends BaseAttachment {
   getType() {
     return Protocol.definition().BuildingType.SpeedAttachment
   }
+
+  applyEffect(player) {
+    const speedBoost = Constants.Attachments.SpeedAttachment.speedBoost
+    player.speed *= speedBoost
+  }
+
+  removeEffect(player) {
+    const speedBoost = Constants.Attachments.SpeedAttachment.speedBoost
+    player.speed /= speedBoost
+  }
 }
 
 module.exports = SpeedAttachment

@@ -1,6 +1,7 @@
 const BaseEquipment = require("./../base_equipment")
 const Protocol = require('../../../../common/util/protocol')
 const Attachments = require('./attachments')
+const Constants = require('../../../../common/constants.json')
 
 class ArmorEquipment extends BaseEquipment {
   constructor(item, options) {
@@ -172,6 +173,25 @@ class ArmorEquipment extends BaseEquipment {
       if (this.owner && !this.owner.isSector()) {
         this.owner.onOxygenChanged()
       }
+    }
+  }
+  onEquip(player) {
+    if (this.attachments && Array.isArray(this.attachments)) {
+      this.attachments.forEach(attachment => {
+        if (attachment.applyEffect) {
+          attachment.applyEffect(player)
+        }
+      })
+    }
+  }
+
+  onUnequip(player) {
+    if (this.attachments && Array.isArray(this.attachments)) {
+      this.attachments.forEach(attachment => {
+        if (attachment.removeEffect) {
+          attachment.removeEffect(player)
+        }
+      })
     }
   }
 

@@ -2356,6 +2356,8 @@ class Player extends BaseEntity {
       this.getHandEquip().onOwnerPositionChanged(this)
     }
 
+
+
     this.updateDragTargetPosition()
     this.updateMountPosition()
     this.consumeStamina("walk")
@@ -5443,7 +5445,44 @@ class Player extends BaseEntity {
   }
 
   getMaxSpeed() {
-    return this.getSpeed()
+    let speed = this.speed ? this.speed : Constants.Player.speed
+
+    const armor = this.getArmorEquipment()
+    if (armor && Array.isArray(armor.attachments)) {
+      let multiplier = 1
+      armor.attachments.forEach((attachment) => {
+        if (!attachment) return
+        if (typeof attachment.speedBoost === "number") {
+          multiplier *= attachment.speedBoost
+        } else if (attachment.modifiers && typeof attachment.modifiers.speedMultiplier === "number") {
+          multiplier *= attachment.modifiers.speedMultiplier
+        } else if (attachment.modifiers && typeof attachment.modifiers.speed === "number") {
+          speed += attachment.modifiers.speed
+        }
+      })
+      speed *= multiplier
+    }
+
+    // apply buffs
+    if (this.mounted && Protocol.definition().MobType[this.mounted.type] == "BioRaptor") {
+      const platform = this.getStandingPlatform()
+      if (!platform) {
+        speed += 3
+      }
+    } else if(this.mounted && Protocol.definition().MobType[this.mounted.type] == "Car") {
+      const platform = this.getStandingPlatform()
+      if(platform) {
+        speed += 5
+      }
+    } else if (!this.getArmorEquipment()) {
+      if (!this.game.isMiniGame()) {
+        speed += 2
+      }
+    }
+
+    speed = this.isLowStatus("stamina") ? speed / 2 : speed
+
+    return speed * Constants.globalSpeedMultiplier
   }
 
   getDamageMultiplier() {
@@ -5852,7 +5891,6 @@ class Player extends BaseEntity {
   }
 
 }
-
 Object.assign(Player.prototype, Upgradable.prototype)
 Object.assign(Player.prototype, PlayerCommon.prototype, {
   onGoldChanged(previous, current) {
@@ -5876,7 +5914,6 @@ Object.assign(Player.prototype, PlayerCommon.prototype, {
     // }
   }
 })
-
 Object.assign(Player.prototype, Movable.prototype, {
   getAngleDeltaFromControls() {
     // never change angle based on wasd keys
@@ -5885,8 +5922,23 @@ Object.assign(Player.prototype, Movable.prototype, {
   getSpeed() {
     let speed = this.speed ? this.speed : Constants.Player.speed
 
-    // apply buffs
+    const armor = this.getArmorEquipment()
+    if (armor && Array.isArray(armor.attachments)) {
+      let multiplier = 1
+      armor.attachments.forEach((attachment) => {
+        if (!attachment) return
+        if (typeof attachment.speedBoost === "number") {
+          multiplier *= attachment.speedBoost
+        } else if (attachment.modifiers && typeof attachment.modifiers.speedMultiplier === "number") {
+          multiplier *= attachment.modifiers.speedMultiplier
+        } else if (attachment.modifiers && typeof attachment.modifiers.speed === "number") {
+          speed += attachment.modifiers.speed
+        }
+      })
+      speed *= multiplier
+    }
 
+    // apply buffs
     if (this.mounted && Protocol.definition().MobType[this.mounted.type] == "BioRaptor") {
       const platform = this.getStandingPlatform()
       if (!platform) {
@@ -5902,7 +5954,6 @@ Object.assign(Player.prototype, Movable.prototype, {
         speed += 2
       }
     }
-    
 
     speed = this.isLowStatus("stamina") ? speed / 2 : speed
 
@@ -5912,7 +5963,6 @@ Object.assign(Player.prototype, Movable.prototype, {
     return this.getVelocityFromControls(controlKeys, this.getSpeed())
   }
 })
-
 Object.assign(Player.prototype, ShipMountable.prototype, {
   getRelativeX() {
     return this.relativePosition[0]
@@ -5921,7 +5971,6 @@ Object.assign(Player.prototype, ShipMountable.prototype, {
     return this.relativePosition[1]
   }
 })
-
 Object.assign(Player.prototype, Destroyable.prototype, {
   damage(amount, attacker, sourceEntity) {
     if (this.isInvulnerable) return

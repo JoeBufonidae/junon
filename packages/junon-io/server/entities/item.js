@@ -249,6 +249,13 @@ class Item extends BaseTransientEntity {
       const klass = this.getKlass(this.type)
       this.instance = new klass(this, this.options)
     }
+
+    // Restore attachment data if present
+    if (this.instance && this.attachmentData && Array.isArray(this.attachmentData)) {
+      if (typeof this.instance.fromJson === 'function') {
+        this.instance.fromJson({})
+      }
+    }
   }
 
   getOwner() {
@@ -727,9 +734,6 @@ class Item extends BaseTransientEntity {
     if (klass) return klass
 
     klass = Attachments.forType(type)
-    if (klass) return klass
-
-    klass = Armors.forType(type)
     if (klass) return klass
 
     return null
