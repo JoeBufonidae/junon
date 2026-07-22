@@ -5,27 +5,37 @@ const Helper = require("./../../../../../../common/helper")
 
 class BaseAttachment extends BaseEntity {
   constructor(game, data) {
+    data.x = 0
+    data.y = 0
     super(game, data)
-
     this.repositionSprite()
   }
 
   getSprite() {
     const sprite = new PIXI.Sprite(PIXI.utils.TextureCache[this.getSpritePath()])
+    sprite.width = this.getWidth()
+    sprite.height = this.getHeight()
     return sprite
   }
   
 
   repositionSprite() {
-    this.sprite.anchor.set(0)
-    this.sprite.position.x = 0
-    this.sprite.position.y = 0
-    //this.sprite.rotation = Math.PI/2
+      this.sprite.anchor.set(0)
+      this.sprite.position.x = 0
+      this.sprite.position.y = 0
   }
+
+
+
   getSpriteContainer() {
-    return this.data.player.characterSprite
+      if (this.data.user.isBuildingType()) {
+          return this.data.user.buildingSprite
+      } else {
+          return this.data.user.characterSprite
+      }
   }
  
+  
 
   onPostEquip() {
 

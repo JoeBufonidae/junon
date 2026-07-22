@@ -1492,11 +1492,19 @@ message Item {
   ItemInstance instance = 10;
   bool clientMustDelete = 11;
   uint32 lastUsedTimestamp = 12;
+  repeated AttachmentData attachmentData = 13;
+}
+
+message AttachmentData {
+  uint32 id = 1;
+  uint32 type = 2;
+  uint32 tier = 3;
 }
 
 message ItemInstance {
   uint32 usage = 1;
   string content = 2;
+  repeated AttachmentData attachments = 3;
 }
 
 message Point {

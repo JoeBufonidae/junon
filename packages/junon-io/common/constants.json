@@ -4278,7 +4278,7 @@
       "cost": {
         "gold": 1000
       },
-      "speedBoost": 5,
+      "speedBoost": 2,
       "requirements": {
         "IronBar": 50,
         "Wire": 10,

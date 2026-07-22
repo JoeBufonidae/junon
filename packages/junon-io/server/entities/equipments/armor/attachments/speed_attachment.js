@@ -1,5 +1,5 @@
 const BaseAttachment = require("./base_attachment")
-const Protocol = require('../../../../../common/util/protocol')
+const Protocol = require("../../../../../common/util/protocol")
 const Constants = require("../../../../../common/constants.json")
 
 class SpeedAttachment extends BaseAttachment {
@@ -11,14 +11,10 @@ class SpeedAttachment extends BaseAttachment {
     return Protocol.definition().BuildingType.SpeedAttachment
   }
 
-  applyEffect(player) {
-    const speedBoost = Constants.Attachments.SpeedAttachment.speedBoost
-    player.speed *= speedBoost
-  }
-
-  removeEffect(player) {
-    const speedBoost = Constants.Attachments.SpeedAttachment.speedBoost
-    player.speed /= speedBoost
+  get modifiers() {
+    return {
+      speed: Constants.Attachments.SpeedAttachment.speedBoost
+    }
   }
 }
 

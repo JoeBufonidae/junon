@@ -1,7 +1,9 @@
 const SocketUtil = require("./../util/socket_util")
 const BaseMenu = require("./base_menu")
+const Item = require("./../entities/item")
 const Constants = require("./../../../common/constants.json")
 const Protocol = require("./../../../common/util/protocol")
+const { has } = require("lodash")
 
 
 /*
@@ -59,9 +61,15 @@ class InventoryMenu extends BaseMenu {
     if (slot) {
       let type = parseInt(slot.dataset.type)
       let id = parseInt(slot.dataset.id)
+      let itemIndex = parseInt(slot.dataset.item)
+      const itemKlass = Item.getKlass(type)
+      const hasAttachmentSlots = itemKlass.prototype.getConstants().attachmentSlots
       let isSpaceSuit = type === Protocol.definition().BuildingType.SpaceSuit 
       if (isSpaceSuit) {
         this.game.suitColorMenu.open({colors: this.game.suitColors, entityId: id })
+      }
+      if (hasAttachmentSlots) {
+        this.game.attachmentMenu.open({ entityId: id })
       }
     }
   }

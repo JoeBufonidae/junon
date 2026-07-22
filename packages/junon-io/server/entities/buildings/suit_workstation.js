@@ -17,6 +17,26 @@ class SuitWorkstation extends BaseProcessor {
     return Protocol.definition().BuildingType.SuitWorkstation
   }
 
+  onStorageChanged(item, index) {
+    super.onStorageChanged(item, index)
+
+    this.setBuildingContent(this.getStorageContentType())
+  }
+
+  getStorageContentType() {
+    // Prefer showing armor from the output slot if present, otherwise the input slot
+    const outputIndex = (typeof this.getOutputStorageIndex === 'function') ? this.getOutputStorageIndex() : 3
+    let item = this.get(outputIndex) || this.get(0)
+    if (!item) return ""
+
+    let suitColor = item.instance && item.instance.content
+    if (suitColor) {
+      return [item.type.toString(), suitColor].join(":")
+    }
+
+    return item.type.toString()
+  }
+
   // Helper to get item in slot
   getInputSlot(index) {
     const inputItems = this.getInputItems(this.getInputStorageIndices())
@@ -74,7 +94,6 @@ class SuitWorkstation extends BaseProcessor {
     if (typeof armor.isArmor !== 'function') return false
     if (!armor.isArmor()) return false
     
-    console.log("items are there")
     // Ensure attachments is initialized
     if (!Array.isArray(armor.attachments)) armor.attachments = []
 
@@ -82,13 +101,10 @@ class SuitWorkstation extends BaseProcessor {
     const constants = klass.prototype.getConstants()
     const maxSlots = constants.attachmentSlots
     if (armor.attachments.length >= maxSlots) return false
-    console.log("herrroooo")
 
     const attData = Attachments.forType(attachment.getType())
     if (!attData) return false
-    console.log("second check")
     if (armor.attachments.find(a => a.getType() === attachment.getType())) return false
-    console.log("third check")
     /*
     // Magnet requirement for high tier
     const attTier = attData.tier || 1
@@ -152,6 +168,7 @@ class SuitWorkstation extends BaseProcessor {
     const attachmentType = attachmentItem.getType()
     const attWrapper = {
       id: attachmentType,
+      type: attachmentType,
       getType: () => attachmentType,
       getName: () => (attachmentItem.getTypeName ? attachmentItem.getTypeName() : ""),
       tier: AttachmentKlass.tier || (AttachmentKlass.prototype && AttachmentKlass.prototype.tier) || 1,

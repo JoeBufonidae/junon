@@ -1218,6 +1218,54 @@ body {
     z-index: 11;
 }
 
+#attachment_menu .attachment_slots_info {
+    margin-bottom: 12px;
+}
+
+#attachment_menu .attachment_slots_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+#attachment_menu .attachment_list_container {
+    max-height: 260px;
+    overflow-y: auto;
+    text-align: left;
+    padding-right: 2px;
+}
+
+#attachment_menu .attachment_list_row {
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background-color: #181818;
+    color: #f5f5f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#attachment_menu .attachment_name {
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+#attachment_menu .attachment_tier {
+    color: #8fa;
+    font-size: 12px;
+}
+
+#attachment_menu .attachment_list_empty {
+    color: #888;
+    font-size: 14px;
+    padding: 16px 0;
+}
+
 .processor_storage .inventory_slot {
     vertical-align: middle !important;
 }
