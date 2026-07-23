@@ -10,12 +10,19 @@ class BaseAttachment extends BaseTransientEntity {
   getType() {
     throw new Error("must implement BaseAttachment.getType")
   }
-  getKlass() {
-    return "attachment"
-  }
-  isAttachment() {
+  
+  // getKlass() {
+  //   return "attachment"
+  // }
+
+  // isAttachment() {
+  //   return true
+  // }
+
+  static isUsable() {
     return true
   }
+
   getTypeName() {
     return Helper.getTypeNameById(this.getType())
   }

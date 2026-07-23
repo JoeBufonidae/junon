@@ -806,6 +806,7 @@ class Player extends BaseEntity {
     if (!existingEquipment) {
       // init equipment
       data.user = this
+      alert("renderEquipment: " + Item.getKlass(data.type).name + " index=" + index)
       this.equipments[index] = Item.getKlass(data.type).build(this.game, data)
       this.equipments[index].onPostEquip()
 

@@ -10,9 +10,12 @@ class SpeedAttachment extends BaseAttachment {
 
   repositionSprite() {
     super.repositionSprite()
-    //this.sprite.scale.set(1)
+    this.sprite.x = 31
+    this.sprite.y = 0
+    this.sprite.scale.x = 0.1
+    this.sprite.scale.y = 0.1
   }
-  
+
   getType() {
     return Protocol.definition().BuildingType.SpeedAttachment
   }

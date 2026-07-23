@@ -23,8 +23,8 @@ class BaseAttachment extends BaseEntity {
       this.sprite.anchor.set(0)
       this.sprite.position.x = 0
       this.sprite.position.y = 0
-  }
 
+    }
 
 
   getSpriteContainer() {
