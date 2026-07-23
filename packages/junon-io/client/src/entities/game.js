@@ -2242,7 +2242,8 @@ class Game {
   onInventoryChanged(data) {
     if (!this.player) return
     if (!data.inventory) return
-
+    
+    alert("InventoryChanged: " + JSON.stringify(data.inventory))
     if (data.inventory.index === Constants.holdItemIndex) {
       this.onHoldItemInventoryChanged(data.inventory)
       return
@@ -3407,7 +3408,6 @@ class Game {
 
   renderActiveEquip(index) {
     const quickInventoryIndex = index
-
     const activeInventorySlot = document.querySelector("#player_quick_inventory .player_inventory_slot.active")
     if (activeInventorySlot) {
       activeInventorySlot.className = "player_inventory_slot inventory_slot"

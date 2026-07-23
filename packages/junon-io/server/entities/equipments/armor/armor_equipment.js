@@ -8,6 +8,7 @@ class ArmorEquipment extends BaseEquipment {
     super(item, options);
     this.attachments = []; // Store attachment objects here
     this.combinedStats = null; // cache for merged stats
+    //this.usageCapacity = this.getUsageCapacity()
   }
 
   // -------- Attachment management --------
@@ -69,20 +70,29 @@ class ArmorEquipment extends BaseEquipment {
     }
     return this.combinedStats || super.getStats();
   }
- 
-  // -------- Existing methods unchanged --------
 
   applyVelocity(player, velocity) {
     player.body.velocity = velocity // by default, set immediately
   }
 
   reduceDamage(amount, sourceEntity) {
+
     if (sourceEntity && sourceEntity.hasCategory("elemental")) {
+      if (this.isBreakable()) {
+        this.setUsage(this.usage - amount)
+        console.log(this.usage)
+      }
+      
       return amount
     }
 
     let newAmount = amount - this.getDefense()
     if (newAmount < 0) newAmount = 0
+
+    if (this.isBreakable()) {
+      this.setUsage(this.usage - newAmount)
+      console.log(this.usage)
+    }
 
     return newAmount
   }
@@ -98,6 +108,10 @@ class ArmorEquipment extends BaseEquipment {
   getDampingFactor() {
     return 0.8 // by default
   }
+
+  // getUsageCapacity() {
+  //   return this.sector?.entityCustomStats[this.item.id]?.capacity || this.sector?.itemCustomStats[this.getType()]?.capacity || this.getStats().usageCapacity || 500
+  // }
 
   hasOxygen() {
     return false

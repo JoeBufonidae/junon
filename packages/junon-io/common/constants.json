@@ -4145,7 +4145,7 @@
       "lightColor": "#850101",
       "isLightPersistent": true,
       "isCostIndependent": true,
-      "brightness": 100,
+      "brightness": 1,
       "attachmentSlots":5,
       "cost": {
         "gold": 50000
@@ -4153,7 +4153,8 @@
       "stats": {
         "range": 64,
         "oxygen": 150,
-        "defense": 0
+        "defense": 0,
+        "usageCapacity":1000
       },
       "requirements": {
         "Meteorite": 40,

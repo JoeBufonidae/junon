@@ -4871,7 +4871,7 @@ class Player extends BaseEntity {
 
   onEquipmentUsageChanged(equipment) {
     this.game.triggerEvent("EquipmentUsageChanged", { itemType: equipment.item.type, usage: equipment.usage, actorId: this.getId() })
-
+    console.log("EquipmentUsageChanged", { itemType: equipment.item.type, usage: equipment.usage, actorId: this.getId(), index: equipment.item.index })
     if (this.isPlayerReady && equipment.item.storage && !this.isRemoved) {
       this.getSocketUtil().emit(this.socket, "InventoryChanged", { inventory: equipment.item })
     }
