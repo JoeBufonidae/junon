@@ -80,7 +80,7 @@ class ArmorEquipment extends BaseEquipment {
     if (sourceEntity && sourceEntity.hasCategory("elemental")) {
       if (this.isBreakable()) {
         this.setUsage(this.usage - amount)
-        console.log(this.usage)
+        //console.log(this.usage)
       }
       
       return amount
@@ -91,7 +91,7 @@ class ArmorEquipment extends BaseEquipment {
 
     if (this.isBreakable()) {
       this.setUsage(this.usage - newAmount)
-      console.log(this.usage)
+      //console.log(this.usage)
     }
 
     return newAmount
@@ -183,6 +183,7 @@ class ArmorEquipment extends BaseEquipment {
         storage.user.forceOxygenConsumption()
       }
     } else {
+      
       // equipped to building
       if (this.owner && !this.owner.isSector()) {
         this.owner.onOxygenChanged()
@@ -190,6 +191,7 @@ class ArmorEquipment extends BaseEquipment {
     }
   }
   onEquip(player) {
+    
     if (this.attachments && Array.isArray(this.attachments)) {
       this.attachments.forEach(attachment => {
         if (attachment.applyEffect) {

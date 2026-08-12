@@ -122,13 +122,11 @@ class InventoryMenu extends BaseMenu {
 
   renderInventory(data) {
     // we use document since we are updating both inventory + quickInventory
-
     const prevInventorySlot = document.querySelector(".player_inventory_slot[data-id='" + data.id  + "']")
     if (prevInventorySlot) {
       this.getPlayer().inventory[prevInventorySlot.dataset.index] = null
       this.game.resetInventorySlot(prevInventorySlot)
     }
-
     const index = data.index
     const inventorySlot = document.querySelector(".player_inventory_slot[data-index='" + index  + "']")
     this.game.renderInventorySlot(inventorySlot, data)

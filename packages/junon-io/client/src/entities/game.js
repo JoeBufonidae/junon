@@ -1589,7 +1589,7 @@ class Game {
     SocketUtil.on("InstallAttachment", this.onInstallAttachment.bind(this))
     SocketUtil.on("RemoveAttachment", this.onRemoveAttachment.bind(this))
   }
-
+  
   onBadgeEquipped(data) {
     try {
       let tint = Number("0x" + data.badge.color);
@@ -2243,7 +2243,6 @@ class Game {
     if (!this.player) return
     if (!data.inventory) return
     
-    alert("InventoryChanged: " + JSON.stringify(data.inventory))
     if (data.inventory.index === Constants.holdItemIndex) {
       this.onHoldItemInventoryChanged(data.inventory)
       return
@@ -3536,31 +3535,38 @@ class Game {
   }
 
   renderInventorySlot(inventorySlot, data) {
-    inventorySlot.querySelector("img").src = this.getImageSrcForItemType(data.type)
-    if (data.id) {
-      inventorySlot.dataset.id = data.id
-    }
-    inventorySlot.dataset.type = data.type
+      let targetSlot = inventorySlot;
 
-    inventorySlot.dataset.content = data.count === 1 ? "" : data.count
-    inventorySlot.dataset.special = data.instance ? data.instance.content : ""
+      let previousId = inventorySlot.dataset.id;
+      let previousUsage = inventorySlot.dataset.usage;
 
-    // show item count in primary action btn
-    if (this.isMobile() && inventorySlot.dataset.id === this.mobilePrimaryActionBtn.dataset.id) {
-      this.mobilePrimaryActionBtn.dataset.content = data.count === 1 ? "" : data.count
-    }
+      let equipmentKlass = Equipments.forType(data.type);
+      let isArmor =
+          equipmentKlass &&
+          Object.getPrototypeOf(equipmentKlass.prototype).constructor.name === "ArmorEquipment";
+      let isSameItem = previousId === String(data.id);
+      let usageChanged = previousUsage !== String(data.instance ? data.instance.usage : undefined);
 
-    if (data.lastUsedTimestamp) {
-      this.renderInventoryCooldown(inventorySlot, data)
-    }
+      if (isArmor && isSameItem && usageChanged && inventorySlot.classList.contains("player_inventory_slot")) 
+        {targetSlot = document.querySelector(".equipment_slot.armor");}
 
-    if (data.instance) {
-      inventorySlot.dataset.usage = data.instance.usage
-      this.renderInventorySlotUsage(inventorySlot, data.instance.usage)
-    } else {
-      inventorySlot.dataset.usage = ""
-      this.removeInventorySlotUsage(inventorySlot)
-    }
+      targetSlot.querySelector("img").src = this.getImageSrcForItemType(data.type);
+
+      if (data.id) {targetSlot.dataset.id = data.id;}
+
+      targetSlot.dataset.type = data.type;
+      targetSlot.dataset.content = data.count === 1 ? "" : data.count;
+      targetSlot.dataset.special = data.instance ? data.instance.content : "";
+
+      if (data.lastUsedTimestamp) {this.renderInventoryCooldown(targetSlot, data);}
+
+      if (data.instance) {
+          targetSlot.dataset.usage = data.instance.usage;
+          this.renderInventorySlotUsage(targetSlot, data.instance.usage);
+      } else {
+          targetSlot.dataset.usage = "";
+          this.removeInventorySlotUsage(targetSlot);
+      }
   }
 
   resetInventorySlot(inventorySlot) {
@@ -3589,12 +3595,14 @@ class Game {
     if (!equipmentKlass) return
     if (equipmentKlass.prototype.isUnbreakable() && !equipmentKlass.prototype.shouldShowUsage()) return
 
+
+    
     let maxUsage;
     if(this.sector.entityCustomStats[inventorySlot.dataset.id]) maxUsage = this.sector.entityCustomStats[inventorySlot.dataset.id].capacity
     else if(this.sector.itemCustomStats[inventorySlot.dataset.type]) maxUsage = this.sector.itemCustomStats[inventorySlot.dataset.type].capacity
     else maxUsage = equipmentKlass.prototype.getStats().usageCapacity || 100
-    this.renderItemUsageFor(inventorySlot, usage, maxUsage)
 
+    this.renderItemUsageFor(inventorySlot, usage, maxUsage)
     if (this.isMobile() && inventorySlot.dataset.id === this.mobilePrimaryActionBtn.dataset.id) {
       this.renderItemUsageFor(this.mobilePrimaryActionBtn, usage, maxUsage)
     }

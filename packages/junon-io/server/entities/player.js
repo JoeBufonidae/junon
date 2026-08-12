@@ -2881,22 +2881,70 @@ class Player extends BaseEntity {
         // removed armor, reset dirt
         this.dirt = 0
       }
-
       let previousArmor = previousItem ? previousItem.getTypeName() : ""
       let currentArmor = equipmentItem ? equipmentItem.getTypeName() : ""
+      let storedPreviousItem
 
+      if (previousItem) {console.log("A", previousArmor)
+        storedPreviousItem = previousItem
+      }
+        else {console.log("previousItem is not here")
+        }
+
+      // if (previousItem) {storedPreviousItem = previousItem
+      //   console.log(previousItem.instance.getConstants())
+      // }
+      // if (previousItem) {previousArmor = storedPreviousItem.getTypeName()
+      // console.log("A", previousArmor)}
+      if (previousArmor != currentArmor && equipmentItem) {
+        const healthBoost = equipmentItem.instance.getConstants().stats.healthBoost || 0;
+        const oldHealthBoost = previousItem?.instance?.getConstants()?.stats?.healthBoost ?? 0;
+        
+        if (storedPreviousItem) {console.log("B", previousArmor)}
+        else {console.log("storedPreviousItem is not here")}
+        const currentMaxHealth = this.getMaxHealth();
+        const newMaxHealth = currentMaxHealth - oldHealthBoost + healthBoost;
+        //console.log(currentMaxHealth, newMaxHealth)
+        this.game.executeCommand(this.game.sector, `/stat ${this.id} health:${newMaxHealth}`)
+      }
       this.game.triggerEvent("ArmorEquipChanged", {
           playerId: this.getId(),
           player: this.getName(),
           previous: previousArmor,
           current: currentArmor
-      })
-
+        }) //for some reason this is destroying the previousItem and previousArmor variable
     }
-
     this.onStateChanged()
   }
 
+  //   onEquipmentStorageChanged(item, index, previousItem) {
+  //   let equipmentItem = this.equipments.get(index)
+
+  //   // ensure owned by player
+  //   if (equipmentItem && equipmentItem.getOwner() !== this) {
+  //     equipmentItem.setOwner(this)
+  //   }
+
+  //   if (index === Protocol.definition().EquipmentRole.Armor) {
+  //     if (!equipmentItem) {
+  //       // removed armor, reset dirt
+  //       this.dirt = 0
+  //     }
+
+  //     let previousArmor = previousItem ? previousItem.getTypeName() : ""
+  //     let currentArmor = equipmentItem ? equipmentItem.getTypeName() : ""
+
+  //     this.game.triggerEvent("ArmorEquipChanged", {
+  //         playerId: this.getId(),
+  //         player: this.getName(),
+  //         previous: previousArmor,
+  //         current: currentArmor
+  //     })
+
+  //   }
+
+  //   this.onStateChanged()
+  // }
   onItemCountChanged(item) {
     if (this.isPlayerReady && !this.isRemoved) {
       if (item.storage === this.inventory ||
@@ -4871,7 +4919,6 @@ class Player extends BaseEntity {
 
   onEquipmentUsageChanged(equipment) {
     this.game.triggerEvent("EquipmentUsageChanged", { itemType: equipment.item.type, usage: equipment.usage, actorId: this.getId() })
-    console.log("EquipmentUsageChanged", { itemType: equipment.item.type, usage: equipment.usage, actorId: this.getId(), index: equipment.item.index })
     if (this.isPlayerReady && equipment.item.storage && !this.isRemoved) {
       this.getSocketUtil().emit(this.socket, "InventoryChanged", { inventory: equipment.item })
     }

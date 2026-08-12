@@ -4130,7 +4130,8 @@
       "stats": {
         "range": 64,
         "oxygen": 150,
-        "defense": 4
+        "defense": 4,
+        "healthBoost": 150
       },
       "requirements": {
         "Meteorite": 40,
@@ -4142,10 +4143,10 @@
       "parent": "Equipments.BaseEquipment",
       "width": 64,
       "height": 64,
-      "lightColor": "#850101",
+      "lightColor": "#ffffff",
       "isLightPersistent": true,
       "isCostIndependent": true,
-      "brightness": 1,
+      "brightness": 0.8,
       "attachmentSlots":5,
       "cost": {
         "gold": 50000
@@ -4210,7 +4211,8 @@
       "isLightPersistent": true,
       "brightness": 0.8,
       "stats": {
-        "range": 64
+        "range": 64,
+        "healthBoost": 50
       },
       "requirements": {
         "PlantFiber": 50
