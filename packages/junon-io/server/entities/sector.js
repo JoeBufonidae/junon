@@ -3591,6 +3591,39 @@ class Sector {
     return this.getRowCount() * Constants.tileSize
   }
 
+  syncAllAttachmentData() {
+    // Sync player equipment attachments
+    for (let playerId in this.players) {
+      let player = this.players[playerId]
+      if (!player.equipments) continue
+      
+      let armorItem = player.equipments.get(Protocol.definition().EquipmentRole.Armor)
+      if (armorItem && typeof armorItem.syncAttachmentData === 'function') {
+        armorItem.syncAttachmentData()
+      }
+    }
+    
+    // Sync building storage attachments
+    this.forEachBuilding((building) => {
+      if (!building.storage) return
+      
+      for (let index in building.storage) {
+        let item = building.storage[index]
+        if (item && typeof item.syncAttachmentData === 'function') {
+          item.syncAttachmentData()
+        }
+      }
+    })
+    
+    // Sync pickup item attachments
+    for (let pickupId in this.pickups) {
+      let pickup = this.pickups[pickupId]
+      if (pickup && pickup.item && typeof pickup.item.syncAttachmentData === 'function') {
+        pickup.item.syncAttachmentData()
+      }
+    }
+  }
+
 }
 
 Object.assign(Sector.prototype, Owner.prototype, {

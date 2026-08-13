@@ -24,6 +24,12 @@ class ArmorEquipment extends BaseEquipment {
     }
     this.attachments.push(attachment);
     this.updateStatsFromAttachments();
+    
+    // Sync to item's serialized attachmentData for save persistence
+    if (this.item && typeof this.item.syncAttachmentData === 'function') {
+      this.item.syncAttachmentData();
+    }
+    
     return true;
   }
 
@@ -37,6 +43,12 @@ class ArmorEquipment extends BaseEquipment {
     if (index === -1) return false;
     this.attachments.splice(index, 1);
     this.updateStatsFromAttachments();
+    
+    // Sync to item's serialized attachmentData for save persistence
+    if (this.item && typeof this.item.syncAttachmentData === 'function') {
+      this.item.syncAttachmentData();
+    }
+    
     return true;
   }
 

@@ -15,8 +15,35 @@ PlayerCommon.prototype = {
     this.RESPAWN_TIME = 5 * 1000
     this.thirst = this.getMaxThirst()
   },
+  getMeleeSpeedMultiplier() {
+    const armor = this.getArmorEquipment ? this.getArmorEquipment() : null
+    if (!armor || !Array.isArray(armor.attachments)) return 1
+
+    let multiplier = 1
+    armor.attachments.forEach((attachment) => {
+      if (!attachment || !attachment.modifiers) return
+
+      if (typeof attachment.modifiers.meleeSpeedBoost === "number" && attachment.modifiers.meleeSpeedBoost > 0) {
+        multiplier *= attachment.modifiers.meleeSpeedBoost
+      }
+    })
+
+    return multiplier
+  },
   getActionInterval() {
-    return this.isLowStatus("stamina") ? this.ACTION_INTERVAL * 2 : this.ACTION_INTERVAL
+    let interval = this.ACTION_INTERVAL || this.getStats().reload || 500
+    const activeItem = this.getActiveItem ? this.getActiveItem() : null
+    const isMeleeActive = activeItem && activeItem.instance && typeof activeItem.instance.isMeleeEquipment === "function" && activeItem.instance.isMeleeEquipment()
+
+    if (isMeleeActive) {
+      interval /= this.getMeleeSpeedMultiplier()
+    }
+
+    if (this.isLowStatus("stamina")) {
+      interval *= 2
+    }
+
+    return interval
   },
   getCameraBoundingBox() {
     var padding = Constants.tileSize*3;

@@ -924,6 +924,9 @@ class Game {
 
     this.getSocketUtil().broadcast(this.getSocketIds(), "SaveProgress", { finished: false })
 
+    // Sync all attachment data before save
+    this.sector.syncAllAttachmentData()
+
     await WorldSerializer.saveSector(this.sector)
 
     this.isSaving = false

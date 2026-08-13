@@ -1260,6 +1260,15 @@ body {
     font-size: 12px;
 }
 
+#attachment_menu .attachment_sprite {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    image-rendering: auto;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
 #attachment_menu .attachment_list_empty {
     color: #888;
     font-size: 14px;

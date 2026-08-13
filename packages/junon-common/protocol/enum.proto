@@ -269,6 +269,11 @@ enum BuildingType {
   FrameArmor = 275;
   SuitWorkstation = 276;
   SpeedAttachment = 277;
+  ArmorBoostAttachment = 278;
+  HealthBoostAttachment = 279;
+  MeleeSpeedAttachment = 280;
+  KnockbackAttachment = 281;
+  MeleeDamageAttachment = 282;
 }
 
 enum TerrainType {

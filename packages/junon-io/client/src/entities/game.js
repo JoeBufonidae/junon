@@ -3547,8 +3547,13 @@ class Game {
       let isSameItem = previousId === String(data.id);
       let usageChanged = previousUsage !== String(data.instance ? data.instance.usage : undefined);
 
-      if (isArmor && isSameItem && usageChanged && inventorySlot.classList.contains("player_inventory_slot")) 
-        {targetSlot = document.querySelector(".equipment_slot.armor");}
+      if (isArmor && inventorySlot.classList.contains("player_inventory_slot")) {
+        const equipmentSlot = document.querySelector(".equipment_slot[data-index='" + inventorySlot.dataset.index + "']");
+        const equipmentSlotMatchesItem = equipmentSlot && equipmentSlot.dataset.id === String(data.id);
+        if (equipmentSlotMatchesItem && (isSameItem || usageChanged)) {
+          targetSlot = equipmentSlot;
+        }
+      }
 
       targetSlot.querySelector("img").src = this.getImageSrcForItemType(data.type);
 

@@ -574,11 +574,13 @@ class Player extends BaseEntity {
     }
 
     if (data.equipments) {
+      this.isRestoringEquipment = true
       for (let index in data.equipments.storage) {
         let itemData = data.equipments.storage[index]
         let item = new Item(this, itemData.type, itemData)
         this.equipments.storeAt(itemData.index, item)
       }
+      this.isRestoringEquipment = false
     }
 
     if (data.inventory) {
@@ -2868,6 +2870,47 @@ class Player extends BaseEntity {
     })
   }
 
+  getArmorHealthBoost(item) {
+    if (!item || !item.instance) return 0
+
+    let stats = item.instance.getStats ? item.instance.getStats() : {}
+    if (typeof stats.healthBoost !== "undefined") {
+      return Number(stats.healthBoost) || 0
+    }
+
+    let constantsStats = item.instance.getConstants ? item.instance.getConstants().stats : {}
+    return Number(constantsStats.healthBoost || 0)
+  }
+
+  sanitizeMaxHealthValue(value) {
+    const numericValue = Number(value)
+
+    if (!Number.isFinite(numericValue) || numericValue < 100 || numericValue > 1000000) {
+      return 100
+    }
+
+    return Math.floor(numericValue)
+  }
+
+  updateArmorHealthBoost(previousItem, equipmentItem) {
+    const previousHealthBoost = this.getArmorHealthBoost(previousItem)
+    const currentHealthBoost = this.getArmorHealthBoost(equipmentItem)
+
+    if (previousHealthBoost === currentHealthBoost) return
+
+    const currentMaxHealth = this.getMaxHealth()
+    const newMaxHealth = Math.max(100, currentMaxHealth - previousHealthBoost + currentHealthBoost)
+    const sanitizedMaxHealth = this.sanitizeMaxHealthValue(newMaxHealth)
+    const entityStats = this.sector?.entityCustomStats?.[this.id] || {}
+
+    entityStats.health = sanitizedMaxHealth
+    this.sector.setCustomEntityStat(this.id, entityStats)
+
+    if (this.health > sanitizedMaxHealth) {
+      this.setHealth(sanitizedMaxHealth)
+    }
+  }
+
   onEquipmentStorageChanged(item, index, previousItem) {
     let equipmentItem = this.equipments.get(index)
 
@@ -2876,43 +2919,28 @@ class Player extends BaseEntity {
       equipmentItem.setOwner(this)
     }
 
+    if (this.isRestoringEquipment) {
+      this.onStateChanged()
+      return
+    }
+
     if (index === Protocol.definition().EquipmentRole.Armor) {
       if (!equipmentItem) {
         // removed armor, reset dirt
         this.dirt = 0
       }
+
       let previousArmor = previousItem ? previousItem.getTypeName() : ""
       let currentArmor = equipmentItem ? equipmentItem.getTypeName() : ""
-      let storedPreviousItem
 
-      if (previousItem) {console.log("A", previousArmor)
-        storedPreviousItem = previousItem
-      }
-        else {console.log("previousItem is not here")
-        }
+      this.updateArmorHealthBoost(previousItem, equipmentItem)
 
-      // if (previousItem) {storedPreviousItem = previousItem
-      //   console.log(previousItem.instance.getConstants())
-      // }
-      // if (previousItem) {previousArmor = storedPreviousItem.getTypeName()
-      // console.log("A", previousArmor)}
-      if (previousArmor != currentArmor && equipmentItem) {
-        const healthBoost = equipmentItem.instance.getConstants().stats.healthBoost || 0;
-        const oldHealthBoost = previousItem?.instance?.getConstants()?.stats?.healthBoost ?? 0;
-        
-        if (storedPreviousItem) {console.log("B", previousArmor)}
-        else {console.log("storedPreviousItem is not here")}
-        const currentMaxHealth = this.getMaxHealth();
-        const newMaxHealth = currentMaxHealth - oldHealthBoost + healthBoost;
-        //console.log(currentMaxHealth, newMaxHealth)
-        this.game.executeCommand(this.game.sector, `/stat ${this.id} health:${newMaxHealth}`)
-      }
       this.game.triggerEvent("ArmorEquipChanged", {
           playerId: this.getId(),
           player: this.getName(),
           previous: previousArmor,
           current: currentArmor
-        }) //for some reason this is destroying the previousItem and previousArmor variable
+        })
     }
     this.onStateChanged()
   }
@@ -5501,8 +5529,8 @@ getMaxSpeed() {
     armor.attachments.forEach((attachment) => {
       if (!attachment || !attachment.modifiers) return
 
-      if (typeof attachment.modifiers.speed === "number") {
-        speed += attachment.modifiers.speed
+      if (typeof attachment.modifiers.speedBoost === "number") {
+        speed += attachment.modifiers.speedBoost
       }
 
       if (typeof attachment.modifiers.speedMultiplier === "number") {
@@ -5975,13 +6003,12 @@ Object.assign(Player.prototype, Movable.prototype, {
     if (armor && Array.isArray(armor.attachments)) {
       let multiplier = 1
       armor.attachments.forEach((attachment) => {
-        if (!attachment) return
-        if (typeof attachment.speedBoost === "number") {
-          multiplier *= attachment.speedBoost
-        } else if (attachment.modifiers && typeof attachment.modifiers.speedMultiplier === "number") {
+        if (!attachment || !attachment.modifiers) return
+        if (typeof attachment.modifiers.speedBoost === "number") {
+          speed += attachment.modifiers.speedBoost
+        }
+        if (typeof attachment.modifiers.speedMultiplier === "number") {
           multiplier *= attachment.modifiers.speedMultiplier
-        } else if (attachment.modifiers && typeof attachment.modifiers.speed === "number") {
-          speed += attachment.modifiers.speed
         }
       })
       speed *= multiplier
@@ -6168,7 +6195,7 @@ Object.assign(Player.prototype, Destroyable.prototype, {
   getMaxHealth() {
     if (this.sector) {
       if (this.sector.entityCustomStats[this.id]) {
-        return this.sector.entityCustomStats[this.id].health
+        return this.sanitizeMaxHealthValue(this.sector.entityCustomStats[this.id].health)
       }
     }
 

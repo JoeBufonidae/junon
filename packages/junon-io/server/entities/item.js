@@ -138,8 +138,13 @@ class Item extends BaseTransientEntity {
     if (!this.lastUsedTimestamp) return true
 
     let cooldown = this.getCooldown()
+    const itemIsMelee = this.instance && typeof this.instance.isMeleeEquipment === "function" && this.instance.isMeleeEquipment()
 
-    if (user.hasEffect("rage")) {
+    if (itemIsMelee && user && typeof user.getMeleeSpeedMultiplier === "function") {
+      cooldown /= user.getMeleeSpeedMultiplier()
+    }
+
+    if (user && user.hasEffect && user.hasEffect("rage")) {
       cooldown = cooldown / 2
     }
 
@@ -237,6 +242,82 @@ class Item extends BaseTransientEntity {
     return klassType === "equipment" && klass.prototype.getType() === Protocol.definition().BuildingType.Dismantler
   }
 
+  normalizeAttachmentData(attachment) {
+    if (!attachment || typeof attachment !== "object") return null
+
+    const id = attachment.id !== undefined ? attachment.id : (attachment.type !== undefined ? attachment.type : null)
+    const type = attachment.type !== undefined ? attachment.type : (attachment.id !== undefined ? attachment.id : null)
+    const tier = attachment.tier !== undefined ? attachment.tier : 1
+
+    if (id === null || type === null) return null
+
+    return {
+      id: id,
+      type: type,
+      tier: tier
+    }
+  }
+
+  syncAttachmentData() {
+    if (!this.instance) return
+
+    const liveAttachments = Array.isArray(this.instance.attachments) ? this.instance.attachments : []
+    const serializedAttachments = Array.isArray(this.attachmentData) ? this.attachmentData : []
+
+    // Always sync: push live to serialized for save, and deserialize for load
+    if (liveAttachments.length > 0) {
+      // Update serialized data from live attachments (for save)
+      this.attachmentData = liveAttachments
+        .map((attachment) => this.normalizeAttachmentData(attachment))
+        .filter(Boolean)
+    } else if (serializedAttachments.length > 0 && liveAttachments.length === 0) {
+      // Restore live attachments from serialized data (after load)
+      this.instance.attachments = serializedAttachments
+        .map((attachment) => {
+          const normalized = this.normalizeAttachmentData(attachment)
+          if (!normalized) return null
+
+          const attachmentType = normalized.type
+          let attachmentKlass = null
+
+          try {
+            attachmentKlass = Attachments.forType(attachmentType)
+          } catch (e) {
+            attachmentKlass = null
+          }
+
+          const wrapper = {
+            id: normalized.id,
+            type: normalized.type,
+            tier: normalized.tier,
+            modifiers: (attachmentKlass && attachmentKlass.prototype && attachmentKlass.prototype.modifiers) || {},
+            isAttachment: () => true,
+            getType: () => normalized.type,
+            getName: () => attachmentKlass ? (attachmentKlass.getTypeName ? attachmentKlass.getTypeName() : "") : ""
+          }
+
+          if (attachmentKlass && attachmentKlass.prototype && typeof attachmentKlass.prototype.applyEffect === "function") {
+            wrapper.applyEffect = function(player) {
+              return attachmentKlass.prototype.applyEffect.call(this, player)
+            }
+          }
+
+          if (attachmentKlass && attachmentKlass.prototype && typeof attachmentKlass.prototype.removeEffect === "function") {
+            wrapper.removeEffect = function(player) {
+              return attachmentKlass.prototype.removeEffect.call(this, player)
+            }
+          }
+
+          return wrapper
+        })
+        .filter(Boolean)
+
+      if (typeof this.instance.updateStatsFromAttachments === "function") {
+        this.instance.updateStatsFromAttachments()
+      }
+    }
+  }
+
   initMaterializable(instance) {
     if (!this.isEquipment()) return
     let klass = this.getKlass(this.type)
@@ -250,10 +331,12 @@ class Item extends BaseTransientEntity {
       this.instance = new klass(this, this.options)
     }
 
-    // Restore attachment data if present
-    if (this.instance && this.attachmentData && Array.isArray(this.attachmentData)) {
-      if (typeof this.instance.fromJson === 'function') {
-        this.instance.fromJson({})
+    this.syncAttachmentData()
+
+    if (this.instance && this.instance.isDrainable()) {
+      const hasLegacyMissingUsage = this.instance.usage === undefined || this.instance.usage === null || Number.isNaN(this.instance.usage)
+      if (hasLegacyMissingUsage && this.instance.shouldBeFullOnSpawn()) {
+        this.instance.setUsage(this.instance.getUsageCapacity())
       }
     }
   }

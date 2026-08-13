@@ -43,35 +43,67 @@ class InventoryMenu extends BaseMenu {
     document.querySelector("#player_quick_inventory").addEventListener("dblclick", this.onQuickInventoryDblClick.bind(this), true)
   }
 
+  openAttachmentMenuIfNeeded(slot) {
+    if (!slot) return false
+
+    const type = parseInt(slot.dataset.type)
+    const id = parseInt(slot.dataset.id)
+    if (Number.isNaN(type) || Number.isNaN(id)) return false
+
+    const itemKlass = Item.getKlass(type)
+    if (!itemKlass || !itemKlass.prototype || !itemKlass.prototype.getConstants) return false
+
+    const hasAttachmentSlots = !!itemKlass.prototype.getConstants().attachmentSlots
+    if (hasAttachmentSlots) {
+      this.game.attachmentMenu.open({ entityId: id })
+      return true
+    }
+
+    return false
+  }
+
   onQuickInventoryDblClick(e) {
     let slot = e.target.closest(".player_inventory_slot")
-    if (slot) {
-      let type = parseInt(slot.dataset.type)
-      let isFloor = type === Protocol.definition().BuildingType.Floor 
-      let isWall = type === Protocol.definition().BuildingType.Wall || type === Protocol.definition().BuildingType.Wall3d
-      if (isFloor || isWall) {
-        this.game.colorPickerMenu.open({ colors: this.game.colors, entityId: null })
-      }
+    if (!slot) return
+
+    let type = parseInt(slot.dataset.type)
+    let isFloor = type === Protocol.definition().BuildingType.Floor
+    let isWall = type === Protocol.definition().BuildingType.Wall || type === Protocol.definition().BuildingType.Wall3d
+    if (isFloor || isWall) {
+      this.game.colorPickerMenu.open({ colors: this.game.colors, entityId: null })
+      return
     }
+
+    this.openAttachmentMenuIfNeeded(slot)
+  }
+
+  onInventorySlotClick(e) {
+    if (this.game.isMiniGame()) return
+
+    const slot = e.target.closest(".inventory_slot")
+    if (!slot) return
+
+    let type = parseInt(slot.dataset.type)
+    let isSpaceSuit = type === Protocol.definition().BuildingType.SpaceSuit
+    if (isSpaceSuit) {
+      this.game.suitColorMenu.open({ colors: this.game.suitColors, entityId: parseInt(slot.dataset.id) })
+    }
+
+    this.openAttachmentMenuIfNeeded(slot)
   }
 
   onPlayerEquipmentDblClick(e) {
     if (this.game.isMiniGame()) return
     let slot = e.target.closest(".equipment_slot")
-    if (slot) {
-      let type = parseInt(slot.dataset.type)
-      let id = parseInt(slot.dataset.id)
-      let itemIndex = parseInt(slot.dataset.item)
-      const itemKlass = Item.getKlass(type)
-      const hasAttachmentSlots = itemKlass.prototype.getConstants().attachmentSlots
-      let isSpaceSuit = type === Protocol.definition().BuildingType.SpaceSuit 
-      if (isSpaceSuit) {
-        this.game.suitColorMenu.open({colors: this.game.suitColors, entityId: id })
-      }
-      if (hasAttachmentSlots) {
-        this.game.attachmentMenu.open({ entityId: id })
-      }
+    if (!slot) return
+
+    let type = parseInt(slot.dataset.type)
+    let isSpaceSuit = type === Protocol.definition().BuildingType.SpaceSuit
+    if (isSpaceSuit) {
+      this.game.suitColorMenu.open({ colors: this.game.suitColors, entityId: parseInt(slot.dataset.id) })
     }
+
+    this.openAttachmentMenuIfNeeded(slot)
   }
 
   open(label, storageId) {
@@ -99,14 +131,17 @@ class InventoryMenu extends BaseMenu {
   initListeners() {
     super.initListeners()
 
+    this.el.querySelector("#player_equipment").addEventListener("click", this.onInventorySlotClick.bind(this), true)
     this.el.querySelector("#player_equipment").addEventListener("dblclick", this.onPlayerEquipmentDblClick.bind(this), true)
 
     Array.from(this.el.querySelectorAll(".inventory_slot")).forEach((el) => {
       this.initInventorySlotListener(el)
+      el.addEventListener("click", this.onInventorySlotClick.bind(this), true)
     })
 
     Array.from(document.querySelectorAll("#player_quick_inventory_menu .inventory_slot")).forEach((el) => {
       this.initInventorySlotListener(el)
+      el.addEventListener("click", this.onInventorySlotClick.bind(this), true)
     })
   }
 

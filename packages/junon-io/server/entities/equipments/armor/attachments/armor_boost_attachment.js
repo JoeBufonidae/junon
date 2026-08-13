@@ -2,20 +2,20 @@ const BaseAttachment = require("./base_attachment")
 const Protocol = require("../../../../../common/util/protocol")
 const Constants = require("../../../../../common/constants.json")
 
-class SpeedAttachment extends BaseAttachment {
+class ArmorBoostAttachment extends BaseAttachment {
   getConstantsTable() {
-    return "Attachments.SpeedAttachment"
+    return "Attachments.ArmorBoostAttachment"
   }
 
   getType() {
-    return Protocol.definition().BuildingType.SpeedAttachment
+    return Protocol.definition().BuildingType.ArmorBoostAttachment
   }
 
   get modifiers() {
     return {
-      speedBoost: Constants.Attachments.SpeedAttachment.speedBoost
+      defense: Constants.Attachments.ArmorBoostAttachment.defenseBoost
     }
   }
 }
 
-module.exports = SpeedAttachment
+module.exports = ArmorBoostAttachment

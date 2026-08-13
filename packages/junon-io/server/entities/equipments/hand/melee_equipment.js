@@ -86,9 +86,27 @@ class MeleeEquipment extends HandEquipment {
   }
 
   useOnTarget(user, target) {
-    const damage = this.getDamage(target)
+    let damage = this.getDamage(target)
+    if (this.owner && this.owner.getArmorEquipment) {
+      const armor = this.owner.getArmorEquipment()
+      if (armor && Array.isArray(armor.attachments)) {
+        armor.attachments.forEach((attachment) => {
+          if (!attachment || !attachment.modifiers) return
+
+          if (typeof attachment.modifiers.meleeDamage === "number") {
+            damage += attachment.modifiers.meleeDamage
+          }
+        })
+      }
+    }
+
+
     if (target) {
       target.damage(damage, user, this)
+      if (!this.game.isMiniGame() && 
+         target.hasCategory("knockback_resistant")) {
+        this.applyKnockback(user, target)
+      }
       if (user.isPlayer()) {
       }
 
@@ -98,6 +116,41 @@ class MeleeEquipment extends HandEquipment {
     }
 
     return true
+  }
+
+  applyKnockback(attacker, target) {
+    if (!attacker || !target) return
+    if (!attacker.getArmorEquipment) return
+
+    const armor = attacker.getArmorEquipment()
+    if (!armor || !Array.isArray(armor.attachments)) return
+
+    let knockback = 0
+    armor.attachments.forEach((attachment) => {
+      if (!attachment || !attachment.modifiers) return
+
+      if (typeof attachment.modifiers.knockback === "number") {
+        knockback += attachment.modifiers.knockback
+      }
+
+      if (typeof attachment.modifiers.knockbackMultiplier === "number") {
+        knockback *= attachment.modifiers.knockbackMultiplier
+      }
+    })
+
+    if (knockback <= 0) return
+    if (typeof target.enableCustomVelocity !== "function" || typeof target.applyForce !== "function") return
+
+    target.enableCustomVelocity()
+
+    const dx = target.getX() - attacker.getX()
+    const dy = target.getY() - attacker.getY()
+    const distance = Math.hypot(dx, dy) || 1
+
+    const x = dx === 0 && dy === 0 ? knockback : (dx / distance) * knockback
+    const y = dx === 0 && dy === 0 ? 0 : (dy / distance) * knockback
+
+    target.applyForce([x, y])
   }
 
   applyStun(target) {

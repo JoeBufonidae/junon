@@ -172,7 +172,6 @@ class SuitWorkstation extends BaseProcessor {
       getType: () => attachmentType,
       getName: () => (attachmentItem.getTypeName ? attachmentItem.getTypeName() : ""),
       tier: AttachmentKlass.tier || (AttachmentKlass.prototype && AttachmentKlass.prototype.tier) || 1,
-      speedBoost: (Constants.Attachments && Constants.Attachments.SpeedAttachment && Constants.Attachments.SpeedAttachment.speedBoost) || 2,
       modifiers: (AttachmentKlass.prototype && AttachmentKlass.prototype.modifiers) || {},
       isAttachment: () => true,
       applyEffect(player) {

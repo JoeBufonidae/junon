@@ -4086,7 +4086,8 @@
       },
       "isCostIndependent": true,
       "stats": {
-        "range": 64
+        "range": 64,
+        "usageCapacity": 500
       },
       "requirements": {
         "Cloth": 20
@@ -4106,7 +4107,8 @@
       },
       "stats": {
         "range": 64,
-        "oxygen": 300
+        "oxygen": 300,
+        "usageCapacity":1000
       },
       "requirements": {
         "Glass": 5,
@@ -4131,7 +4133,8 @@
         "range": 64,
         "oxygen": 150,
         "defense": 4,
-        "healthBoost": 150
+        "healthBoost": 150,
+        "usageCapacity":10000
       },
       "requirements": {
         "Meteorite": 40,
@@ -4155,7 +4158,7 @@
         "range": 64,
         "oxygen": 150,
         "defense": 0,
-        "usageCapacity":1000
+        "usageCapacity":5000
       },
       "requirements": {
         "Meteorite": 40,
@@ -4178,7 +4181,9 @@
       "stats": {
         "range": 64,
         "oxygen": 100,
-        "defense": 10
+        "defense": 8,
+        "healthBoost": 300,
+        "usageCapacity":10000
       },
       "requirements": {
         "Meteorite": 180,
@@ -4196,7 +4201,8 @@
       "isLightPersistent": true,
       "brightness": 0.8,
       "stats": {
-        "range": 64
+        "range": 64,
+        "usageCapacity":500
       },
       "requirements": {
         "PlantFiber": 30
@@ -4212,7 +4218,8 @@
       "brightness": 0.8,
       "stats": {
         "range": 64,
-        "healthBoost": 50
+        "healthBoost": 50,
+        "usageCapacity":500
       },
       "requirements": {
         "PlantFiber": 50
@@ -4227,7 +4234,8 @@
       "isLightPersistent": true,
       "brightness": 0.8,
       "stats": {
-        "range": 64
+        "range": 64,
+        "usageCapacity":500
       },
       "requirements": {
         "PlantFiber": 50
@@ -4243,7 +4251,9 @@
       "brightness": 0.8,
       "attachmentSlots":1,
       "stats": {
-        "range": 64
+        "range": 64,
+        "healthBoost": 50,
+        "usageCapacity":1000
       },
       "requirements": {
         "PlantFiber": 50
@@ -4264,7 +4274,8 @@
       },
       "stats": {
         "range": 64,
-        "oxygen": 150
+        "oxygen": 150,
+        "usageCapacity":5000
       },
       "requirements": {
         "Meteorite": 50,
@@ -4281,13 +4292,83 @@
       "cost": {
         "gold": 1000
       },
-      "speedBoost": 2,
+      "speedBoost": 3,
       "requirements": {
         "IronBar": 50,
         "Wire": 10,
         "CircuitBoard": 5
       },
       "description": "Boosts speed" 
+    },
+    "ArmorBoostAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 1500
+      },
+      "defenseBoost": 4,
+      "requirements": {
+        "IronBar": 60,
+        "Wire": 12,
+        "CircuitBoard": 8
+      },
+      "description": "Increases suit defense"
+    },
+    "HealthBoostAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 1500
+      },
+      "healthBoost": 100,
+      "requirements": {
+        "SteelBar": 30,
+        "PlantFiber": 40,
+        "CircuitBoard": 8
+      },
+      "description": "Raises max health"
+    },
+    "MeleeSpeedAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 1800
+      },
+      "meleeSpeedBoost": 1.5,
+      "requirements": {
+        "IronBar": 70,
+        "Wire": 15,
+        "CircuitBoard": 10
+      },
+      "description": "Faster melee attacks"
+    },
+    "KnockbackAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 1600
+      },
+      "knockback": 16,
+      "requirements": {
+        "IronBar": 80,
+        "SteelBar": 20,
+        "Wire": 12
+      },
+      "description": "Adds push effect to melee attacks"
+    },
+    "MeleeDamageAttachment": {
+      "width": 96,
+      "height": 96,
+      "cost": {
+        "gold": 2000
+      },
+      "meleeDamage": 10,
+      "requirements": {
+        "SteelBar": 50,
+        "IronBar": 40,
+        "CircuitBoard": 12
+      },
+      "description": "Higher melee output"
     }
   },
   "Transports": {
