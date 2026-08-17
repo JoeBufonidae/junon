@@ -3,18 +3,18 @@ const Protocol = require('../../../common/util/protocol')
 const Attachments = require("./../equipments/armor/attachments")
 const Constants = require('../../../common/constants')
 
-class SuitWorkstation extends BaseProcessor {
+class SuitReconstructor extends BaseProcessor {
   constructor(container, data) {
     super(container, data)
     this.slotCount = 4 // 0: armor, 1: attachment, 2: magnet, 3: output
   }
 
   getConstantsTable() {
-    return "Buildings.SuitWorkstation"
+    return "Buildings.SuitReconstructor"
   }
 
   getType() {
-    return Protocol.definition().BuildingType.SuitWorkstation
+    return Protocol.definition().BuildingType.SuitReconstructor
   }
 
   onStorageChanged(item, index) {
@@ -24,31 +24,17 @@ class SuitWorkstation extends BaseProcessor {
   }
 
   getStorageContentType() {
-    const outputIndex = (typeof this.getOutputStorageIndex === "function")
-      ? this.getOutputStorageIndex()
-      : 3
+    // Prefer showing armor from the output slot if present, otherwise the input slot
+    const outputIndex = (typeof this.getOutputStorageIndex === 'function') ? this.getOutputStorageIndex() : 3
+    let item = this.get(outputIndex) || this.get(0)
+    if (!item) return ""
 
-    const armor = this.get(outputIndex) || this.get(0)
-    const attachment = this.get(1)
+    let suitColor = item.instance && item.instance.content
+    if (suitColor) {
+      return [item.type.toString(), suitColor].join(":")
+    }
 
-    // Nothing in the workstation
-    if (!armor && !attachment) return ""
-
-    const armorType = armor
-      ? armor.type.toString()
-      : ""
-
-    const suitColor = armor && armor.instance
-      ? armor.instance.content
-      : ""
-
-    const color = suitColor || ""
-
-    const attachmentType = attachment
-      ? attachment.getType().toString()
-      : ""
-
-    return [armorType, color, attachmentType].join(":")
+    return item.type.toString()
   }
 
   // Helper to get item in slot
@@ -224,4 +210,4 @@ class SuitWorkstation extends BaseProcessor {
   }
 }
 
-module.exports = SuitWorkstation
+module.exports = SuitReconstructor

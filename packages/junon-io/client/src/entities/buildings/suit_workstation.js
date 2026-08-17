@@ -2,6 +2,7 @@ const BaseBuilding = require("./base_building")
 const Protocol = require("./../../../../common/util/protocol")
 const Constants = require("./../../../../common/constants.json")
 const Equipments = require("./../equipments/index")
+const Attachments = require("./../equipments/armor/attachments")
 
 class SuitWorkstation extends BaseBuilding {
   constructor(game, data, isEquipDisplay) {
@@ -43,6 +44,16 @@ class SuitWorkstation extends BaseBuilding {
     this.armorEquipContainer.scale.y = 3.0
     sprite.addChild(this.armorEquipContainer)
 
+    this.attachmentContainer = new PIXI.Container()
+    this.attachmentContainer.name = "Attachment"
+    this.attachmentContainer.pivot.x = Constants.tileSize / 2 + 35
+    this.attachmentContainer.pivot.y = Constants.tileSize / 2 - 25
+    this.attachmentContainer.rotation = 90 * Math.PI
+    this.attachmentContainer.scale.x = 2.5
+    this.attachmentContainer.scale.y = 2.5
+    sprite.addChild(this.attachmentContainer)
+
+
     return sprite
   }
 
@@ -55,20 +66,50 @@ class SuitWorkstation extends BaseBuilding {
   }
 
   onContentChanged() {
-    const armorType = this.content
-    if (armorType) {
-      let suitType = armorType.split(":")[0]
-      let color = armorType.split(":")[1]
+    // Remove existing armor
+    if (this.armor) {
+      this.armor.remove()
+      this.armor = null
+    }
 
-      let data = { x: 0, y: 0, user: this }
-      data.instance = {
-        content: color
+    // Remove existing attachment
+    if (this.attachment) {
+      this.attachment.remove()
+      this.attachment = null
+    }
+
+    if (!this.content) return
+
+    const parts = this.content.split(":")
+    const suitType = parts[0]
+    const color = parts[1]
+    const attachmentType = parts[2]
+
+    // Build armor if one exists
+    if (suitType) {
+      const armorData = {
+        x: 0,
+        y: 0,
+        user: this,
+        instance: {
+          content: color
+        }
       }
 
-      this.armor = Equipments.forType(suitType).build(this.game, data)
-    } else if (this.armor) {
-      // no more armor in storage, remove it
-      this.armor.remove()
+      this.armor = Equipments.forType(suitType).build(this.game, armorData)
+    }
+
+    // Build attachment if one exists
+    if (attachmentType) {
+      const attachmentData = {
+        x: 0,
+        y: 0,
+        user: this
+      }
+
+      this.attachment = Attachments
+        .forType(attachmentType)
+        .build(this.game, attachmentData)
     }
   }
 

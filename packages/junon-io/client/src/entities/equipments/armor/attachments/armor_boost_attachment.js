@@ -4,15 +4,11 @@ const Protocol = require("./../../../../../../common/util/protocol")
 
 class ArmorBoostAttachment extends BaseAttachment {
   getSpritePath() {
-    return 'mockattachment.png'
+    return 'attachment_armor.png'
   }
 
   repositionSprite() {
     super.repositionSprite()
-    this.sprite.x = 31
-    this.sprite.y = 0
-    this.sprite.scale.x = 0.1
-    this.sprite.scale.y = 0.1
   }
 
   getType() {

@@ -104,7 +104,7 @@ class MeleeEquipment extends HandEquipment {
     if (target) {
       target.damage(damage, user, this)
       if (!this.game.isMiniGame() && 
-         target.hasCategory("knockback_resistant")) {
+         !target.hasCategory("knockback_resistant")) {
         this.applyKnockback(user, target)
       }
       if (user.isPlayer()) {

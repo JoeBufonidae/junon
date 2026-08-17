@@ -20,16 +20,17 @@ class BaseAttachment extends BaseEntity {
   
 
   repositionSprite() {
-      this.sprite.anchor.set(0)
-      this.sprite.position.x = 0
-      this.sprite.position.y = 0
-
+      this.sprite.x = 53
+      this.sprite.y = 20.4
+      this.sprite.scale.x = 0.33
+      this.sprite.scale.y = 0.33
+      this.sprite.rotation = 45 * Math.PI/2
     }
 
 
   getSpriteContainer() {
       if (this.data.user.isBuildingType()) {
-          return this.data.user.buildingSprite
+          return this.data.user.attachmentContainer
       } else {
           return this.data.user.characterSprite
       }

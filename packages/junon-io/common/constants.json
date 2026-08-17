@@ -6339,7 +6339,7 @@
       "storageCount": 4,
       "categories": {"producer": true},
       "isInteractable": true,
-      "menuDescription": "Suit Workstation",
+      "menuDescription": "Adds attachments to suits.",
       "requirements": {
         "IronBar": 30,
         "CircuitBoard": 10,
@@ -6357,7 +6357,35 @@
         "health": "+25",
         "count": "+25"
       },
-      "description": "Suit Workstation"
+      "description": "Adds attachments to suits"
+    },
+    "SuitReconstructor": {
+      "parent": "Buildings.BaseProcessor",
+      "width": 128,
+      "height": 128,
+      "hasMenu": true,
+      "storageCount": 4,
+      "categories": {"producer": true},
+      "isInteractable": true,
+      "menuDescription": "Put suit to repair in first slot, suit to destroy in second.",
+      "requirements": {
+        "IronBar": 30,
+        "CircuitBoard": 10,
+        "Wire": 5
+      },
+      "cost": {
+        "gold": 500
+      },
+      "stats": {
+        "health": 150,
+        "count": 125,
+        "processingRate": 10
+      },
+      "upgrade": {
+        "health": "+25",
+        "count": "+25"
+      },
+      "description": "Repairs a suit with pieces from another suit"
     },
     "Workshop": {
       "width": 64,

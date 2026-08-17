@@ -274,6 +274,7 @@ enum BuildingType {
   MeleeSpeedAttachment = 280;
   KnockbackAttachment = 281;
   MeleeDamageAttachment = 282;
+  SuitReconstructor = 283;
 }
 
 enum TerrainType {
