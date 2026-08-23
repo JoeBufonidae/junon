@@ -1,18 +1,20 @@
 const BaseCommand = require("./base_command")
 const Constants = require("../../common/constants")
 const Protocol = require('../../common/util/protocol')
+const { menu } = require(".")
 
 class Menu extends BaseCommand {
     getUsage() {
         return [
-            "/menu close [menu name] [player name]",
-            "/menu open [menu name] [player name]",
-            "Available menu names:",
-            this.getAllowedMenus().join(", ")
+            "Toggles a menu's visibility to players",
+            "/menu close [menu] [player]",
+            "/menu open [menu] [player]",
+            "ex: available menu names:",
+            this.getAllowedMenusToOpen().join(", ")
         ]
     }
 
-    getAllowedMenus()
+    getAllowedMenusToOpen()
     {
         return ["blueprintMenu",
                 "inventoryMenu",
@@ -22,13 +24,20 @@ class Menu extends BaseCommand {
                 "welcomeMenu",
                 "mapMenu",
                 "miniMapMenu",
-                "atmMenu",
                 "sidebarMenu",
                 "commandBlockMenu",
                 "voteMenu",
                 "friendsMenu",
                 "badgeMenu",
-                "teamMenu"]
+                "teamMenu",
+                "terminalMenu"]
+    }
+
+    getUnallowedMenusToClose()
+    {
+        return ["friendsMenu",
+                "badgeMenu",
+                "commandBlockMenu"]
     }
 
     allowOwnerOnly() {
@@ -37,9 +46,11 @@ class Menu extends BaseCommand {
 
     perform(caller, args) {
         let subcommand = args[0]
-        let menuName = args[1]
+        let menuName = this.sector.klassifySnakeCase(args[1])
+        menuName = menuName[0].toLowerCase() + menuName.slice(1)
         let player = args[2]
         let multiplePlayers
+        console.log(menuName)
         // if(!caller || !caller.isPlayer()) return
 
         if(player) {
@@ -53,10 +64,10 @@ class Menu extends BaseCommand {
             // only check allowed menus here
             // since player shouldn't have entity-dependent menus open with this cmd
             // but should be able to have them closed
-            let allowedMenus = this.getAllowedMenus()
+            let allowedMenus = this.getAllowedMenusToOpen()
             if(allowedMenus.indexOf(menuName) === -1)
             {
-                caller.showChatError("Menu invalid / unallowed: " + menuName)
+                caller.showChatError("Menu invalid or unallowed: " + menuName)
                 return
             }
 
@@ -70,6 +81,12 @@ class Menu extends BaseCommand {
             return
         }
         if(subcommand == "close") {
+            let disallowedMenus = this.getUnallowedMenusToClose()
+            if(disallowedMenus.indexOf(menuName) !== -1)
+            {
+                caller.showChatError("Menu invalid or unallowed: " + menuName)
+                return
+            }
             if(multiplePlayers) {
                 player.forEach((entity) => {
                     this.getSocketUtil().emit(entity.socket, "CloseMenu", {menuName: menuName})

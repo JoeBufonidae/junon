@@ -226,6 +226,16 @@ class Player extends BaseEntity {
     return gold >= 1000000
   }
 
+  triggerPlayerMenu(data) {
+    let finalMenuName = this.sector.klassifySnakeCase(data.menuName)
+    finalMenuName = finalMenuName[0].toLowerCase() + finalMenuName.slice(1)
+    this.game.triggerEvent("PlayerMenu", {
+      menuName: finalMenuName,
+      state: data.state,
+      player: this.getName(),
+    })
+  }
+
   canEditCommandBlock() {
     if (this.sector.isLobby()) return true
     if (!this.sector.canUseCommandBlocks()) return false
