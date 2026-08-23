@@ -255,8 +255,12 @@ class BaseMenu {
   }
 
   menuChanged(newState) {
+    let finalMenuName = this.el.id
+    if ( this.el.id == 'chat_container' ) {
+      finalMenuName = 'chat_menu'
+    }
     SocketUtil.emit("TriggerPlayerMenu", {
-      menuName: this.el.id,
+      menuName: finalMenuName,
       state: newState,
     })
   }
@@ -280,8 +284,10 @@ class BaseMenu {
       }
     }
 
+    if(!this.isOpen()) {
+      this.menuChanged(true)
+    }
     this.setOpenDisplay()
-    this.menuChanged(true)
   }
 
   setOpenDisplay() {
@@ -307,9 +313,11 @@ class BaseMenu {
     if (this.storageId) {
       SocketUtil.emit("CloseStorage", { id: this.storageId })
     }
-
+    
+    if(!this.isClose()) {
+      this.menuChanged(false)
+    }
     this.el.style.display = 'none'
-    this.menuChanged(false)
   }
 
   isOpen() {

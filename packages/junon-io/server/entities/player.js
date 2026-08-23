@@ -227,8 +227,10 @@ class Player extends BaseEntity {
   }
 
   triggerPlayerMenu(data) {
+    let finalMenuName = this.sector.klassifySnakeCase(data.menuName)
+    finalMenuName = finalMenuName[0].toLowerCase() + finalMenuName.slice(1)
     this.game.triggerEvent("PlayerMenu", {
-      menuName: data.menuName,
+      menuName: finalMenuName,
       state: data.state,
       player: this.getName(),
     })

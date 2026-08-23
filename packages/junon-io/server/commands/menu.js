@@ -1,6 +1,7 @@
 const BaseCommand = require("./base_command")
 const Constants = require("../../common/constants")
 const Protocol = require('../../common/util/protocol')
+const { menu } = require(".")
 
 class Menu extends BaseCommand {
     getUsage() {
@@ -23,7 +24,6 @@ class Menu extends BaseCommand {
                 "welcomeMenu",
                 "mapMenu",
                 "miniMapMenu",
-                "atmMenu",
                 "sidebarMenu",
                 "commandBlockMenu",
                 "voteMenu",
@@ -36,7 +36,8 @@ class Menu extends BaseCommand {
     getUnallowedMenusToClose()
     {
         return ["friendsMenu",
-                "badgeMenu"]
+                "badgeMenu",
+                "commandBlockMenu"]
     }
 
     allowOwnerOnly() {
@@ -45,9 +46,11 @@ class Menu extends BaseCommand {
 
     perform(caller, args) {
         let subcommand = args[0]
-        let menuName = args[1]
+        let menuName = this.sector.klassifySnakeCase(args[1])
+        menuName = menuName[0].toLowerCase() + menuName.slice(1)
         let player = args[2]
         let multiplePlayers
+        console.log(menuName)
         // if(!caller || !caller.isPlayer()) return
 
         if(player) {
