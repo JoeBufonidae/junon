@@ -8,8 +8,16 @@ const BaseProcessor = require("./base_processor")
 class MiningDrill extends BaseProcessor {
 
   onBuildingPlaced() {
-    if (this.getPlacer()) {
-      let team = this.getPlacer().getTeam()
+    const placer = this.getPlacer()
+
+    if (placer) {
+      const team = placer.getTeam()
+      this.prevMiningDrillCount = team.getMiningDrillCount()
+    } else if (this.owner) {
+      const team = this.owner.isPlayer()
+        ? this.owner.getTeam()
+        : this.owner
+
       this.prevMiningDrillCount = team.getMiningDrillCount()
     }
 
