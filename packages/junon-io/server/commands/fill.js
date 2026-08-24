@@ -14,7 +14,7 @@ class Fill extends BaseCommand {
       "ex: /fill 1 1 5 5 floor",
     ]
   }
-  
+  //maybe add a arguement to make it so fill platform doesnt delete structures
   allowOwnerOnly() {
     return true
   }
