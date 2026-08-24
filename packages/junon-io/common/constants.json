@@ -4627,7 +4627,7 @@
       },
       "stats": {
         "health": 500,
-        "speed": 64,
+        "speed": 96,
         "count": 125
       },
       "upgrade": {

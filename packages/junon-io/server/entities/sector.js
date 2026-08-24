@@ -1228,6 +1228,12 @@ class Sector {
     }
   }
   
+  removeStructures(row, col) {
+    let tile = this.structureMap.get(row, col)
+    if (tile) {
+      tile.remove()
+    }
+  }
 
   addClaim(entity, claimer) {
     new Claim(this, entity, claimer, this.game.timestamp)
