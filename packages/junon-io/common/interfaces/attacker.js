@@ -335,6 +335,7 @@ Attacker.prototype = {
 
   // sorted by distance limited to tree group. first trees have priority
   findLineOfSightTarget() {
+    console.log("[FIND LOS CALLED]", this.constructor.name)
     const targets = this.getAttackables().map((tree) => {
       let targetsInRange = this.getLineOfSightTargets(tree)
 

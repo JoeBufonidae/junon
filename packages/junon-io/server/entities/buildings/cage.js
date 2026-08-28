@@ -19,6 +19,10 @@ class Cage extends Wall {
     return this.isOwnedBy(player)
   }
 
+  isPenetrable() {
+    return true
+  }
+
   getConstantsTable() {
     return "Buildings.Cage"
   }

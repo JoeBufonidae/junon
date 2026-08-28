@@ -288,7 +288,7 @@ class BaseProjectile extends BaseEntity {
 
 
     if (!entity) return false
-
+    
     if (this.owner && this.owner.isPlayer() && !this.owner.canDamage(entity)) {
       return false
     }
@@ -307,6 +307,7 @@ class BaseProjectile extends BaseEntity {
     if (entity.hasCategory("trap")) return true
     if (entity.hasCategory("platform") && this.shouldHitFloor) return true
     if (entity.hasCategory("lamp")) return true
+    if (entity.isBuilding() && entity.isPenetrable()) return false
     if (!entity.isCollidable(this)) return false
     if (entity.isBuilding() && entity.getConstants().isPassable) return false
 

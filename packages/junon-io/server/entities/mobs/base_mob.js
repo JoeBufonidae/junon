@@ -2478,6 +2478,9 @@ Object.assign(BaseMob.prototype, Attacker.prototype, {
   findStructuresInChunkRegion(chunkRegion, range) {
     let structures = chunkRegion.getStructures()
     return structures.filter((structure) => {
+      if (structure.isPenetrable() && this.getAttackRange() > 96) {
+        return false
+      }
       return this.canAttack(structure) && this.isWithinRange(structure, range)
     })
   },
@@ -2558,11 +2561,13 @@ Object.assign(BaseMob.prototype, Attacker.prototype, {
       },
       neighborStopCondition: (chunkRegion, hops) => {
         return hops >= 3
-      }
+      },
+      passThroughPenetrableWall: true
     })
 
     return this.applyTargetSelectionStrategy(targets)
   },
+
   shouldAttack() {
     if (this.getRaid() && this.getRaid().isRaidEnded) {
       return false

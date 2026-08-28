@@ -2366,7 +2366,11 @@ class Sector {
         desiredChunkRegion = chunkRegion
       }
 
-      let chunkRegionNeighbors = chunkRegion.getNeighbors({ sameBiome: true, passThroughWall: false })
+      let chunkRegionNeighbors = chunkRegion.getNeighbors({
+        sameBiome: true,
+        passThroughWall: options.passThroughWall || false,
+        passThroughPenetrableWall: options.passThroughPenetrableWall || false
+      })
       let shouldStopNeighborTraversal = desiredChunkRegion ||
                                         options.neighborStopCondition(chunkRegion, hops)
 

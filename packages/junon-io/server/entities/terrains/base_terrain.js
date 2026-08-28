@@ -301,6 +301,10 @@ class BaseTerrain  {
     return false
   }
 
+  isPenetrable() {
+    return false
+  }
+
   shouldCollideEdge() {
     return false
   }

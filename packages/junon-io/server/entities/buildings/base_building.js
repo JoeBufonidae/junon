@@ -150,6 +150,11 @@ class BaseBuilding extends BaseEntity {
     return null
   }
 
+  isPenetrable() {
+    return false
+  }
+
+
   onEffectLevelChanged(effect, level) {
     super.onEffectLevelChanged(effect, level)
 
