@@ -1540,6 +1540,7 @@ class Sector {
       let player = this.changedPlayers[key]
       player.sendChangedPlayersToClient()
       player.sendChangedCorpsesToClient()
+      player.sendChangedMobsToClient()
     }
 
     this.clearChangedPlayers()

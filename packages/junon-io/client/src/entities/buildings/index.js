@@ -83,7 +83,7 @@ for (let name in Constants.Walls) {
 
 Buildings.Furnitures.Bed = require("./bed")
 Buildings.Furnitures.Sign = require("./sign")
-
+Buildings.Furnitures.NeonSign = require("./neon_sign")
 Buildings.Furnitures.Table = require("./table")
 Buildings.Furnitures.LargeTable = require("./large_table")
 Buildings.Furnitures.WoodTable = require("./wood_table")

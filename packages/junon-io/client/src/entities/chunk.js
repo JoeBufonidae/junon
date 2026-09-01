@@ -40,7 +40,7 @@ class Chunk {
   removeStale(data) {
     let groupsToSkip = []
     if (this.sector.isFovMode()) {
-      groupsToSkip = ["players", "corpses"]
+      groupsToSkip = ["players", "corpses", "mobs"]
     }
 
     let currentCollectionMap = this.getCollectionMapFromData(data)

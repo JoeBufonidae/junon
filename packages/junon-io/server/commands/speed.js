@@ -6,7 +6,7 @@ class Speed extends BaseCommand {
   getUsage() {
     return [
       "Sets the speed of an entity to a certain value",
-      "/speed [player] [1-20]",
+      "/speed [player] [1-50]",
       "ex: /speed kuroro 20"
     ]
   }
@@ -25,8 +25,8 @@ class Speed extends BaseCommand {
       return
     }
 
-    if (isNaN(speed) || speed < 0 || speed > 30) {
-      player.showChatError("/speed [1-30]")
+    if (isNaN(speed) || speed < 0 || speed > 50) {
+      player.showChatError("/speed [1-50]")
       return
     }
 

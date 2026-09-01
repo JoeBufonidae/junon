@@ -5394,7 +5394,7 @@
       "height": 32,
       "categories": {"wall": true, "custom_colors": true},
       "cost": {
-        "gold": 50
+        "gold": 30
       },
       "requirements": {
         "IronBar": 3
@@ -5646,6 +5646,37 @@
         "count": "+25"
       },
       "description": "Display Editable Text to Players"
+    },
+    "NeonSign": {
+      "width": 32,
+      "height": 32,
+      "cost": {
+        "gold": 200
+      },
+      "isPassable": true,
+      "categories": {"sign": true, "switch":true,"lamp":true},
+      "hasMenu": true,
+      "hasEditableContent": true,
+      "isInteractable": true,
+      "maxContentLength": 300,
+      "isLightSource": true,
+      "lightColor": "#00ffff",
+      "isLightPersistent": true,
+      "lightRadius": 2,
+      "requirements": {
+        "IronBar": 20,
+        "CircuitBoard": 5,
+        "Wire": 5,
+        "Glass": 5
+      },
+      "stats": {
+        "health": 50
+      },
+      "upgrade": {
+        "health": "+100",
+        "count": "+25"
+      },
+      "description": "Display Editable Text to Players. Has a self contained power source"
     },
     "EmergencyButton": {
       "width": 64,

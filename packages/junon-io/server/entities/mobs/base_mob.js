@@ -35,6 +35,8 @@ class BaseMob extends BaseEntity {
     this.unreachableGoals = {}
     this.regions = {}
 
+    this.playerViewerships = {}
+
     this.type = this.getType()
     this.container = sector
     this.onMasterRemovedListener = this.onMasterRemoved.bind(this)
@@ -57,11 +59,43 @@ class BaseMob extends BaseEntity {
     this.onPositionChanged({ isGridPositionChanged: true })
     this.onPostInit()
 
+    if (this.sector.isFovMode()) {
+      this.addNewlyVisibleMobToPlayers()
+    }
+
     this.executeTurn()
   }
 
   preApplyData() {
 
+  }
+
+  addPlayerViewership(player) {
+    this.playerViewerships[player.getId()] = player
+  }
+
+  removePlayerViewership(player) {
+    delete this.playerViewerships[player.getId()]
+  }
+
+  unregisterFromPlayerViewership() {
+    for (let id in this.playerViewerships) {
+      let player = this.playerViewerships[id]
+      player.removeVisibleMob(this)
+    }
+
+    this.playerViewerships = {}
+  }
+
+  addNewlyVisibleMobToPlayers() {
+    let boundingBox = this.getNeighborBoundingBox(Constants.tileSize * 6)
+    let players = this.sector.playerTree.search(boundingBox)
+    for (var i = 0; i < players.length; i++) {
+      let player = players[i]
+      if (player.calculateEntityVisible(this)) {
+        player.addVisibleMob(this)
+      }
+    }
   }
 
   initBehavior() {
@@ -881,6 +915,7 @@ this.setNameColor(data.nameColor)
 
     this.sector.removeEntityFromTreeByName(this, "mobs")
     this.unregisterFromChunkRegion()
+    this.unregisterFromPlayerViewership()
 
     this.goals.forEach((goal) => {
       goal.remove()
@@ -2069,6 +2104,12 @@ this.setNameColor(data.nameColor)
     let chunk = this.getChunk()
     if (chunk) {
       chunk.addChangedMobs(this)
+    }
+
+    if (this.sector.isFovMode()) {
+      for (let id in this.playerViewerships) {
+        this.playerViewerships[id].addChangedMobs(this)
+      }
     }
   }
 

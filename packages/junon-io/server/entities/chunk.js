@@ -486,16 +486,6 @@ class Chunk {
     this.clearChangedTransports()
   }
 
-  sendChangedMobsToClients() {
-    if (Object.keys(this.changedMobs).length === 0) return
-
-    this.forEachSubscribers((player) => {
-      this.getSocketUtil().emit(player.getSocket(), "EntityUpdated", { mobs: this.changedMobs })
-    })
-
-    this.clearChangedMobs()
-  }
-
   sendChangedPickupsToClients() {
     if (Object.keys(this.changedPickups).length === 0) return
 
@@ -526,10 +516,12 @@ class Chunk {
       if (shouldSkipFov) {
         players = this.sector.getPlayersByChunk(this)
         corpses = this.sector.getCorpsesByChunk(this)
+        mobs = this.sector.getMobsByChunk(this)
       }
     } else {
       players = this.sector.getPlayersByChunk(this)
       corpses = this.sector.getCorpsesByChunk(this)
+      mobs = this.sector.getMobsByChunk(this)
     }
 
     let projectiles = this.sector.getProjectilesByChunk(this)
@@ -637,6 +629,31 @@ class Chunk {
 
     this.clearChangedPlayers()
   }
+
+
+  sendChangedMobsToClients() {
+    if (Object.keys(this.changedMobs).length === 0) return
+
+    if (this.sector.isFovMode()) {
+      this.forEachSubscribers((player) => {
+        if (player.shouldSkipFov()) {
+          this.safeExecute(() => {
+            this.getSocketUtil().emit(player.getSocket(), "EntityUpdated", { mobs: this.changedMobs })
+          })
+        }
+      })
+    } else {
+      this.forEachSubscribers((player) => {
+        this.safeExecute(() => {
+          // sometimes player.health is not integer. guard against it and continue processing others
+          this.getSocketUtil().emit(player.getSocket(), "EntityUpdated", { mobs: this.changedMobs })
+        })
+      })
+    }
+
+    this.clearChangedMobs()
+  }
+
 
   safeExecute(cb) {
     try {

@@ -2447,6 +2447,7 @@ class Player extends BaseEntity {
     this.fovTileHits = this.sector.fovManager.calculateFov(this)
     this.determineVisiblePlayers()
     this.determineVisibleCorpses()
+    this.determineVisibleMobs()
   }
 
   hasSameViewDistance(player, otherPlayer) {
@@ -2499,6 +2500,28 @@ class Player extends BaseEntity {
     }
   }
 
+  determineVisibleMobs() {
+    let prevVisibleMobs = this.visibleMobs
+
+    let visibleMobs = this.getVisibleMobs()
+
+    // visible before. hidden now.
+    for (let id in prevVisibleMobs) {
+      if (!visibleMobs[id]) {
+        let mob = prevVisibleMobs[id]
+        this.removeVisibleMob(mob)
+      }
+    }
+
+    // hidden before. visible now.
+    for (let id in visibleMobs) {
+      if (!prevVisibleMobs[id]) {
+        let mob = visibleMobs[id]
+        this.addVisibleMob(mob)
+      }
+    }
+  }
+
   determineVisibleCorpses() {
     let prevVisibleCorpses = this.visibleCorpses
 
@@ -2544,6 +2567,16 @@ class Player extends BaseEntity {
     this.onVisiblePlayerRemoved(player)
   }
 
+  addVisibleMob(mob) {
+    this.visibleMobs[mob.getId()] = mob
+    this.onVisibleMobAdded(mob)
+  }
+
+  removeVisibleMob(mob) {
+    delete this.visibleMobs[mob.getId()]
+    this.onVisibleMobRemoved(mob)
+  }
+
   onVisibleCorpseAdded(corpse) {
     corpse.addPlayerViewership(this)
     this.addChangedCorpses(corpse)
@@ -2562,6 +2595,16 @@ class Player extends BaseEntity {
   onVisiblePlayerRemoved(player) {
     player.removePlayerViewership(this)
     this.addRemovedPlayers(player)
+  }
+
+  onVisibleMobAdded(mob) {
+    mob.addPlayerViewership(this)
+    this.addChangedMobs(mob)
+  }
+
+  onVisibleMobRemoved(mob) {
+    mob.removePlayerViewership(this)
+    this.addRemovedMobs(mob)
   }
 
   sendChangedPlayersToClient() {
@@ -2588,6 +2631,18 @@ class Player extends BaseEntity {
     this.clearChangedCorpses()
   }
 
+  sendChangedMobsToClient() {
+    if (Object.keys(this.changedMobs).length > 0) {
+      this.getSocketUtil().emit(this.getSocket(), "EntityUpdated", { mobs: this.changedMobs })
+    }
+
+    if (Object.keys(this.removedMobs).length > 0) {
+      this.getSocketUtil().emit(this.getSocket(), "EntityUpdated", { mobs: this.removedMobs })
+    }
+
+    this.clearChangedMobs()
+  }
+
   clearChangedPlayers() {
     this.changedPlayers = {}
     this.removedPlayers = {}
@@ -2596,6 +2651,11 @@ class Player extends BaseEntity {
   clearChangedCorpses() {
     this.changedCorpses = {}
     this.removedCorpses = {}
+  }
+
+  clearChangedMobs() {
+    this.changedMobs = {}
+    this.removedMobs = {}
   }
 
   addChangedPlayers(entity) {
@@ -2634,6 +2694,24 @@ class Player extends BaseEntity {
     this.sector.addChangedPlayers(this)
   }
 
+  addChangedMobs(entity) {
+    // temp replacement solution for 09af920ee20c8d06ac82d33719aeabb7e5bd824c
+    // maybe remove or fix properly in future
+    if (isNaN(entity.x) || isNaN(entity.y)) return
+
+    this.changedMobs[entity.id] = entity
+    this.sector.addChangedPlayers(this)
+  }
+
+  addRemovedMobs(entity) {
+    // temp replacement solution for 09af920ee20c8d06ac82d33719aeabb7e5bd824c
+    // maybe remove or fix properly in future
+    if (isNaN(entity.x) || isNaN(entity.y)) return
+
+    this.removedMobs[entity.id] = { id: entity.id, clientMustDelete: true }
+    this.sector.addChangedPlayers(this)
+  }
+
   getVisiblePlayers() {
     let visible = {}
 
@@ -2658,6 +2736,22 @@ class Player extends BaseEntity {
       let isVisible = this.calculateEntityVisible(corpse)
       if (isVisible) {
         visible[corpse.getId()] = corpse
+      }
+    }
+
+    return visible
+  }
+
+  getVisibleMobs() {
+    let visible = {}
+
+    let mobs = this.sector.mobTree.search(this.getCameraBoundingBox())
+
+    for (var i = 0; i < mobs.length; i++) {
+      let mob = mobs[i]
+      let isVisible = this.calculateEntityVisible(mob)
+      if (isVisible) {
+        visible[mob.getId()] = mob
       }
     }
 
@@ -3072,6 +3166,10 @@ class Player extends BaseEntity {
     this.visibleCorpses = {}
     this.changedCorpses = {}
     this.removedCorpses = {}
+
+    this.visibleMobs = {}
+    this.changedMobs = {}
+    this.removedMobs = {}
 
     this.lastChatTimestamp = 0
     this.screenshotTaken = 0
