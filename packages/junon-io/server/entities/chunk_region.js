@@ -680,12 +680,6 @@ class ChunkRegion {
       }
     }
 
-console.log("[LOS NEIGHBORS]", {
-  region: this.getId(),
-  passThroughPenetrableWall: options.passThroughPenetrableWall,
-  neighbors: Object.values(neighbors).map(neighbor => neighbor.getId())
-})
-
     return Object.values(neighbors)
   }
 

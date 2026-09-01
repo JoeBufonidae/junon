@@ -2,7 +2,7 @@ const Constants = require('../../../common/constants.json')
 const Protocol = require('../../../common/util/protocol')
 const Wall = require("./wall")
 
-class Cage extends Wall {
+class LowWall extends Wall {
   updateRoom() {
     // dont
   }
@@ -24,13 +24,13 @@ class Cage extends Wall {
   }
 
   getConstantsTable() {
-    return "Buildings.Cage"
+    return "Buildings.LowWall"
   }
 
   getType() {
-    return Protocol.definition().BuildingType.Cage
+    return Protocol.definition().BuildingType.LowWall
   }
 
 }
 
-module.exports = Cage
+module.exports = LowWall

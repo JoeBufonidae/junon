@@ -4982,7 +4982,7 @@
         "gold": 15
       },
       "requirements": {
-        "IronBar": 1
+        "IronBar": 5
       },
       "stats": {
         "health": 300,
@@ -5388,6 +5388,26 @@
         "count": "+25"
       },
       "description": "Used to secure tamed animals/aliens"
+    },
+    "LowWall": {
+      "width": 32,
+      "height": 32,
+      "categories": {"wall": true, "custom_colors": true},
+      "cost": {
+        "gold": 50
+      },
+      "requirements": {
+        "IronBar": 3
+      },
+      "stats": {
+        "health": 150,
+        "count": 100
+      },
+      "upgrade": {
+        "health": "+100",
+        "count": "+25"
+      },
+      "description": "Low wall you can shoot over"
     },
     "Fence": {
       "width": 128,

@@ -282,10 +282,10 @@ class BaseProjectile extends BaseEntity {
   }
 
   canDamage(entity) {
+    if (entity.isBuilding() && entity.isPenetrable()) return false
     if(this.sourceEntity && this.sourceEntity.canAttack) return this.sourceEntity.canAttack(entity)
     /* if can/can't attack, then can/can't damage. 
      Edit constraints in Attacker.canAttack(target) */
-
 
     if (!entity) return false
     

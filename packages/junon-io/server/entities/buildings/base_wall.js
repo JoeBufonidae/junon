@@ -119,16 +119,6 @@ class BaseWall extends BaseFloor {
       let chunkRegion = wallChunkRegions[id]
       chunkRegions[chunkRegion.getId()] = chunkRegion
     }
-
-console.log("[LOS WALL REGIONS]", {
-  wall: this.constructor.name,
-  wallId: this.getId(),
-  row: this.getRow(),
-  col: this.getCol(),
-  regions: Object.keys(chunkRegions)
-})
-
-
     return chunkRegions
   }
 
