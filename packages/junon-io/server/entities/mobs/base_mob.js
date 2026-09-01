@@ -1790,8 +1790,15 @@ this.setNameColor(data.nameColor)
       return
     }
 
+    let data = {
+      "mobId": targetEntityToMove.id,
+      "mobType": targetEntityToMove.getTypeName(),
+      "goalId": goal.targetEntity.id,
+    }
+    this.game.triggerEvent("GoalAchieved", data)
+
     goal.onReached()
-    goal.remove()
+    goal.remove() //do it here
   }
 
   npcLeaveGame() {

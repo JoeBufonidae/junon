@@ -595,6 +595,14 @@
         "isPowered": "true if powered, false if not"
       }
     },
+    "GoalAchieved": {
+      "description": "Event triggered when a mobs goal is achieved",
+      "variables": {
+        "mobId": "id of mob",
+        "mobType": "type of mob",
+        "goalId": "id of goal"
+      }
+    },
     "Timer:start": {
       "description": "Event triggered when timer starts",
       "variables": {
