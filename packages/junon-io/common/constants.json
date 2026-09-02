@@ -6450,7 +6450,8 @@
       },
       "stats": {
         "health": 300,
-        "count": 125
+        "count": 125,
+        "powerConsumption": 50
       },
       "upgrade": {
         "health": "+25",
