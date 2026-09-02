@@ -261,6 +261,7 @@ class BaseMob extends BaseEntity {
     this.setContent(data.content)
     this.setNameColor(data.nameColor)
     this.setNameSize(data.nameSize)
+    this.setEquipments(data)
 
     if (data.hasOwnProperty('weaponType')) {
       this.setWeaponType(data.weaponType)
@@ -272,6 +273,42 @@ class BaseMob extends BaseEntity {
 
     if (data.shipId) {
       this.ship = this.game.ships[data.shipId]
+    }
+  }
+
+  setEquipments(data) {
+    if (!data.equipments) return
+    if (!data.equipments.storage) return
+    
+    for (let index in data.equipments.storage) {
+      let equipment = data.equipments.storage[index]    
+      this.renderEquipment(equipment)
+    }
+  }
+
+  renderEquipment(data) {
+    if (!this.isEquipper()) return
+
+    const index = data.index
+    let existingEquipment = this.equipments[index]
+
+    // equipment slot changed
+    if (existingEquipment) {
+      let isSameEquipment = data.id === existingEquipment.id
+      if (isSameEquipment) {
+        existingEquipment.syncWithServer(data)
+      } else {
+        existingEquipment.remove()
+        existingEquipment = null
+      }
+    }
+
+    // dont convert to else if (existingEquipment can become null above)
+    if (!existingEquipment) {
+      // init equipment
+      data.user = this
+      this.equipments[index] = Item.getKlass(data.type).build(this.game, data)
+      this.equipments[index].onPostEquip()
     }
   }
   

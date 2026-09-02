@@ -34,9 +34,29 @@ class SetEquipment extends BaseCommand {
     let type = args[2] || ""
     type = this.sector.klassifySnakeCase(type)
 
-    let targetPlayers = this.getPlayersBySelector(username)
-    if (targetPlayers.length === 0) {
-      player.showChatError("No such player: " + username)
+    // Try to find players first, then mobs (by name or ID)
+    let targetEntities = this.getPlayersBySelector(username)
+    if (targetEntities.length === 0) {
+      // Try by numeric ID
+      const id = parseInt(username)
+      if (!isNaN(id)) {
+        const entity = this.game.getEntity(id)
+        if (entity && !entity.isPlayer()) {
+          targetEntities = [entity]
+        }
+      }
+      
+      // Try by name
+      if (targetEntities.length === 0) {
+        const entity = this.game.getMobByName(username)
+        if (entity) {
+          targetEntities = [entity]
+        }
+      }
+    }
+
+    if (targetEntities.length === 0) {
+      player.showChatError("No such player or mob: " + username)
       return
     }
 
@@ -68,12 +88,12 @@ class SetEquipment extends BaseCommand {
       return
     }
 
-    targetPlayers.forEach((targetPlayer) => {
-      if (!targetPlayer.equipments.isFullyStored()) {
+    targetEntities.forEach((targetEntity) => {
+      if (!targetEntity.equipments.isFullyStored()) {
         let options = {}
 
-        const item = targetPlayer.createItem(type, options)
-        targetPlayer.equipments.storeAt(index, item)
+        const item = targetEntity.createItem(type, options)
+        targetEntity.equipments.storeAt(index, item)
       }
     })
 

@@ -85,6 +85,7 @@ message Mob {
   Goal goals = 53;
   uint32 nameColor = 54;
   uint32 nameSize = 55;
+  Equipments equipments = 59;
 }
 
 message Network {

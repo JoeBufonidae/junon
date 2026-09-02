@@ -76,5 +76,6 @@ message Mob {
   string content = 30;
   uint32 nameColor = 31;
   uint32 nameSize = 32;
+  Equipments equipments = 33;
 }
 

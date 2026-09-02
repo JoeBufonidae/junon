@@ -1270,6 +1270,7 @@ this.setNameColor(data.nameColor)
 
 
     this.onStateChanged("weaponType")
+    this.onStateChanged("equipments")
   }
 
   getHandItem() {
@@ -2107,7 +2108,10 @@ this.setNameColor(data.nameColor)
     }).join(", ")
   }
 
-  onStateChanged() {
+  onStateChanged(attribute) {
+    if (attribute) {
+      this.changedAttributes[attribute] = true
+    }
     let chunk = this.getChunk()
     if (chunk) {
       chunk.addChangedMobs(this)

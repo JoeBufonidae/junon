@@ -28,7 +28,28 @@ class SuitColor extends BaseCommand {
       return
     }
 
-    let entities = this.getPlayersBySelector(selector) 
+    let entities = this.getPlayersBySelector(selector)
+
+    if (entities.length === 0) {
+      const id = parseInt(selector)
+
+      if (!isNaN(id)) {
+        const entity = this.game.getEntity(id)
+
+        if (entity && !entity.isPlayer()) {
+          entities = [entity]
+        }
+      }
+
+      if (entities.length === 0) {
+        const entity = this.game.getMobByName(selector)
+
+        if (entity) {
+          entities = [entity]
+        }
+      }
+    }
+
     entities.forEach((entity) => {
       entity.changeSuitColor(color)
     })
