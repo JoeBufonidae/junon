@@ -40,7 +40,6 @@ const Commands = require("../commands/index")
 const Sidebar = require("./sidebar")
 const xss = require("xss")
 const IpBan = require("junon-common/db/ip_ban")
-const sector = require("./sector.js")
 
 class Game {
   constructor(server, sectorData = {}) {

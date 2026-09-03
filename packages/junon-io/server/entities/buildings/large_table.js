@@ -8,6 +8,10 @@ class LargeTable extends BaseBuilding {
     return "Buildings.LargeTable"
   }
 
+  isPenetrable() {
+    return true
+  }
+
   getType() {
     return Protocol.definition().BuildingType.LargeTable
   }

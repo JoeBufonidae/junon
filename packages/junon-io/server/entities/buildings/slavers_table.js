@@ -14,6 +14,10 @@ class SlaversTable extends BaseBuilding {
     }
   }
 
+  isPenetrable() {
+    return true
+  }
+
   getConstantsTable() {
     return "Buildings.SlaversTable"
   }

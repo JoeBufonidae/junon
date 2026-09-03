@@ -7,6 +7,10 @@ class WoodTable extends BaseBuilding {
   getConstantsTable() {
     return "Buildings.WoodTable"
   }
+  
+  isPenetrable() {
+    return true
+  }
 
   getType() {
     return Protocol.definition().BuildingType.WoodTable

@@ -1,0 +1,36 @@
+{
+  "version": "v0.8.6.alpha",
+  "date": "September 3, 2026",
+  "title": "Monthly Update by BigT",
+  "content": {
+    "features": [
+      "Update by BigTforLife",
+      "Gave humans hand and armor equip slot",
+      "-Made it so you can set armor and hand of human mob with /setequipment command",
+      "-Humans can now equip armors (cosmetic only for now)",
+      "-Set human mob space suit color with /suitcolor",
+      "Made projectiles go through cage and over all tables (more things might have this in the future now)",
+      "Added low wall that can be shot over but not walked through",
+      "Added windows, thick windows, tall windows, and tall thick windows",
+      "Added circuit board printer which prints circuit boards from copper bars and glass at high efficiency",
+      "-Circuit boards now cost 5 copper bars and 5 glass bars in furnace (subject to balancing)",
+      "-Circuit boards now sell for 30 gold, making them a higher value item",
+      "Added neon signs",
+      "Added /setstructure command",
+      "Mobs are now hid in FOV mode",
+      "Floors are now rotatable which will make cool patterns accessible in non-peaceful gamemode",
+      "FOV is now enabled in hardcore mode",
+      "Enabled /level command and added $getLevel($entityId) function",
+      "Added GoalAchieved trigger"
+    ],
+    
+    "bugs": [
+      "Fix guns shooting over buildings",
+      "Fill building no longer overrides floor and terrain",
+      "Centered shower sprite",
+      "Fixed oil refinery sprite being the wrong number of pixels",
+      "Fixed small wooden table sprite",
+      "Removed throwable projectiles exploding on collision"
+    ]
+  }
+}

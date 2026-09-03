@@ -374,55 +374,56 @@ class Sector {
     return false
   }
 
-  initSettings(entities) {
-    let firespread = true;
-    let isItemBreakingEnabled = true;
-    let isFovMode = false;
 
-    if (this.isPeaceful()) {
-      firespread = false;
-      isItemBreakingEnabled = true;
-    }
+initSettings(entities) {
+  // Base/default settings
+  this.settings = {
+    isPvPAllowed: false,
+    isFovMode: false,
+    isZoomAllowed: true,
+    showMiniMap: true,
+    showPlayerList: true,
+    isMobAutospawn: true,
+    isFloorAutodirt: true,
+    isStaminaEnabled: true,
+    isHungerEnabled: true,
+    isOxygenEnabled: true,
+    isChatEnabled: true,
+    isInfiniteAmmo: false,
+    isInfinitePower: false,
+    isCorpseEnabled: true,
+    isShadowsEnabled: true,
+    isPlayerSavingEnabled: true,
+    showTeamJoin: false,
+    isCraftingEnabled: true,
+    isBloodEnabled: true,
+    isSuitChangeEnabled: true,
+    isDropInventoryOnDeath: false,
+    isMutantEnabled: true,
+    isGravityEnabled: false,
+    isFireSpreadEnabled: true,
+    isItemBreakingEnabled: true,
+    isSpectateAllowed: true
+  };
 
-    // Game-mode-specific settings
-    if (this.isHardcore()) {
-      isFovMode = true;
-    }
-
-    // Load saved settings first
-    if (entities && entities.settings) {
-      // whatever settings need to be loaded
-    }
-
-    this.settings = {
-      isPvPAllowed: false,
-      isFovMode: isFovMode,
-      isZoomAllowed: true,
-      showMiniMap: true,
-      showPlayerList: true,
-      isMobAutospawn: true,
-      isFloorAutodirt: true,
-      isStaminaEnabled: true,
-      isHungerEnabled: true,
-      isOxygenEnabled: true,
-      isChatEnabled: true,
-      isInfiniteAmmo: false,
-      isInfinitePower: false,
-      isCorpseEnabled: true,
-      isShadowsEnabled: true,
-      isPlayerSavingEnabled: true,
-      showTeamJoin: false,
-      isCraftingEnabled: true,
-      isBloodEnabled: true,
-      isSuitChangeEnabled: true,
-      isDropInventoryOnDeath: false,
-      isMutantEnabled: true,
-      isGravityEnabled: false,
-      isFireSpreadEnabled: firespread,
-      isItemBreakingEnabled: isItemBreakingEnabled,
-      isSpectateAllowed: true
-    };
+  if (this.isPeaceful()) {
+    this.settings.isFireSpreadEnabled = false;
+    this.settings.isItemBreakingEnabled = true;
   }
+  
+  if (entities && entities.settings) {
+    for (let name in entities.settings) {
+      if (typeof this.settings[name] !== 'undefined') {
+        this.settings[name] = entities.settings[name];
+      }
+    }
+  }
+
+  if (this.isHardcore()) {
+    this.settings.isFovMode = true;
+  }
+}
+
 
   canBeCrafted(type) {
     if (this.isMiniGame()) {

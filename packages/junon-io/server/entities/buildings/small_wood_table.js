@@ -8,6 +8,10 @@ class SmallWoodTable extends BaseBuilding {
     return "Buildings.SmallWoodTable"
   }
 
+  isPenetrable() {
+    return true
+  }
+
   getType() {
     return Protocol.definition().BuildingType.SmallWoodTable
   }
