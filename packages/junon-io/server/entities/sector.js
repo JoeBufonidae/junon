@@ -377,11 +377,26 @@ class Sector {
   initSettings(entities) {
     let firespread = true;
     let isItemBreakingEnabled = true;
-    if(this.isPeaceful()) firespread = false;
-    if(this.isPeaceful()) isItemBreakingEnabled = true;
+    let isFovMode = false;
+
+    if (this.isPeaceful()) {
+      firespread = false;
+      isItemBreakingEnabled = true;
+    }
+
+    // Game-mode-specific settings
+    if (this.isHardcore()) {
+      isFovMode = true;
+    }
+
+    // Load saved settings first
+    if (entities && entities.settings) {
+      // whatever settings need to be loaded
+    }
+
     this.settings = {
       isPvPAllowed: false,
-      isFovMode: false,
+      isFovMode: isFovMode,
       isZoomAllowed: true,
       showMiniMap: true,
       showPlayerList: true,
@@ -404,17 +419,9 @@ class Sector {
       isMutantEnabled: true,
       isGravityEnabled: false,
       isFireSpreadEnabled: firespread,
-      isItemBreakingEnabled: true,
+      isItemBreakingEnabled: isItemBreakingEnabled,
       isSpectateAllowed: true
-    }
-
-    if (!entities) return
-
-    for (let name in entities.settings) {
-      if (typeof this.settings[name] !== 'undefined') {
-        this.settings[name] = entities.settings[name]
-      }
-    }
+    };
   }
 
   canBeCrafted(type) {
@@ -869,6 +876,15 @@ class Sector {
   isPeaceful() {
     return this.gameMode === 'peaceful'
   }
+
+  isSurvival() {
+    return this.gameMode === 'survival'
+  }
+
+  isHardcore() {
+    return this.gameMode === 'hardcore'
+  }
+  
 
   canUseCommandBlocks() {
     return this.isPeaceful() || this.isMiniGame()

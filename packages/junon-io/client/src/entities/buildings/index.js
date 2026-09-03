@@ -26,6 +26,7 @@ Buildings.Production.ChemistryStation = require("./chemistry_station")
 Buildings.Production.MiningDrill = require("./mining_drill")
 Buildings.Production.DeepDrill = require("./deep_drill")
 Buildings.Production.AmmoPrinter = require("./ammo_printer")
+Buildings.Production.CircuitBoardPrinter = require("./circuit_board_printer")
 
 // structures
 

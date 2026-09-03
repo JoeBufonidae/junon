@@ -279,6 +279,7 @@ enum BuildingType {
   SmallWoodTable = 285;
   LowWall = 286;
   NeonSign = 287;
+  CircuitBoardPrinter = 288;
 }
 
 enum TerrainType {

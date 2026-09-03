@@ -70,16 +70,13 @@ class BaseProcessor extends BaseBuilding {
   onProgressChanged() {
     if (this.hasReachedFullProgress()) {
       this.progress = 0
-      let inputItem = this.getInputItems(this.getInputStorageIndices())[0]
-
-      let outputItem = this.createOutputItem(inputItem)
+      let inputItems = this.getInputItems(this.getInputStorageIndices())
+      let outputItem = this.createOutputItem(inputItems)
       if (outputItem) {
         this.storeAt(this.getOutputStorageIndex(), outputItem)
-      }
-
-
-      if (inputItem) {
-        inputItem.consume()
+        inputItems.forEach((inputItem) => {
+          inputItem.consume()
+        })
       }
     }
   }

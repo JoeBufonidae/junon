@@ -1970,8 +1970,14 @@ class Player extends BaseEntity {
         }
       }
 
-      storage.addViewSubscriber(this)
-      this.getSocketUtil().emit(this.socket, "RenderStorage", { id: storage.id, inventory: storage })
+    storage.addViewSubscriber(this)
+    this.getSocketUtil().emit(this.socket, "RenderStorage", {
+      id: storage.id,
+      inventory: storage,
+      progress: typeof storage.getProgressPercentage === "function"
+        ? storage.getProgressPercentage()
+        : 0
+    })
     }
   }
 

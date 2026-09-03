@@ -1310,8 +1310,9 @@ class BaseBuilding extends BaseEntity {
   showPowerOff() {
     this.powerOffSprite = new PIXI.Sprite(PIXI.utils.TextureCache["power_off.png"])
     this.powerOffSprite.anchor.set(0.5)
-    this.powerOffSprite.width  = Constants.tileSize * 3/4
-    this.powerOffSprite.height = Constants.tileSize * 3/4
+
+    this.powerOffSprite.width = Constants.tileSize * 3/4 / this.buildingSprite.scale.x
+    this.powerOffSprite.height = Constants.tileSize * 3/4 / this.buildingSprite.scale.y
 
     this.buildingSprite.addChild(this.powerOffSprite)
 

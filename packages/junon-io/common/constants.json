@@ -2246,6 +2246,7 @@
     "CircuitBoard": {
       "width": 32,
       "height": 32,
+      "isCostIndependent": true,
       "cost": {
         "gold": 30
       },
@@ -2254,7 +2255,8 @@
         "speed": 5
       },
       "requirements": {
-        "CopperBar": 2
+        "CopperBar": 5,
+        "Glass": 5
       },
       "upgrade": {},
       "description": "CircuitBoard"
@@ -4040,7 +4042,6 @@
       "isThrowable": true,
       "isStackable": true,
       "isUnbreakable": true,
-      "isCostIndependent": true,
       "cost": {
         "gold": 1000
       },
@@ -6719,6 +6720,37 @@
         "count": "+25"
       },
       "description": "[Deprecated] No longer functional"
+    },
+    "CircuitBoardPrinter": {
+      "parent": "Buildings.BaseProcessor",
+      "width": 96,
+      "height": 96,
+      "hasMenu": true,
+      "categories": {"producer": true},
+      "isInteractable": true,
+      "menuDescription": "Slot 1: Copper Bar + Slot 2: Glass = Output: Circuit Board",
+      "storageCount": 3,
+      "requirements": {
+        "IronBar": 90,
+        "CopperBar": 10,
+        "CircuitBoard": 5, 
+        "Wire": 15,
+        "Glass": 10
+      },
+      "cost": {
+        "gold": 650
+      },
+      "stats": {
+        "health": 150,
+        "count": 125,
+        "processingRate": 3,
+        "powerConsumption": 250
+      },
+      "upgrade": {
+        "health": "+25",
+        "count": "+25"
+      },
+      "description": "Turns copper bars and glass into circuit boards at high efficiency"
     },
     "OilRefinery": {
       "width": 96,
