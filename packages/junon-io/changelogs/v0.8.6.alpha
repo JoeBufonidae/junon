@@ -11,7 +11,7 @@
       "-Set human mob space suit color with /suitcolor",
       "Made projectiles go through cage and over all tables (more things might have this in the future now)",
       "Added low wall that can be shot over but not walked through",
-      "Added windows, thick windows, tall windows, and tall thick windows",
+      "Added window and armored window",
       "Added circuit board printer which prints circuit boards from copper bars and glass at high efficiency",
       "-Circuit boards now cost 5 copper bars and 5 glass bars in furnace (subject to balancing)",
       "-Circuit boards now sell for 30 gold, making them a higher value item",

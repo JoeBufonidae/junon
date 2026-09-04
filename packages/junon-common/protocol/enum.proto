@@ -280,6 +280,8 @@ enum BuildingType {
   LowWall = 286;
   NeonSign = 287;
   CircuitBoardPrinter = 288;
+  Window = 289;
+  ArmoredWindow = 290;
 }
 
 enum TerrainType {
