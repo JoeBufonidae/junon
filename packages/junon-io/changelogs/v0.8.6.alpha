@@ -22,6 +22,7 @@
       "FOV is now enabled in hardcore mode",
       "Enabled /level command and added $getLevel($entityId) function",
       "Added GoalAchieved trigger",
+      "Raised speed limit in /speed and /stat"
       "From PoTATo_0",
       "Overclock can now be toggled on and off in peaceful mode. It is off by default",
       "Solar panels have a reduced capacity of 500W now and their production is 25 during the day and -50 at night"
