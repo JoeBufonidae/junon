@@ -4994,8 +4994,8 @@
         "IronBar": 5
       },
       "stats": {
-        "health": 300,
-        "pvpHealth": 600,
+        "health": 500,
+        "pvpHealth": 1000,
         "count": 100
       },
       "upgrade": {
@@ -5386,7 +5386,7 @@
         "gold": 50
       },
       "requirements": {
-        "IronBar": 4
+        "IronBar": 3
       },
       "stats": {
         "health": 100,
@@ -5417,6 +5417,49 @@
         "count": "+25"
       },
       "description": "Low wall you can shoot over"
+    },
+    "Window": {
+      "width": 32,
+      "height": 32,
+      "categories": {"wall": true, "custom_colors": true, "melee_resistant":false},
+      "cost": {
+        "gold": 50
+      },
+      "requirements": {
+        "LowWall": 1,
+        "Glass": 3
+      },
+      "stats": {
+        "health": 50,
+        "count": 100
+      },
+      "upgrade": {
+        "health": "+100",
+        "count": "+25"
+      },
+      "description": "Glass window that you can see through. Fragile"
+    },
+    "ArmoredWindow": {
+      "width": 32,
+      "height": 32,
+      "categories": {"wall": true, "custom_colors": true, "melee_resistant":false},
+      "cost": {
+        "gold": 50
+      },
+      "requirements": {
+        "LowWall": 1,
+        "Glass": 5,
+        "IronBar": 1
+      },
+      "stats": {
+        "health": 150,
+        "count": 100
+      },
+      "upgrade": {
+        "health": "+100",
+        "count": "+25"
+      },
+      "description": "Glass window that you can see through. Fragile"
     },
     "Fence": {
       "width": 128,

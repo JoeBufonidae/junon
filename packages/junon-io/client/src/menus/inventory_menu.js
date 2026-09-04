@@ -49,7 +49,8 @@ class InventoryMenu extends BaseMenu {
       let isCage = type === Protocol.definition().BuildingType.Cage
       let isLowWall = type === Protocol.definition().BuildingType.LowWall
       let isWall = type === Protocol.definition().BuildingType.Wall || type === Protocol.definition().BuildingType.Wall3d
-      if (isFloor || isWall || isCage || isLowWall) {
+      let isWindow = type === Protocol.definition().BuildingType.Window || type === Protocol.definition().BuildingType.ArmoredWindow
+      if (isFloor || isWall || isCage || isLowWall || isWindow) {
         this.game.colorPickerMenu.open({ colors: this.game.colors, entityId: null })
       }
     }
