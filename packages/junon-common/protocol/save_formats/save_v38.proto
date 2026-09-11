@@ -165,6 +165,8 @@ message Building {
   uint32 colorIndex = 25;
   uint32 textureIndex = 26;
   string name = 27;
+  uint32 nameColor = 28;
+  uint32 nameSize = 29;
 }
 
 message RaidRef {
@@ -216,7 +218,6 @@ message AttachmentData {
 message ItemInstance {
   uint32 usage = 1;
   string content = 2;
-  repeated AttachmentData attachments = 3;
 }
 
 message Mob {
@@ -244,6 +245,8 @@ message Mob {
   uint32 level = 22;
   uint32 status = 23;
   repeated string attackables = 24;
+  uint32 nameColor = 25;
+  uint32 nameSize = 26;
 }
 
 message MasterRef {
@@ -340,7 +343,6 @@ message Player {
   uint32 gold = 23;
   uint32 roleType = 24;
   uint32 score = 25;
-}
 
 message PlayerData {
   string uid = 1;

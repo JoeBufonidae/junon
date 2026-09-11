@@ -5,8 +5,9 @@ const Protocol = require('../../common/util/protocol')
 class Wait extends BaseCommand {
   getUsage() {
     return [
+      "Waits a set amount of seconds in the command block to run the next line of commands",
       "/wait [seconds]",
-      "ex. /wait 5"
+      "ex: /wait 5"
     ]
   }
 
@@ -19,7 +20,7 @@ class Wait extends BaseCommand {
   }
 
   perform(caller, args) {
-    let seconds = parseInt(args[0])
+    let seconds = parseFloat(args[0])
 
     if (caller && caller.isPlayer()) {
       caller.showChatError("Usable in command blocks only")

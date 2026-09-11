@@ -18,6 +18,11 @@ class UndergroundVent extends BaseBuilding {
       return
     }
 
+    if (!this.game.isPeaceful()) {
+      user.showError("Only usable in peaceful")
+      return
+    }
+
     if (user.currentVent === this) {
       this.unhideFromVent(user)
     } else {

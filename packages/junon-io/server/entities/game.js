@@ -255,6 +255,7 @@ class Game {
     const args = tokens.filter((token) => { return token.length > 0 })
     const command = this.commands[commandName]
     if (!command) return
+    if (!this.isGameReady) return
 
     if (delay > 0 && command.isDelayable()) {
       let timestampDelay = delay * Constants.physicsTimeStep
@@ -1040,7 +1041,19 @@ class Game {
 
   triggerEvent(eventName, params = {}) {
     if (!this.isGameReady) return
-    this.sector && this.sector.eventHandler.trigger(eventName, params)
+    try
+    {
+      this.sector && this.sector.eventHandler.trigger(eventName, params)
+    }
+    catch(e)
+    {
+      if(e.name === "RangeError"){
+        // disable processing more triggers
+        this.isGameReady = false
+        throw new Error("possible lag machine detected")
+      }
+
+    }
   }
 
   addTimer(timer) {
@@ -1060,33 +1073,40 @@ class Game {
   hasTimer(name) {
     return this.timers[name]
   }
-
+  
   runTimers() {
-    const isOneSecondInterval = this.timestamp % Constants.physicsTimeStep === 0
-    if (!isOneSecondInterval) return
-
+    const isIntervalElapsed = this.timestamp % (Constants.physicsTimeStep / 20) === 0
+    if (!isIntervalElapsed) return
+    
     for (let name in this.timers) {
       let timer = this.timers[name]
-      if (!timer.tick) {
+      
+      if (timer.elapsedFrames === undefined) {
         timer.tick = 0
+        timer.elapsedFrames = 0
         this.sector.eventHandler.triggerTimerStart(timer)
       }
 
-      timer.tick += 1
-      if (timer.every) {
-        if (timer.tick % timer.every === 0) {
+      timer.elapsedFrames += 1;
+
+      const stepsPerTick = Math.round(timer.every * 10);
+
+      if (timer.every && stepsPerTick > 0) {
+        if (timer.elapsedFrames % stepsPerTick === 0) {
+          timer.tick += 1;
           this.sector.eventHandler.triggerTimerTick(timer)
         }
       } else {
         this.sector.eventHandler.triggerTimerTick(timer)
       }
 
-      if (timer.duration > 0 && timer.tick === timer.duration) {
-        delete this.timers[timer.name]
+      if (timer.duration > 0 && timer.tick >= timer.duration) {
+        delete this.timers[name]
         this.sector.eventHandler.triggerTimerEnd(timer)
       }
     }
   }
+
 
   onRoundStarted() {
     this.sendToMatchmaker({ event: "RoundStarted", data: this.getSectorData() })
@@ -1113,28 +1133,30 @@ class Game {
     this.shouldPause = false
   }
 
-  async setGameMode(gameMode) {
-    if (this.isMiniGame()) return
+async setGameMode(gameMode) {
+  if (this.isMiniGame()) return
 
-    let allowedGameModes = ['peaceful', 'survival', 'hardcore']
-    if (allowedGameModes.indexOf(gameMode) === -1) return
-    if (this.gameMode === gameMode) return
+  let allowedGameModes = ['peaceful', 'survival', 'hardcore']
+  if (allowedGameModes.indexOf(gameMode) === -1) return
+  if (this.gameMode === gameMode) return
 
-    if (!this.gameMode || this.gameMode === 'default') {
-      await SectorModel.update({
-        gameMode: gameMode,
-      }, {
-        where: { uid: this.getSectorUid() }
-      })
+  if (!this.gameMode || this.gameMode === 'default') {
+    await SectorModel.update({
+      gameMode: gameMode,
+    }, {
+      where: { uid: this.getSectorUid() }
+    })
 
-      this.gameMode = gameMode
-      this.sector.setGameMode(gameMode)
+    this.gameMode = gameMode
+    this.sector.setGameMode(gameMode)
 
-      this.getSocketUtil().broadcast(this.getSocketIds(), "SectorUpdated", {
-        gameMode: this.gameMode
-      })
-    }
+    this.sector.initSettings()
+    this.getSocketUtil().broadcast(this.getSocketIds(), "SectorUpdated", {
+      gameMode: this.gameMode,
+      settings: this.sector.settings
+    })
   }
+}
 
   isStale() {
     let twoMinutes = Date.now() - this.gameStartTime > (1000 * 60 * 2)
@@ -1707,6 +1729,7 @@ class Game {
         } else {
           this.gameInfo["memory"] = null
         }
+        this.gameInfo["isLightingCustom"] = this.isLightingCustom
 
         if (player.getSentHour() === null ||
             player.getSentHour() !== this.sector.getHour()) {
@@ -1720,6 +1743,9 @@ class Game {
 
         if (player.isCameraMode()) {
           this.gameInfo["camera"] = player.getCamera().toJson()
+        }
+        if (this.playerArrows) {
+        this.gameInfo["arrowList"] = JSON.stringify(this.playerArrows[player.name]||{})
         }
 
         this.getSocketUtil().emit(player.socket, "GameState", this.gameInfo)

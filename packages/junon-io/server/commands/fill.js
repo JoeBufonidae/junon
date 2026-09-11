@@ -8,18 +8,21 @@ const Buildings = require("../entities/buildings/index")
 class Fill extends BaseCommand {
   getUsage() {
     return [
+      "Fills an area with the chosen terrain or building",
       "/fill [start_row] [start_col] [end_row] [end_col] [terrain_type] [color]",
-      // "/fill building [start_row] [start_col] [end_row] [end_col] [1x1 building] [color]"
+      "/fill building [start_row] [start_col] [end_row] [end_col] [1x1 building] [color]",
+      "ex: /fill 1 1 5 5 floor",
     ]
   }
-  
+  //maybe add a arguement to make it so fill platform doesnt delete structures
   allowOwnerOnly() {
     return true
   }
 
   perform(player, args) {
 
-    if(false) {
+    // /fill building
+    if (args[0] == 'building') {
       let startRow = parseInt(args[1])
       let startCol = parseInt(args[2])
       let endRow   = parseInt(args[3])
@@ -27,103 +30,110 @@ class Fill extends BaseCommand {
       let type     = args[5]
 
       if (!Region.isBoundsValid(this.sector, startRow, startCol, endRow, endCol)) {
-        // show invalid
         player.showChatError("Invalid bounds")
         return
       }
 
-      if(!type) {
+      if (!type) {
         player.showChatError("Must specify building type")
         return
       }
-      const klassName = this.sector.klassifySnakeCase(type)
 
+      const klassName = this.sector.klassifySnakeCase(type)
       let klass = Buildings[klassName]
 
-      if(!klass) {
+      if (!klass) {
         player.showChatError("Invalid building type")
         return
       }
-      if (klass && klass.prototype.hasCategory("platform")) {
+
+      if (klass.prototype.hasCategory("platform")) {
         player.showChatError("You cannot fill with platforms")
+        return
       }
-      
+
       if (Constants.Buildings[klassName]) {
-        if(Constants.Buildings[klassName].width != Constants.tileSize || Constants.Buildings[klassName].height != Constants.tileSize) {
+        if (
+          Constants.Buildings[klassName].width != Constants.tileSize ||
+          Constants.Buildings[klassName].height != Constants.tileSize
+        ) {
           player.showChatError('Building must be 1x1')
           return
         }
       }
-      let data
-      let floorData
 
       this.sector.roomManager.isAllocationDisabled = true
 
       for (var row = startRow; row <= endRow; row++) {
         for (var col = startCol; col <= endCol; col++) {
-          let existingTerrain = this.sector.groundMap.get(row, col)
-          if (existingTerrain) {
-            existingTerrain.remove({ removeAll: true })
-          }
-   
-          // remove any structures
-          this.sector.removeAllBuildings(row, col)
 
-          let floorKlass = Buildings.Floor
+          // Only remove the existing structure.
+          // Floor, platform, distribution, armor, fuel, gas,
+          // and liquid layers are left untouched.
+          this.sector.removeStructures(row, col)
+
           let x = col * Constants.tileSize + Constants.tileSize / 2
           let y = row * Constants.tileSize + Constants.tileSize / 2
           let w = Constants.tileSize
           let h = Constants.tileSize
-          data = { angle: 0, type: klass.getType(), x: x, y: y, w: w, h: h }
-          floorData = { angle: 0, type: floorKlass.getType(), x:x, y:y, w:w, h:h, owner: player.getBuildOwner(), placer: player }
-            data.owner = player.getBuildOwner()
-            data.placer = player
-  
-          let floor = floorKlass.build(floorData, this.sector)
+
+          let data = {
+            angle: 0,
+            type: klass.getType(),
+            x: x,
+            y: y,
+            w: w,
+            h: h,
+            owner: player.getBuildOwner(),
+            placer: player
+          }
+
           let building = klass.build(data, this.sector)
 
           if (building && building.hasCustomColors()) {
 
-
-            if(args[6] && Constants.FloorColors[args[6]]) {
+            if (args[6] && Constants.FloorColors[args[6]]) {
               building.setColorIndex(Constants.FloorColors[args[6]].index)
             } else {
-              if (player.colorIndex >= 0) {
+              const isHexColor = /^#?[0-9A-Fa-f]{3,8}$/i.test(args[6]);
+              if(isHexColor) {
+                let color = parseInt(args[6].replace("#", ""), 16) + 38
+                building.setColorIndex(color)
+              } else if (player.colorIndex >= 0) {
                 building.setColorIndex(player.colorIndex)
               }
             }
-
-            
 
           }
         }
       }
 
+      this.sector.roomManager.isAllocationDisabled = false
       return
     }
 
+    // Normal /fill
     let startRow = parseInt(args[0])
     let startCol = parseInt(args[1])
     let endRow   = parseInt(args[2])
     let endCol   = parseInt(args[3])
 
     // auto invert coords to make it valid
-//     if (startRow > endRow) {
-//       let tempRow = startRow
-//       startRow = endRow
-//       endRow = startRow
-//     }
-// 
-//     if (startCol > endCol) {
-//       let tempCol = startCol
-//       startCol = endCol
-//       endCol = startCol
-//     }
+    // if (startRow > endRow) {
+    //   let tempRow = startRow
+    //   startRow = endRow
+    //   endRow = tempRow
+    // }
+    //
+    // if (startCol > endCol) {
+    //   let tempCol = startCol
+    //   startCol = endCol
+    //   endCol = tempCol
+    // }
 
-    let type   = args[4]
+    let type = args[4]
 
     if (!Region.isBoundsValid(this.sector, startRow, startCol, endRow, endCol)) {
-      // show invalid
       player.showChatError("Invalid bounds")
       return
     }
@@ -133,7 +143,8 @@ class Fill extends BaseCommand {
       return
     }
 
-    const klassName = this.sector.klassifySnakeCase(type)
+    let klassName = this.sector.klassifySnakeCase(type)
+
     if (klassName === "Meteorite") {
       klassName = "MeteoriteAsteroid"
     }
@@ -146,7 +157,6 @@ class Fill extends BaseCommand {
       if (buildingklass && buildingklass.prototype.hasCategory("platform")) {
         klass = buildingklass
         isPlatform = true
-
       } else {
         player.showChatError("Invalid terrain type")
         return
@@ -159,49 +169,65 @@ class Fill extends BaseCommand {
 
     for (var row = startRow; row <= endRow; row++) {
       for (var col = startCol; col <= endCol; col++) {
+
+        // Normal /fill behavior:
+        // remove the existing terrain.
         let existingTerrain = this.sector.groundMap.get(row, col)
+
         if (existingTerrain) {
           existingTerrain.remove({ removeAll: true })
         }
- 
-        // remove any structures
-        this.sector.removeAllBuildings(row, col)
 
+        // Normal /fill removes all building layers.
+        this.sector.removeAllBuildings(row, col)
 
         let x = col * Constants.tileSize + Constants.tileSize / 2
         let y = row * Constants.tileSize + Constants.tileSize / 2
         let w = Constants.tileSize
         let h = Constants.tileSize
-        data = { angle: 0, type: klass.getType(), x: x, y: y, w: w, h: h }
+
+        data = {
+          angle: 0,
+          type: klass.getType(),
+          x: x,
+          y: y,
+          w: w,
+          h: h
+        }
+
         if (isPlatform) {
           data.owner = player.getBuildOwner()
           data.placer = player
-
         }
       
         let building = klass.build(data, this.sector)
 
         if (building && building.hasCustomColors()) {
-          
 
-          if(args[5] && Constants.FloorColors[args[5]]) {
+          if (args[5] && Constants.FloorColors[args[5]]) {
             building.setColorIndex(Constants.FloorColors[args[5]].index)
           } else {
-            if (player.colorIndex >= 0) {
+            const isHexColor = /^#?[0-9A-Fa-f]{3,8}$/i.test(args[5]);
+            if(isHexColor) {
+              let color = parseInt(args[5].replace("#", ""), 16) + 38
+              building.setColorIndex(color)
+            } else if (player.colorIndex >= 0) {
               building.setColorIndex(player.colorIndex)
             }
-            if (player.textureIndex >= 0) {
-              building.setTextureIndex(player.textureIndex)
-            }
           }
-      
+
+          if(args[6] && Constants.FloorTextures[args[6]]) {
+            building.setTextureIndex(Constants.FloorTextures[args[6]].index)
+          } else if (player.textureIndex >= 0) {
+            building.setTextureIndex(player.textureIndex)
+          }
+
         }
       }
     }
 
     this.sector.roomManager.isAllocationDisabled = false
   }
-
 }
 
 module.exports = Fill

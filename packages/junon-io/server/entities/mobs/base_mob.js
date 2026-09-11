@@ -35,6 +35,8 @@ class BaseMob extends BaseEntity {
     this.unreachableGoals = {}
     this.regions = {}
 
+    this.playerViewerships = {}
+
     this.type = this.getType()
     this.container = sector
     this.onMasterRemovedListener = this.onMasterRemoved.bind(this)
@@ -57,11 +59,43 @@ class BaseMob extends BaseEntity {
     this.onPositionChanged({ isGridPositionChanged: true })
     this.onPostInit()
 
+    if (this.sector.isFovMode()) {
+      this.addNewlyVisibleMobToPlayers()
+    }
+
     this.executeTurn()
   }
 
   preApplyData() {
 
+  }
+
+  addPlayerViewership(player) {
+    this.playerViewerships[player.getId()] = player
+  }
+
+  removePlayerViewership(player) {
+    delete this.playerViewerships[player.getId()]
+  }
+
+  unregisterFromPlayerViewership() {
+    for (let id in this.playerViewerships) {
+      let player = this.playerViewerships[id]
+      player.removeVisibleMob(this)
+    }
+
+    this.playerViewerships = {}
+  }
+
+  addNewlyVisibleMobToPlayers() {
+    let boundingBox = this.getNeighborBoundingBox(Constants.tileSize * 6)
+    let players = this.sector.playerTree.search(boundingBox)
+    for (var i = 0; i < players.length; i++) {
+      let player = players[i]
+      if (player.calculateEntityVisible(this)) {
+        player.addVisibleMob(this)
+      }
+    }
   }
 
   initBehavior() {
@@ -172,6 +206,12 @@ class BaseMob extends BaseEntity {
 
     if (data.name) {
       this.setName(data.name)
+    }
+    if (data.nameSize) {
+this.setNameSize(data.nameSize)
+    }
+    if (data.nameColor) {
+this.setNameColor(data.nameColor)
     }
 
     if (data.owner) {
@@ -610,10 +650,15 @@ class BaseMob extends BaseEntity {
     }
   }
 
+  setNameColor(color) {
+    this.nameColor = color || 16777215
+  }
+  setNameSize(size) {
+    this.nameSize = Math.min(Math.max(parseInt(size),1),50) || 23
+  }
   setName(name) {
     this.name = name
   }
-
   autocreateName() {
     return true
   }
@@ -870,6 +915,7 @@ class BaseMob extends BaseEntity {
 
     this.sector.removeEntityFromTreeByName(this, "mobs")
     this.unregisterFromChunkRegion()
+    this.unregisterFromPlayerViewership()
 
     this.goals.forEach((goal) => {
       goal.remove()
@@ -1177,6 +1223,8 @@ class BaseMob extends BaseEntity {
     this.consumeDrunk()
     this.consumeSpin()
     this.consumeFear()
+    this.consumeHaste()
+    this.consumeInvisible()
 
     if (this.isKnocked) return
     if (this.isPilot) return
@@ -1224,6 +1272,7 @@ class BaseMob extends BaseEntity {
 
 
     this.onStateChanged("weaponType")
+    this.onStateChanged("equipments")
   }
 
   getHandItem() {
@@ -1264,7 +1313,15 @@ class BaseMob extends BaseEntity {
 
     return goal
   }
-
+  
+  removeAllGoals() {
+    this.goals.forEach((goal) => {
+      goal.remove()
+    })
+    
+    this.goals = []
+  }
+  
   removeGoalAt(index) {
     const goal = this.goals[index]
     if (!goal) return
@@ -1736,8 +1793,15 @@ class BaseMob extends BaseEntity {
       return
     }
 
+    let data = {
+      "mobId": targetEntityToMove.id,
+      "mobType": targetEntityToMove.getTypeName(),
+      "goalId": goal.targetEntity.id,
+    }
+    this.game.triggerEvent("GoalAchieved", data)
+
     goal.onReached()
-    goal.remove()
+    goal.remove() //do it here
   }
 
   npcLeaveGame() {
@@ -1930,9 +1994,16 @@ class BaseMob extends BaseEntity {
   isRaidMember() {
     return !!this.raid
   }
-
+  
   onGridPositionChanged() {
     this.trackRegions()
+
+    this.game.triggerEvent("MobMove", {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      row: this.getRow(),
+      col: this.getCol()
+    })
   }
 
   getOccupiedRoom() {
@@ -1973,13 +2044,7 @@ class BaseMob extends BaseEntity {
 
   onClosedDoorEncountered(door) {
     if (door.getAlliance() === this.getAlliance()) {
-      if (this.isPet()) {
-        if (door.isAutomatic() || this.hasMaster()) {
-          door.openFor(3000)
-        }
-      } else {
-        door.openFor(3000)
-      }
+      door.interact(this)
     }
   }
 
@@ -2045,10 +2110,19 @@ class BaseMob extends BaseEntity {
     }).join(", ")
   }
 
-  onStateChanged() {
+  onStateChanged(attribute) {
+    if (attribute) {
+      this.changedAttributes[attribute] = true
+    }
     let chunk = this.getChunk()
     if (chunk) {
       chunk.addChangedMobs(this)
+    }
+
+    if (this.sector.isFovMode()) {
+      for (let id in this.playerViewerships) {
+        this.playerViewerships[id].addChangedMobs(this)
+      }
     }
   }
 
@@ -2256,6 +2330,15 @@ class BaseMob extends BaseEntity {
     return base
   }
 
+  ping(id) {
+    let data = {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      pingId: parseInt(id)
+    }
+    this.game.triggerEvent("MobPinged", data)
+  }
+
 }
 
 Object.assign(BaseMob.prototype, Movable.prototype, {
@@ -2449,6 +2532,9 @@ Object.assign(BaseMob.prototype, Attacker.prototype, {
   findStructuresInChunkRegion(chunkRegion, range) {
     let structures = chunkRegion.getStructures()
     return structures.filter((structure) => {
+      if (structure.isPenetrable() && this.getAttackRange() > 96) {
+        return false
+      }
       return this.canAttack(structure) && this.isWithinRange(structure, range)
     })
   },
@@ -2529,11 +2615,13 @@ Object.assign(BaseMob.prototype, Attacker.prototype, {
       },
       neighborStopCondition: (chunkRegion, hops) => {
         return hops >= 3
-      }
+      },
+      passThroughPenetrableWall: true
     })
 
     return this.applyTargetSelectionStrategy(targets)
   },
+
   shouldAttack() {
     if (this.getRaid() && this.getRaid().isRaidEnded) {
       return false

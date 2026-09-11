@@ -282,13 +282,13 @@ class BaseProjectile extends BaseEntity {
   }
 
   canDamage(entity) {
+    if (entity.isBuilding() && entity.isPenetrable()) return false
     if(this.sourceEntity && this.sourceEntity.canAttack) return this.sourceEntity.canAttack(entity)
     /* if can/can't attack, then can/can't damage. 
      Edit constraints in Attacker.canAttack(target) */
 
-
     if (!entity) return false
-
+    
     if (this.owner && this.owner.isPlayer() && !this.owner.canDamage(entity)) {
       return false
     }
@@ -307,6 +307,7 @@ class BaseProjectile extends BaseEntity {
     if (entity.hasCategory("trap")) return true
     if (entity.hasCategory("platform") && this.shouldHitFloor) return true
     if (entity.hasCategory("lamp")) return true
+    if (entity.isBuilding() && entity.isPenetrable()) return false
     if (!entity.isCollidable(this)) return false
     if (entity.isBuilding() && entity.getConstants().isPassable) return false
 

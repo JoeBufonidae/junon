@@ -29,7 +29,7 @@ class SpaceSuit extends ArmorEquipment {
   updateHandsColor() {
     let color = this.data.instance.content || this.content || "gray"
 
-    if (this.user && this.user.isPlayer() && color !== 'gray') {
+    if (this.user && (this.user.isPlayer() || this.user.getType() === Protocol.definition().MobType.Human) && color !== 'gray') {
       this.user.hands.tint = 0x666666
       this.user.leftHand.tint = 0x666666
       this.user.rightHand.tint = 0x666666
@@ -43,7 +43,7 @@ class SpaceSuit extends ArmorEquipment {
   remove() {
     super.remove()
 
-    if (this.user && this.user.isPlayer()) {
+    if (this.user && (this.user.isPlayer() || this.user.getType() === Protocol.definition().MobType.Human)) {
       this.user.hands.tint = 0xd2b48c
       this.user.leftHand.tint = 0xd2b48c
       this.user.rightHand.tint = 0xd2b48c

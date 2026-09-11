@@ -10,6 +10,10 @@ class ButcherTable extends BaseBuilding {
     this.getPlacer() && this.getPlacer().progressTutorial("corpse", 0)
   }
 
+  isPenetrable() {
+    return true
+  }
+
   interact(user, options = {}) {
     if (this.activeCorpse) return false
 

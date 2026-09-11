@@ -771,7 +771,10 @@ class Grid {
 
       if (obstacle && obstacle.isCollidable() && obstacle !== entityToIgnore) {
         obstacles.push({ x: intersection[0], y: intersection[1], entity: obstacle, distance: distance })
-        break
+
+        if (!obstacle.isBuilding() || !obstacle.isPenetrable()) {
+          break
+        }
       }
 
       // next iteration
@@ -855,7 +858,9 @@ class Grid {
 
       if (obstacle && obstacle.isCollidable() && obstacle !== entityToIgnore) {
         obstacles.push({ x: intersection[0], y: intersection[1], entity: obstacle, distance: distance })
-        break
+        if (!obstacle.isBuilding() || !obstacle.isPenetrable()) {
+          break
+        }
       }
 
       // next iteration

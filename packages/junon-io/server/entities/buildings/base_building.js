@@ -131,14 +131,29 @@ class BaseBuilding extends BaseEntity {
 
   getPlacer() {
     if (!this.placer) return null
-    if (this.placer.isPlayerData()) {
-      let playerId = this.placer.data.id
-      let player = this.game.players[playerId]
-      if (player) return player
-    } else {
+
+    if (
+      typeof this.placer.isPlayerData === "function" &&
+      this.placer.isPlayerData()
+    ) {
+      const playerId = this.placer.data.id
+      return this.game.players[playerId] || null
+    }
+
+    if (
+      typeof this.placer.isPlayer === "function" &&
+      this.placer.isPlayer()
+    ) {
       return this.placer
     }
+
+    return null
   }
+
+  isPenetrable() {
+    return false
+  }
+
 
   onEffectLevelChanged(effect, level) {
     super.onEffectLevelChanged(effect, level)
@@ -256,6 +271,12 @@ class BaseBuilding extends BaseEntity {
     if (data.name) {
       this.setName(data.name)
     }
+    if (data.nameColor) {
+      this.setNameColor(data.nameColor)
+    }
+    if (data.nameSize) {
+      this.setNameSize(data.nameSize)
+    }
 
     if (data.containerId) {
       this.container = this.game.getEntity(data.containerId)
@@ -279,6 +300,10 @@ class BaseBuilding extends BaseEntity {
 
     if (data.isWatered) {
       this.isWatered = data.isWatered
+    }
+
+    if (data.prices) {
+      this.prices = data.prices
     }
 
     if (data.effects) {
@@ -699,8 +724,24 @@ class BaseBuilding extends BaseEntity {
     return this.content
   }
 
-  onOpenStateChanged() {
+  onOpenStateChanged(user = null) {
     this.onStateChanged("isOpen")
+
+    let changerType
+    
+    if (user?.isPlayer()) {
+      changerType = user?.getName()
+    } else {
+      changerType = user?.getTypeName()
+    }
+
+    this.game.triggerEvent("BuildingStateChanged", {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      changerId: user?.getId(),
+      changerType,
+      state: this.isOpen
+    })
   }
 
   onAccessTypeChanged() {
@@ -1693,6 +1734,11 @@ class BaseBuilding extends BaseEntity {
     this.setEffectLevel("blood", this.getEffectLevel("blood") + 1)
   }
 
+  setBlood(lvl) {
+    if (!this.sector.settings['isBloodEnabled']) return
+    this.setEffectLevel("blood", Math.max(Math.min(parseInt(lvl),4),0))
+  }
+
   getSpeedMultiplier() {
     let multiplier = 1
 
@@ -1873,6 +1919,19 @@ class BaseBuilding extends BaseEntity {
 
     return countMet
   }
+  
+  getInventoryItemCount(ingredientType) {
+    let currentCount = 0
+
+    for (let index in this.storage) {
+      let item = this.storage[index]
+      if (item && item.type === Helper.getBuildingTypeByName(this.sector.klassifySnakeCase(ingredientType))) {
+        currentCount += item.count
+      }
+    }
+
+    return currentCount
+  }
 
   canAddEffect(effectName) {
     if (effectName === "spin") return false
@@ -1896,6 +1955,14 @@ class BaseBuilding extends BaseEntity {
   setName(name) {
     this.name = name
     this.onStateChanged('name')
+  }
+  setNameColor(color) {
+    this.nameColor = color || 16777215
+    this.onStateChanged('nameColor')
+  }
+  setNameSize(size) {
+    this.nameSize = Math.min(Math.max(parseInt(size),1),50) || 23
+    this.onStateChanged('nameSize')
   }
 
   getAmmoType() {
@@ -1943,6 +2010,15 @@ class BaseBuilding extends BaseEntity {
     return _.isEqual(json, otherJson)
   }
 
+  ping(id) {
+    let data = {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      pingId: parseInt(id)
+    }
+    this.game.triggerEvent("BuildingPinged", data)
+  }
+
 }
 
 Object.assign(BaseBuilding.prototype, Upgradable.prototype, {
@@ -1981,7 +2057,8 @@ Object.assign(BaseBuilding.prototype, Destroyable.prototype, {
     this.remove()
 
     let data = {
-      entityId: this.getId()
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
     }
     this.game.triggerEvent("BuildingDestroyed", data)
   },
@@ -2030,6 +2107,7 @@ Object.assign(BaseBuilding.prototype, Destroyable.prototype, {
   }
 })
 
+
 Object.assign(BaseBuilding.prototype, ShipMountable.prototype, {
   getRelativeX() {
     return this.relativeX
@@ -2046,7 +2124,12 @@ Object.assign(BaseBuilding.prototype, Powerable.prototype, {
   onPowerChanged() {
     this.onStateChanged("usage")
     this.onStateChanged("isPowered")
-    this.game.triggerEvent("IsPowerChanged", { entityId: this.getId(), isPowered: this.isPowered })
+    let data = {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      isPowered: this.isPowered
+    }
+    this.game.triggerEvent("IsPowerChanged", data)
   }
 })
 

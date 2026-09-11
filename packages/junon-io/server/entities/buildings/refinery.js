@@ -13,13 +13,10 @@ class Refinery extends BaseProcessor {
   getConstantsTable() {
     return "Buildings.Refinery"
   }
-  getOutputStorageIndex() {
-    return 2
-  }
 
   canProceed() {
     // deprecated
-    //return false
+    return false
 
     let outputItem = this.getOutputItem()
     if (outputItem && outputItem.isFullyStacked()) return false
@@ -31,8 +28,7 @@ class Refinery extends BaseProcessor {
     super.onPowerChanged()
 
     if (this.isPowered) {
-    //comment out below line to disable
-      this.container.addProcessor(this)
+      // this.container.addProcessor(this)
     }
   }
 
@@ -42,17 +38,13 @@ class Refinery extends BaseProcessor {
 
   isProcessable(inputItems) {
     const inputItem = inputItems[0]
-    console.log(inputItems.length)
     return inputItem.isOre() || inputItem.isBar()
   }
 
   createOutputItem(inputItem) {
-    //comment out below to disable
-    return this.sector.createItem("Gold", { count: Math.floor(inputItem.getCost() / 2) })
+    // return this.sector.createItem("Gold", { count: Math.floor(inputItem.getCost() / 2) })
   }
 
 }
 
 module.exports = Refinery
-
-

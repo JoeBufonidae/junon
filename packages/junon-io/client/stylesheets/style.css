@@ -477,11 +477,28 @@ body {
 #home_background {
     width: 100%;
     height: 100%;
-    background-color: #0b1825;
+    background-color: #000000;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
 }
 
 #home_background.security_camera {
     background-color: #444;
+}
+
+#home_background_image {
+    opacity: 0.8;
+    -webkit-user-select: none;
+    user-select: none;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+#home_background.security_camera #home_background_image {
+    display: none;
 }
 
 .arrow-right {
@@ -1788,6 +1805,92 @@ html[lang='ja'] .stats_type {
     padding: 5px 10px;
 }
 
+.setarrowcommand {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    pointer-events: auto; /* Required to register hover */
+    z-index: 0;
+    transform-origin: center center; 
+    display: none;
+
+    --arrow-color: white; 
+    --arrow-outline-color: black; 
+}
+.setarrowcommand::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--arrow-outline-color);
+    -webkit-mask: url('./../assets/images/setarrowcommand.png') center/contain no-repeat;
+    mask: url('./../assets/images/setarrowcommand.png') center/contain no-repeat;
+}
+.setarrowcommand::after {
+    content: '';
+    position: absolute;
+    --arrow-inset: 5px; 
+    
+    top: var(--arrow-inset);  
+    left: var(--arrow-inset);
+    right: var(--arrow-inset);
+    bottom: var(--arrow-inset);
+    
+    background-color: var(--arrow-color); 
+    -webkit-mask: url('./../assets/images/setarrowcommand.png') center/contain no-repeat;
+    mask: url('./../assets/images/setarrowcommand.png') center/contain no-repeat;
+}
+.arrow-tooltip {
+    position: absolute;
+    
+    top: 50%;
+    left: 50%;
+    
+    transform: rotate(calc(var(--arrow-rotation, 0deg) * -1)) translate(-50%, 15px);
+    transform-origin: 0 0;
+    
+    white-space: nowrap;
+    font-family: cc;
+    font-size: 15px;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 10;
+}
+.setarrowcommand:hover .arrow-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+#caption_center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: cc;
+    font-size: 60px;
+    opacity: 0;
+    color: white;
+    text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+}
+#caption_footer {
+    position: fixed;
+    bottom: 8%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: cc;
+    font-size: 30px;
+    opacity: 0;
+    color: white;
+}
+
 #error_title:empty,
 #error_menu_content:empty {
     background: none !important;
@@ -2957,6 +3060,14 @@ html[lang='ru'] #blueprint_menu {
     color: #ccc;
 }
 
+.reprice_btn {
+    float: right;
+    margin: 0px -5px 0px 5px;
+    height: 35px;
+    background: none;
+    border: none;
+}
+
 .sell_trade_content {
     display: none;
 }
@@ -2967,6 +3078,16 @@ html[lang='ru'] #blueprint_menu {
     font-size: 18px;
     line-height: 35px;
     font-family: 'cc';
+}
+
+.trade_item_reprice {
+    display: none;
+    text-align: end;
+    border: none;
+    background: none;
+    height: 18px;
+    width: 80px;
+    margin: 8px 4px;
 }
 
 .trade_item_cost.custom {
@@ -3448,6 +3569,14 @@ html[lang='ru'] .blueprint_name {
     float: left;
 }
 
+.crafting_options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
 .crafting_requirements {
     margin-left: 10px;
 }
@@ -3793,12 +3922,13 @@ body.imposter_mode #welcome_hud .game_info {
 
 .stove_status_message,
 .processor_status_message,
+#vending_status_message,
 #crafting_status_message {
     top: 2px;
     position: absolute;
     font-family: 'cc';
     left: 50%;
-    margin-left: -65px;
+    margin-left: -55px;
     color: #dd4b4b;
 }
 
@@ -4461,6 +4591,11 @@ html[lang='ja'] #total_online_count {
 
 .game_invite_container .main_colony_list {
     margin-top: 20px;
+}
+
+.main_colony_list, .search_colony_list {
+    height: 50vh;
+    overflow-y: scroll;
 }
 
 .colony_list.list_mode .team_entry_row {
@@ -5681,6 +5816,8 @@ html[lang='ja'] .mobile_authentication_container .btn {
 .purchasable_items_list {
     margin-top: 20px;
     margin-bottom: 20px;
+    max-height: 320px;
+    overflow-y: scroll;
 }
 
 .vending_machine_tab_content .buy_btn {
@@ -7813,6 +7950,8 @@ body.minigame #map_menu_frame {
     margin-top: 20px;
     background-color: #bf5036;
     font-family: 'cc';
+    line-height: 20px;
+    font-size: 25px;
 }
 
 .global_ban_list_container {
@@ -8227,6 +8366,7 @@ body.imposter_mode .minigame_poster {
 }
 
 .in_game_middle_menu {
+    height: calc(50vh + 50px);
     display: block;
     position: absolute;
     z-index: 11;
@@ -8771,6 +8911,10 @@ body.imposter_mode .minigame_poster {
     margin: 0px;
 }
 
+.functions_table_hidden {
+    display: none !important;
+}
+
 .function_table {}
 
 .function_table tr {}
@@ -8780,8 +8924,25 @@ body.imposter_mode .minigame_poster {
     padding: 2px 5px;
 }
 
+.function_table tbody tr td {
+    width: 30%;
+}
+
+.function_table button {
+    color: #00b9ff;
+    background-color: #00000000;
+    border: none;
+    cursor: pointer;
+}
+
 .function_name {
     color: orange !important;
+}
+
+.function_header {
+    color: #ffc14d !important;
+    font-size: 20px;
+    margin: 7px;
 }
 
 .action_description a {
@@ -9153,4 +9314,17 @@ body.moderator .team_entry_row .ban_world_btn {
 
 .team_entry_row .ban_world_btn:hover {
     background-color: #c44242;
+}
+
+#home_background {
+    background-color:rgba(0,0,0,0);
+}
+#home_background_image {
+    top: -5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 120vh;
+    object-fit: cover;
 }

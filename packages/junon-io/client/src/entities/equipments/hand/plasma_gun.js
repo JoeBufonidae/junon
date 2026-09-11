@@ -8,8 +8,10 @@ class PlasmaGun extends RangeEquipment {
     super.repositionSprite()
 
     this.sprite.position.x = 8
-
-    // this.sprite.position.x 
+    
+    this.user.holdHandsHeavy()
+    
+    //this.user.hands.x = -4
   }
 
   getSpritePath() {

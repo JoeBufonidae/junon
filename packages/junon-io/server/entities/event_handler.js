@@ -6,6 +6,10 @@ const Trigger = require("./trigger")
 const Protocol = require('../../common/util/protocol')
 const Helper = require('../../common/helper')
 const Constants = require('../../common/constants.json')
+const EntityGroup = require("./entity_group")
+const Perlin = require("../util/perlin")
+const { indexOf } = require("lodash")
+const helper = require("../../common/helper")
 
 class EventHandler {
   constructor(sector) {
@@ -21,6 +25,8 @@ class EventHandler {
     this.isRoundStarted = false
     this.isRoundStarting = false
     this.processingEvents = new Set() // Track events currently being processed to prevent infinite loops
+    this.processingOverflow = 0
+    this.PROCESSING_LIMIT = 25
   }
 
   getSocketUtil() {
@@ -184,6 +190,14 @@ class EventHandler {
     return Math.abs(this._safeNumber(value))
   }
 
+  exp(value) {
+    return Math.exp(this._safeNumber(value))
+  }
+
+  tanh(value) {
+    return Math.tanh(this._safeNumber(value))
+  }
+
   log(value, base = Math.E) {
     const numValue = this._safeNumber(value)
     const numBase = this._safeNumber(base)
@@ -206,7 +220,7 @@ class EventHandler {
     return this._fixFloat(result, Math.max(12, -prec + 2))
   }
 
- ceil(value, precision = 0) {
+  ceil(value, precision = 0) {
     const num = this._safeNumber(value)
     const prec = this._safeNumber(precision)
     
@@ -225,6 +239,26 @@ class EventHandler {
   max(...values) {
     if (values.length === 0) return -Infinity
     return Math.max(...values.map(v => this._safeNumber(v)))
+  }
+
+  radian(value) {
+    return this._safeNumber(value) * (Math.PI / 180)
+  }
+
+  sin(value) {
+    return Math.sin(this._safeNumber(value))
+  }
+
+  cos(value) {
+    return Math.cos(this._safeNumber(value))
+  }
+
+  tan(value) {
+    return Math.tan(this._safeNumber(value))
+  }
+
+  atan2(y, x) {
+      return Math.atan2(this._safeNumber(y), this._safeNumber(x))
   }
 
   length(value) {
@@ -327,9 +361,14 @@ class EventHandler {
 
   getInventoryItemCount(entityId, typeName) {
     let player = this.getPlayer(entityId)
-    if (!player) return 0
+    if (player) {
+      return player.getInventoryItemCount(typeName)
+    }
 
-    return player.getInventoryItemCount(typeName)
+    let entity = this.game.getEntity(entityId)
+    if (!entity) return 0
+
+    return entity.getInventoryItemCount(typeName)
   }
 
   getContent(entityId) {
@@ -340,6 +379,13 @@ class EventHandler {
     return content    
   }
 
+  getIsPowered(buildingId) {
+    let building = this.game.getEntity(buildingId)
+    
+    if (!building) return undefined
+    
+    return building.isPowered
+  }
 
   getUsage(itemId) {
     let item = this.game.getEntity(itemId)
@@ -489,10 +535,29 @@ class EventHandler {
     return player.getTeam().scoreIndex || 0
   }
 
-  getAngle(playerId) {
-    let player = this.getPlayer(playerId)
-    if (!player) return 0
-    return player.angle
+  getAngle(entityId) {
+    let player = this.getPlayer(entityId)
+    if (player) {
+      return player.angle
+    }
+
+    let entity = this.game.getEntity(entityId)
+    if (!entity) return 0
+    return entity.angle
+  }
+
+  getName(entityId) {
+    let player = this.getPlayer(entityId)
+    if (player) {
+      return player.name
+    }
+
+    let entity = this.game.getEntity(entityId)
+    if (entity) {
+      return entity.name
+    }
+
+    return undefined
   }
 
   getTeamColor(playerId) {
@@ -577,10 +642,11 @@ class EventHandler {
     if (this.shouldPreventTimer(timer)) return
 
     let name = "Timer:" + timer.name + ":tick"
-    let params = {
-      "seconds": timer.tick,
-      "remaining": timer.duration - timer.tick
-    }
+    let params = {}
+
+    params["seconds"] = timer.tick
+    params["remaining"] = timer.duration - timer.tick
+
     this.trigger(name, params)
 
     params["name"] = timer.name
@@ -620,7 +686,7 @@ class EventHandler {
   }
 
   hasReachedMaxVariableCount() {
-    return Object.keys(this.variables).length >= 100
+    return Object.keys(this.variables).length >= 10000
   }
 
   loadVariables(variables) {
@@ -718,6 +784,32 @@ class EventHandler {
     return entity.health
   }
 
+
+
+  getY(entityId) {
+    let player = this.getPlayer(entityId)
+    if (player) {
+      return player.getY() / Constants.tileSize
+    }
+
+    let entity = this.game.getEntity(entityId)
+    if (!entity) return 0
+
+    return entity.getY() / Constants.tileSize
+  }
+
+  getX(entityId) {
+    let player = this.getPlayer(entityId)
+    if (player) {
+      return player.getX() / Constants.tileSize
+    }
+
+    let entity = this.game.getEntity(entityId)
+    if (!entity) return 0
+
+    return entity.getX() / Constants.tileSize
+  }
+
   getRow(entityId) {
     let player = this.getPlayer(entityId)
     if (player) {
@@ -764,7 +856,7 @@ class EventHandler {
   }
 
   getBuildingType(entityId) {
-    let entity = this.game.getEntity(entityId)
+    let entity = this.game.getEntity(entityId) || this.game.getEntity(this.getPlayerId(entityId))
     
     if (!entity) return ""
     
@@ -777,6 +869,10 @@ class EventHandler {
     }
     
     return entity.type || ""
+  }
+
+  getEntityType(entityId) {
+    return this.getBuildingType(entityId)
   }
 
   hasEffect(entityId, effectName) {
@@ -970,9 +1066,9 @@ class EventHandler {
 
     // Prevent infinite loops by checking if this event is already being processed
     // disable for now. need to fix to handle nested events
-    // if (this.processingEvents.has(eventKey)) {
-    //   return
-    // }
+    if (this.processingEvents.has(eventKey)) {
+      this.processingOverflow++
+    }
 
     // Mark this event as being processed
     this.processingEvents.add(eventKey)
@@ -1027,6 +1123,7 @@ class EventHandler {
 
   resetProcessingEvents() {
     this.processingEvents.clear()
+    this.processingOverflow = 0
   }
 
   updateTaskCompleted() {
@@ -1073,7 +1170,11 @@ class EventHandler {
   }
 
   runAction(action, params) {
-    this.commandDelay = 0 // always reset command delay at beginning
+    if(this.processingOverflow > this.PROCESSING_LIMIT) {
+      this.commandDelay = 0.1 * (this.processingOverflow - this.PROCESSING_LIMIT) // offload if overwhelmed
+    } else {
+      this.commandDelay = 0 // always reset command delay at beginning
+    }
 
     if (action.timer) {
       if (action.timer.shouldRemove) {
@@ -1158,6 +1259,236 @@ class EventHandler {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
 
+  seedRandom(seed, min, max) {
+    seed = parseInt(seed)
+    min = parseInt(min)
+    max = parseInt(max)
+    if (isNaN(seed) || isNaN(min) || isNaN(max)) return 0
+    const a = 1664525
+    const c = 1013904223
+    const rand = ((a * seed + c) % 4294967296) / 4294967296
+    return Math.floor(min + rand * (max - min + 1))
+  }
+
+  simplex(seed, x, y) {
+    const nx = this._safeNumber(x)
+    const ny = this._safeNumber(y)
+    if (seed !== undefined && seed !== null && seed !== '') {
+      Perlin.seed(this._safeNumber(seed))
+    }
+    return Perlin.simplex2(nx, ny)
+  }
+
+  getPlayerId(playerName) {
+    const player = this.game.getPlayerByNameOrId(playerName)
+    
+    if (!player) return undefined
+    return player.getId() || undefined
+  }
+
+  getGoal(entityId) {
+    const entity = this.game.getEntity(entityId)
+
+    if (!entity) return undefined
+    if (!entity.isMob()) return undefined
+    if (entity.goals.length === 0) return undefined
+
+    return entity.getLatestGoal().getTargetEntity().getId()
+  }
+
+  getForceX(entityId) {
+    const player = this.getPlayer(entityId)
+    if (player) {
+      return player.getBody().force[0]
+    }
+    const entity = this.game.getEntity(entityId)
+    if (entity) {
+      return entity.getBody().force[0]
+    } else {
+      return 0
+    }
+  }
+
+  getForceY(entityId) {
+    const player = this.getPlayer(entityId)
+    if (player) {
+      return player.getBody().force[1]
+    }
+    const entity = this.game.getEntity(entityId)
+    if (entity) {
+      return entity.getBody().force[1]
+    } else {
+      return 0
+    }
+  }
+
+  getState(entityId) {
+    const entity = this.game.getEntity(entityId)
+    if (!entity) return undefined
+    
+    return entity.isOpen
+  }
+  
+  if(...args) {
+    let leftSide  = (args[0] || "").trim();
+    let operator  = (args[1] || "").trim();
+    let rightSide = (args[2] || "").trim();
+    
+    let successVal = args[3] !== undefined ? args[3].trim() : "";
+    let failureVal = args[4] !== undefined ? args[4].trim() : "";
+
+    let conditionMet = false;
+
+    if (operator === "=" || operator === "==") {
+        conditionMet = (leftSide === rightSide);
+    } else if (operator === "!=") {
+        conditionMet = (leftSide !== rightSide);
+    } else if (operator === ">") {
+        conditionMet = (Number(leftSide) > Number(rightSide));
+    } else if (operator === "<") {
+        conditionMet = (Number(leftSide) < Number(rightSide));
+    } else if (operator === "~=") {
+        conditionMet = leftSide.includes(rightSide);
+    } else if (operator === ">=") {
+        conditionMet = (Number(leftSide) >= Number(rightSide));
+    } else if (operator === "<=") {
+        conditionMet = (Number(leftSide) <= Number(rightSide));
+    }
+    return conditionMet ? successVal : failureVal;
+  }
+
+
+  getNthWord(...values) {
+    if (values.length < 2) return ""
+    let index = parseInt(values[0])
+    let word = values.slice(1).join(" ").toString()
+    let stringArray = word.split(" ")
+
+    if (isNaN(index) || index < 1) {
+      return ""
+    }
+    if (!word || typeof word !== "string") {
+      return ""
+    }
+    if(index > stringArray.length+1) {
+      return ""
+    }
+
+    let letter = stringArray[index - 1]
+    return letter
+  }
+
+  getNthLetter(...values) {
+    if (values.length === 0) return ""
+    let index = parseInt(values[0])
+    let word = values[1].toString();
+    if (isNaN(index)) {
+      return ""
+    }
+    if (!word || typeof word !== "string") {
+      return ""
+    }
+    if (index < 1 || index > word.length) {
+      return ""
+    }
+    let letter = word[index - 1];
+    return letter
+  }
+
+  getValuePosition(...values) {
+    if (values.length < 3) return undefined;
+    let returnIndex = 0;
+    let index = 0;
+    let targetIndex = parseInt(values[0]);
+    let value = values[1].toString();
+    let string = values[2].toString();
+    while (index < targetIndex) {
+      returnIndex = string.indexOf(value, returnIndex) + value.length;
+      index += 1;
+    }
+    return returnIndex - value.length + 1;
+  }
+
+  getValueLength(...values) {
+    if (values.length === 0) return 0;
+    let string = values[0].toString().length;
+    return string;
+  }
+
+  getPushedValue(...values) {
+    if (values.length < 3) return undefined;
+    let index = parseInt(values[0]);
+    let value = values[1].toString();
+    let string = values[2].toString();
+    return string.slice(0, index) + value + string.slice(index);
+  }
+
+  getRemovedValue(...values) {
+    if (values.length < 3) return undefined;
+    let value = values[1].toString();
+    let string = values[2].toString();
+    let startIndex = this.getValuePosition(...values) - 1;
+    return string.slice(0,startIndex) + string.slice(startIndex + value.length);
+  }
+
+  getDate(...values) {
+    if (values.length === 0) return undefined;
+    let component = values[0].toString();
+    const acceptedvalues = [
+      'year',
+      'month',
+      'day',
+      'dayweek',
+      'hour',
+      'minute',
+      'second',
+      'millisecond',
+      'unixms'
+    ];
+    if (acceptedvalues.indexOf(component) == -1) {
+      return undefined;
+    }
+    if (values.length > 1 && isNaN(Number(values[1].toString().split(" ").join("")))) {
+      return undefined;
+    }
+    const translatedvalue = [
+      'getUTCFullYear',
+      'getUTCMonth',
+      'getUTCDate',
+      'getUTCDay',
+      'getUTCHours',
+      'getUTCMinutes',
+      'getUTCSeconds',
+      'getUTCMilliseconds',
+      'getTime'
+    ];
+    let finaldate = new Date();
+    if (values.length > 1) {
+      let customdate = values[1].toString().split(' ');
+      customdate = customdate.map(Number);
+      if (customdate.length == 1) {
+        finaldate = new Date(customdate[0]);
+      }else{
+        while (customdate.length<7) {
+          customdate[customdate.length] = 0;
+        }
+        finaldate = new Date(Date.UTC(customdate[0], customdate[1] - 1, customdate[2], customdate[3], customdate[4], customdate[5], customdate[6]));
+      }
+    }
+    let finalcomponent = acceptedvalues.indexOf(component)
+    if (translatedvalue[finalcomponent] === 'getUTCMonth') {
+      return finaldate[translatedvalue[finalcomponent]]() + 1;
+    }
+    return finaldate[translatedvalue[finalcomponent]]();
+  }
+
+  getEntityDistance(entityId, entityId2) {
+    const entity_coords = [this.getX(entityId), this.getY(entityId)];
+    const entity2_coords = [this.getX(entityId2), this.getY(entityId2)];
+
+    return helper.distance(entity_coords[0], entity_coords[1], entity2_coords[0], entity2_coords[1]);
+  }
+
   isVariableInvalid(key) {
     return key.match(/[^a-zA-Z0-9_$]/)
   }
@@ -1196,6 +1527,7 @@ class EventHandler {
       "$getEquip": true,
       "$getRole": true,
       "$getHealth": true,
+      "$getLevel": true,
       "$getStamina": true,
       "$getSpeed": true,
       "$getOxygen": true,
@@ -1204,12 +1536,17 @@ class EventHandler {
       "$getMaxStamina": true,
       "$getMaxOxygen": true,
       "$getMaxHunger": true,
+      "$getPlayerId": true,
       "$getOwner": true,
       "$random": true,
+      "$seedRandom": true,
+      "$simplex": true,
       "$formatTime": true,
       "$getTeamMemberCount": true,
       "$getRoleMemberCount": true,
       "$getPlayerCount": true,
+      "$getY": true,
+      "$getX": true,
       "$getRow": true,
       "$getCol": true,
       "$getRegionPlayerCount": true,
@@ -1226,14 +1563,22 @@ class EventHandler {
       "$pow": true,
       "$root": true,
       "$abs": true,
+      "$exp": true,
+      "$tanh": true,
       "$log": true,
       "$min": true,
       "$max": true,
       "$floor": true,
       "$ceil": true,
+      "$radian": true,
+      "$sin": true,
+      "$cos": true,
+      "$tan": true,
+      "$atan2": true,
       "$isLoggedIn": true,
       "$getEquipId": true,
       "$getBuildingType": true,
+      "$getEntityType": true,
       "$getDay": true,
       "$getHour": true,
       "$getContent": true,
@@ -1241,9 +1586,24 @@ class EventHandler {
       "$getStructureByCoords": true,
       "$hasEffect": true,
       "$getTotalMobCount": true,
+      "$getGoal": true,
       "$getAngle": true,
+      "$getName": true,
+      "$getIsPowered": true,
       "$getUsage": true,
-      "$getCapacity": true
+      "$getCapacity": true,
+      "$getForceX": true,
+      "$getForceY": true,
+      "$getState": true,
+      "$getNthLetter": true,
+      "$getNthWord": true,
+      "$if": true,
+      "$getValuePosition": true,
+      "$getValueLength": true,
+      "$getPushedValue": true,
+      "$getRemovedValue": true,
+      "$getDate": true,
+      "$getEntityDistance": true,
     }
   }
 
@@ -1271,97 +1631,57 @@ class EventHandler {
   }
 
   interpolateFunctions(result) {
-    let chars = result.split("")
-    let functionBuffer = ""
-    let resultBuffer = ""
+  let previousResult;
+  let safetyCounter = 0;
+  const maxIterations = 100;
 
-    for (var i = 0; i < chars.length; i++) {
-      let char = chars[i]
-      let isEndOfString = i === chars.length - 1
-      if (isEndOfString) {
-        if (functionBuffer.length > 0) {
-          functionBuffer += char
-          let result = this.parseAndEvalExpression(functionBuffer)
-          functionBuffer = ""
-          resultBuffer += result
-        } else {
-          resultBuffer += char
-        }
-      } else if (char === " ") {
-        if (functionBuffer.length > 0) {
-          let result = this.parseAndEvalExpression(functionBuffer)
-          functionBuffer = ""
-          resultBuffer += result
-          resultBuffer += char
-        } else {
-          resultBuffer += char
-        }
-      } else if (functionBuffer.length > 0 || char === "$") {
-        functionBuffer += char
-      } else {
-        resultBuffer += char
-      }
-    }
-
-    return resultBuffer
+  while (result.includes('$') && result !== previousResult && safetyCounter < maxIterations) {
+    previousResult = result;
+    result = this.parseAndEvalExpression(result);
+    safetyCounter++;
   }
 
-  parseAndEvalExpression(expression) {
-    let stack = []
-    let characters = expression.split("")
-    let keyword = ""
+  return result;
+}
 
-    for (var i = 0; i < characters.length; i++) {
-      let character = characters[i]
-      if (character === '(') {
-        stack.push(keyword)
-        stack.push("(")
-        keyword = ""
-        // end functionName
-      } else if (character === ",") {
-        if (keyword) {
-          stack.push(keyword)
-          keyword = ""
-        }
-      } else if (character === ")") {
-        if (keyword) {
-          stack.push(keyword)
-          keyword = ""
-        }
+parseAndEvalExpression(expression) {
+  if (!expression || !expression.includes('$')) return expression;
 
-        let args = []
-        let arg
-        let isFuncFound = false
-        while (!isFuncFound && stack.length > 0) {
-          arg = stack.pop()
+  let innermostFuncRegex = /(\$[a-zA-Z0-9_]+)\(([^()]*?)\)/;
+  let match = expression.match(innermostFuncRegex);
 
-          if (arg === "(") {
-            isFuncFound = true
-            arg = stack.pop() // func name
-            args.unshift(arg)
-          } else {
-            args.unshift(arg)
-          }
+  if (!match) {
+    return expression; 
+  }
 
-        }
+  let fullMatchedText = match[0];
+  let funcName = match[1];
+  let rawArgs = match[2];
 
-        if (isFuncFound) {
-          let funcName = args.shift()
-          if (this.hasFunction(funcName)) {
-            let result = this.runFunction(funcName, args)
-            stack.push(result)
-          } else {
-            this.queueLog({ type: 'error', message: "Does not have function named: " + funcName })
-          }
-        } else {
-        }
-      } else {
-        keyword += character
-      }
+  if (this.hasFunction(funcName)) {
+    let finalizedArgs = [];
+    if (rawArgs.trim() !== "") {
+      finalizedArgs = rawArgs.split(',').map(arg => this.cleanArgument(arg));
     }
 
-    return stack[0]
+    let evaluatedResult = this.runFunction(funcName, finalizedArgs);
+
+    if (typeof evaluatedResult === 'object' && evaluatedResult !== null) {
+      evaluatedResult = JSON.stringify(evaluatedResult);
+    } else {
+      evaluatedResult = String(evaluatedResult);
+    }
+
+    return expression.replace(fullMatchedText, evaluatedResult);
   }
+  return expression.replace(fullMatchedText, `INVALID_${funcName.substring(1)}`);
+}
+
+cleanArgument(...args) {
+  let arg = args[0];
+  if (typeof arg !== 'string') return arg;
+  return arg.trim();
+}
 
   interpolate(value, params, options = {}) {
     let result = value.trim()
@@ -1386,7 +1706,6 @@ class EventHandler {
   }
 
   importFromCommandBlock(commandBlock) {
-    // from the command block
     this.triggers = {}
 
     commandBlock.triggers.forEach((trigger) => {

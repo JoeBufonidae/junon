@@ -4,7 +4,9 @@ class SpawnCorpse extends BaseCommand {
 
   getUsage() {
     return [
-      "/spawncorpse [type]",
+      "Spawns the corpse of a mob",
+      "/spawncorpse [corpse_type] [row] [col]",
+      "ex: /spawncorpse human 5 5"
     ]
   }
   
@@ -14,10 +16,22 @@ class SpawnCorpse extends BaseCommand {
 
   perform(player, args) {
     const type = args[0] || ""
-    const x = args[1]
-    const y = args[2]
+    const row = args[1]
+    const col = args[2]
 
-    this.sector.spawnCorpse({ player: player, type: type, x: x, y: y })
+    if (this.sector.isCorpseLimitExceeded()) {
+      player.showChatError("Cannot exceed corpse limit of 200")
+      return
+    }
+
+    if (typeof row !== 'undefined' && typeof col !== 'undefined') {
+      if (this.sector.isOutOfBounds(row, col)) {
+        player.showChatError("invalid row,col: " + [row, col].join(","))
+        return
+      }
+    }
+
+    this.sector.spawnCorpse({ player: player, type: type, x: col, y: row})
   }
 }
 

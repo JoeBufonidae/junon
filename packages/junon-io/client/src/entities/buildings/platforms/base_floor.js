@@ -151,10 +151,6 @@ class BaseFloor extends BaseBuilding {
     return 0
   }
 
-  rotateEquip() {
-    // dont allow rotation
-  }
-
   getSpritePath() {
     return this.getBaseSpritePath()
   }

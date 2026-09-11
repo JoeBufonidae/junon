@@ -110,12 +110,12 @@ class ProcessorMenu extends BaseMenu {
       }
     }
 
+    this.progressBar = this.el.querySelector(".processor_progress_bar_fill")
+
     SocketUtil.emit("ViewStorage", { id: this.storageId })
 
     this.initPlayerInventoryStorage()
     this.initPlayerInventorySlotListeners()
-
-    this.progressBar = this.el.querySelector(".processor_progress_bar_fill")
   }
 
 

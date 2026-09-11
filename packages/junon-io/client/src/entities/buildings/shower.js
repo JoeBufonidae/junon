@@ -14,7 +14,7 @@ class Shower extends BaseBuilding {
 
   getBuildingSprite() {
     let sprite = super.getBuildingSprite()
-    sprite.position.y = -5
+    //sprite.position.y = -5
     return sprite
   }
 

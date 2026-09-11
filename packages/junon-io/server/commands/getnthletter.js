@@ -5,7 +5,7 @@ class GetNthLetter extends BaseCommand {
         return [
             "Gets nth letter of a word and sets it to $letter variable",
             "/getnthletter [index] [word]",
-            "Ex: /getnthletter 3 example - creates a $letter variable and assigns the letter 'a' to it."
+            "ex: /getnthletter 3 example - creates a $letter variable and assigns the letter 'a' to it."
         ];
     }
 
@@ -23,11 +23,13 @@ class GetNthLetter extends BaseCommand {
         let word = args[1];
         if (!word || typeof word !== "string") {
             caller.showChatError("Invalid word");
+            this.game.executeCommand(this.sector, `/variable set word undefined`);
             return;
         }
 
         if (index < 1 || index > word.length) {
             caller.showChatError("Invalid index");
+            this.game.executeCommand(this.sector, `/variable set word undefined`);
             return;
         }
 

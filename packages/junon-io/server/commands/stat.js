@@ -11,9 +11,11 @@ class Stat extends BaseCommand {
 
   getUsage() {
     return [
-      "/stat [mob|building|weapon|player]",
-      "/stat [mob|building|weapon|player] <flags>",
-      "/stat [mob|building|weapon|player] <stat>:*[multiply]"
+      "Manages the stats of an entity, weapon or player",
+      "/stat [mob_type|building_type|weapon|player]",
+      "/stat [mob_type|building_type|weapon|player] <flags>",
+      "/stat [mob_type|building_type|weapon|player] <stat>:*[multiply]",
+      "ex: /stat Lead_Pipe damage:8"
     ]
   }
   
@@ -136,7 +138,7 @@ class Stat extends BaseCommand {
     } else if (key === 'damage') {
       return "[0-9999999]"
     } else if (key === 'speed') {
-      return "[1-15]"
+      return "[1-50]"
     } else if (key === 'reload') {
       return "[100-10000]"
     } else if (key === 'range') {
@@ -157,7 +159,7 @@ class Stat extends BaseCommand {
       case 'damage':
         return parseInt(value) >= 0 && parseInt(value) <= 9999999
       case 'speed':
-        return parseInt(value) >= 1 && parseInt(value) <= 15
+        return parseInt(value) >= 1 && parseInt(value) <= 50
       case 'range':
         return parseInt(value) >= 1 && parseInt(value) <= 4096
       case 'reload':

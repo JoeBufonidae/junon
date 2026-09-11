@@ -259,6 +259,9 @@ class BaseMob extends BaseEntity {
     this.setGoalTargets(data.goalTargets)
     this.setName(data.name)
     this.setContent(data.content)
+    this.setNameColor(data.nameColor)
+    this.setNameSize(data.nameSize)
+    this.setEquipments(data)
 
     if (data.hasOwnProperty('weaponType')) {
       this.setWeaponType(data.weaponType)
@@ -273,6 +276,60 @@ class BaseMob extends BaseEntity {
     }
   }
 
+  setEquipments(data) {
+    if (!data.equipments) return
+    if (!data.equipments.storage) return
+    
+    for (let index in data.equipments.storage) {
+      let equipment = data.equipments.storage[index]    
+      this.renderEquipment(equipment)
+    }
+  }
+
+  renderEquipment(data) {
+    if (!this.isEquipper()) return
+
+    const index = data.index
+    let existingEquipment = this.equipments[index]
+
+    // equipment slot changed
+    if (existingEquipment) {
+      let isSameEquipment = data.id === existingEquipment.id
+      if (isSameEquipment) {
+        existingEquipment.syncWithServer(data)
+      } else {
+        existingEquipment.remove()
+        existingEquipment = null
+      }
+    }
+
+    // dont convert to else if (existingEquipment can become null above)
+    if (!existingEquipment) {
+      // init equipment
+      data.user = this
+      this.equipments[index] = Item.getKlass(data.type).build(this.game, data)
+      this.equipments[index].onPostEquip()
+    }
+  }
+  
+  setNameColor(color) {
+    this.nameColor = color || 16777215 
+    // Upd:
+    let SavedName = this.name
+    this.setName(" ")
+    this.setName(SavedName)
+    // Upd
+    this.onNameChanged();
+  }
+  setNameSize(size) {
+    this.nameSize = size || 23
+    // Upd:
+    let SavedName = this.name
+    this.setName(" ")
+    this.setName(SavedName)
+    // Upd
+    this.onNameChanged();
+  }
   setName(name) {
     if (this.name !== name) {
       this.name = name
@@ -332,7 +389,6 @@ class BaseMob extends BaseEntity {
       if (!this.usernameText) {
         this.createUsernameSprite()
       } else {
-        this.usernameText.sprite.text = this.name
         if (this.game.changeNameMenu.isOpen()) {
           this.game.changeNameMenu.close()
         }
@@ -343,7 +399,12 @@ class BaseMob extends BaseEntity {
         this.usernameText = null
       }
     }
+    if (this.usernameText && this.usernameText.sprite) {
+ this.usernameText.sprite.text = this.name || "";
+    this.usernameText.sprite.tint = this.nameColor !== undefined ? this.nameColor : 0xffffff;
+    this.usernameText.sprite._font.size = this.nameSize || 23;
   }
+}
 
   createUsernameSprite() {
     this.usernameText = BitmapText.create({
@@ -351,7 +412,6 @@ class BaseMob extends BaseEntity {
       text: this.getName(),
       spriteContainer: this.sprite
     })
-
     this.usernameText.sprite.position.y = this.getHeight()
   }
 
@@ -916,7 +976,8 @@ class BaseMob extends BaseEntity {
     return this.getConstants().isTamable ||
            this.hasCategory("bot") ||
            this.hasCategory("worker") ||
-           this.hasCategory("trader") 
+           this.hasCategory("trader") ||
+           this.owner
   }
 
   canBecomeLivestock() {
@@ -978,16 +1039,21 @@ class BaseMob extends BaseEntity {
   }
 
   showAction(entityMenu) {
+    let actions = ""
+let customActions = this.getActions()
+    if (customActions) {
+      actions += customActions
+    }
+    
     if (!this.belongToOwner(this.game.player)) {
       // reset
-      entityMenu.querySelector(".entity_action").innerHTML = ""
+      entityMenu.querySelector(".entity_action").innerHTML = actions
       return
     }
 
     let player = this.game.player
     let team = player.getTeam()
-    let actions = ""
-
+    
     if (this.canTakeAlong()) {
       const take = "<div class='take_btn ui_btn' data-action='take_along'>" + i18n.t("Take Along") + "</div>"
       const release = "<div class='release_btn ui_btn' data-action='release'>" + i18n.t("Release") + "</div>"
@@ -1014,6 +1080,20 @@ class BaseMob extends BaseEntity {
     }
 
     entityMenu.querySelector(".entity_action").innerHTML = actions
+  }
+
+  getActions() {
+    let buttons = this.sector.getButtonsFor(this.getTypeNameCamelCase())
+    if (buttons.length == 0) {
+      buttons = this.sector.getButtonsFor(this.getId())
+    }
+    let html = ""
+
+    buttons.forEach((button) => {
+      html += button.buildHTML(this)
+    })
+
+    return html
   }
 
   isNPC() {

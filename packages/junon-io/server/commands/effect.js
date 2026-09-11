@@ -5,8 +5,11 @@ const Protocol = require('../../common/util/protocol')
 class Effect extends BaseCommand {
   getUsage() {
     return [
-      "/effect give [player] [effectname]",
-      "/effect clear [player] [effectname]",
+      "Gives an effect to an entity",
+      "/effect give [player|entity_id] [effectname]",
+      // "/effect give [player|entity_id] [effectname] [duration]",
+      // DOESNT FULLY WORK YET, SHOULD BE FIXED BY perrito/akrolpative in later update and fully implemented.
+      "/effect clear [player|entity_id] [effectname]",
       "/effect clear [player]",
       "ex: " + this.getAllowedEffects().join(", ")
     ]
@@ -43,11 +46,13 @@ class Effect extends BaseCommand {
         player.showChatError("No such effect " + targetEffect)
         return
       }
+      
+let duration = parseFloat(args[3]) || undefined
 
       entities.forEach((entity) => {
         if (typeof entity.addEffect === 'function') {
           if (entity.canAddEffect(targetEffect)) {
-            entity.addEffect(targetEffect)
+            entity.addEffect(targetEffect, duration)
           }
           
         }
@@ -56,7 +61,7 @@ class Effect extends BaseCommand {
       player.showChatSuccess("success")
     } else if (args[0] === 'set') {
       if (!args[1]) {
-        player.showChatError("/effect set [id] [" + allowedEffects.join(" | ") + "]")
+        player.showChatError("/effect give [id] [" + allowedEffects.join(" | ") + "]")
         return
       }
 
@@ -75,9 +80,11 @@ class Effect extends BaseCommand {
 
       let level = parseInt(args[3])
       if (isNaN(level)) return
+      
+      let duration = parseFloat(args[4]) || undefined
 
       targetEntities.forEach((targetEntity) => {
-        targetEntity.setEffectLevel(targetEffect, level)
+        targetEntity.setEffectLevel(targetEffect, level, duration)
       })
     } else if (args[0] === 'clear') {
       if (!args[1]) {

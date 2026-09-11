@@ -102,8 +102,15 @@ class Airlock extends BaseBuilding {
     if (this.isOpen) {
       this.close()
     } else {
-      this.open()
+      if (user.isMob()) {
+        this.openFor(3000, user)
+        return
+      } else {
+        this.open()
+      }
     }
+
+    this.onOpenStateChanged(user)
   }
 
   onNetworkAssignmentChanged(networkCollection, network) {
@@ -118,12 +125,43 @@ class Airlock extends BaseBuilding {
     return Object.values(this.rooms)
   }
 
-  openFor(duration) {
+  openFor(duration, entity) {
+    if(!this.getIsPowered()) {return}
     this.open()
 
+    let changerType
+    let changerId
+
+    if (entity) {
+      changerId = entity.getId()
+
+      if (entity.isPlayer()) {
+        changerType = entity.getName()
+      } else {
+        changerType = entity.getTypeName()
+      }
+    }
+
+    this.game.triggerEvent("BuildingStateChanged", {
+      entityId: this.getId(),
+      entityType: this.getTypeName(),
+      changerId,
+      changerType,
+      state: this.isOpen
+    })
+
     clearTimeout(this.closeTimeout)
+
     this.closeTimeout = setTimeout(() => {
       this.close()
+
+      this.game.triggerEvent("BuildingStateChanged", {
+        entityId: this.getId(),
+        entityType: this.getTypeName(),
+        changerId,
+        changerType,
+        state: this.isOpen
+      })
     }, duration)
   }
 

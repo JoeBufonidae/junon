@@ -11,6 +11,12 @@ Equipments.Pistol = require("./hand/pistol")
 Equipments.Shotgun = require("./hand/shotgun")
 Equipments.AssaultRifle = require("./hand/assault_rifle")
 Equipments.Scar17 = require("./hand/scar_17")
+Equipments.Ak47 = require("./hand/ak47")
+Equipments.BoltActionRifle = require("./hand/bolt_action_rifle")
+Equipments.HeavyRifle = require("./hand/heavy_rifle")
+Equipments.Minigun = require("./hand/minigun")
+Equipments.Uzi = require("./hand/uzi")
+Equipments.GrenadeLauncher = require("./hand/grenade_launcher")
 Equipments.FlameThrower = require("./hand/flame_thrower")
 Equipments.PlasmaGun = require("./hand/plasma_gun")
 Equipments.RocketLauncher = require("./hand/rocket_launcher")
@@ -39,6 +45,9 @@ Equipments.PocketTrader = require("./hand/pocket_trader")
 Equipments.Bowl = require("./hand/bowl")
 Equipments.Deconstructor = require('./hand/deconstructor')
 Equipments.Dynamite = require('./hand/dynamite')
+Equipments.ShockGrenade = require('./hand/shock_grenade')
+Equipments.Bayonet = require("./hand/bayonet")
+Equipments.Kukri = require("./hand/kukri")
 
 Equipments.SpaceSuit = require("./armor/space_suit")
 Equipments.CombatArmor = require("./armor/combat_armor")
@@ -56,7 +65,7 @@ Equipments.forType = (type) => {
   return Equipments[klassName]
 }
 
-const craftExcludeList = ["FrameArmor", "Syringe", "StunBaton", "MolotovCocktail", "Grenade", "PoisonGrenade", "BloodBottle", "CombatArmor", "WaterBottle", "NameTag", "SpaceSuit", "BlueEnergySword", "GreenEnergySword", "RedEnergySword", "Katana", "Radio", "AssassinsKnife", "SantaHat", "HazmatSuit", "PoliceSuit", "PrisonerSuit", "LabCoat", "CultistSuit", "ImperialSpecialForcesArmor", "Dynamite"]
+const craftExcludeList = ["FrameArmor", "Bayonet", "Kukri", "Syringe", "StunBaton", "Grenade", "PoisonGrenade", "BloodBottle", "CombatArmor", "WaterBottle", "NameTag", "SpaceSuit", "BlueEnergySword", "GreenEnergySword", "RedEnergySword", "PlasmaGun", "PlasmaBlade", "SquidStaff", "Radio", "AssassinsKnife", "SantaHat", "HazmatSuit", "PoliceSuit", "PrisonerSuit", "LabCoat", "CultistSuit", "ImperialSpecialForcesArmor", "Dynamite", "ShockGrenade"]
 
 Equipments.getList = () => {
   return Object.values(Equipments).filter((klass) => {

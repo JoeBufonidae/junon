@@ -12,6 +12,10 @@ class Table extends BaseBuilding {
     return Protocol.definition().BuildingType.Table
   }
 
+  isPenetrable() {
+    return true
+  }
+
 }
 
 module.exports = Table

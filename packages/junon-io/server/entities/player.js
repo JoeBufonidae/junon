@@ -136,6 +136,7 @@ class Player extends BaseEntity {
     await user.save();
   }
 
+
   async userHasBadge(badgeId) {
     let user = await User.findOne({where: {uid: this.uid}})
     if(!user || !user.badges) return
@@ -150,14 +151,14 @@ class Player extends BaseEntity {
    * Use await with this function!!!!
    * @returns {Promise<boolean>}
    */
-  async hasUserPlayed2Years() {
+  async hasUserPlayed5Years() {
     let userCreatedAt = await this.getUserCreatedAt()
 
     let now = new Date()
     let diff = now - userCreatedAt
     let diffDays = diff / (1000 * 60 * 60 * 24)
 
-    return diffDays > 730
+    return diffDays > 360*5
   }
 
   getBadgeKlass(id) {
@@ -199,8 +200,16 @@ class Player extends BaseEntity {
     
   }
 
-  async equipBadge(badgeName) {
+  async equipBadge(badgeSetName) {
     try {
+      let badgeName = badgeSetName
+      let user = await User.findOne({where: {uid: this.uid}})
+      if(!user) return
+
+      if (badgeName == "Default") {
+        badgeName = "None"
+      }
+      
       let badge = new Badges.badges[badgeName]()
       if(!await this.userHasBadge(badge.getId())) {
         return
@@ -215,7 +224,10 @@ class Player extends BaseEntity {
         },
         playerId: this.id
       })
+      
+      await user.save();
     } catch(e) {
+      console.log(e)
       return
     }
     
@@ -224,6 +236,16 @@ class Player extends BaseEntity {
   async hasOneMillionGold() {
     let gold = await this.getUserGold()
     return gold >= 1000000
+  }
+
+  triggerPlayerMenu(data) {
+    let finalMenuName = this.sector.klassifySnakeCase(data.menuName)
+    finalMenuName = finalMenuName[0].toLowerCase() + finalMenuName.slice(1)
+    this.game.triggerEvent("PlayerMenu", {
+      menuName: finalMenuName,
+      state: data.state,
+      player: this.getName(),
+    })
   }
 
   canEditCommandBlock() {
@@ -478,12 +500,15 @@ class Player extends BaseEntity {
     this.resumeTime = Date.now()
 
     this.joinTimestamp = this.game.timestamp
+    this.prefixesList = {}
 
     if (data.name) {
       this.name = data.name
     } else {
       this.name = this.sanitize(data.username)
     }
+
+    if (this.game.arrowList) {this.game.arrowList[this.name] = {}}
 
     if (data.uid) {
       this.uid = data.uid
@@ -714,11 +739,27 @@ class Player extends BaseEntity {
     })
   }
 
-  toggleFly() {
-    this.isFlying = !this.isFlying
-    let message = this.isFlying ? "Flying mode enabled" : "Flying mode disabled"
+  toggleFly(currState) {
+    
+    let nextState = currState
+    let prevState = this.isFlying
 
-    this.showError(message, { isSuccess: true, fontSize: 36 })
+    if (nextState == null) {
+      nextState = !this.isFlying
+    } else {
+      if (nextState == "true") {
+        nextState = true
+      } else {
+        nextState = false
+      }
+    }
+
+    if (prevState !== nextState) {
+      this.isFlying = nextState
+      let message = this.isFlying ? "Flying mode enabled" : "Flying mode disabled"
+
+      this.showError(message, { isSuccess: true, fontSize: 36 })
+    }
   }
 
   onRoleAssigned() {
@@ -752,7 +793,7 @@ class Player extends BaseEntity {
       this.tutorialIndex["main"] = 1
     }
 
-    this.equipBadge("None")
+    this.equipBadge("Default")
 
     this.game.sendToMatchmaker({ event: "PlayerJoin",
       data: {
@@ -1946,8 +1987,14 @@ class Player extends BaseEntity {
         }
       }
 
-      storage.addViewSubscriber(this)
-      this.getSocketUtil().emit(this.socket, "RenderStorage", { id: storage.id, inventory: storage })
+    storage.addViewSubscriber(this)
+    this.getSocketUtil().emit(this.socket, "RenderStorage", {
+      id: storage.id,
+      inventory: storage,
+      progress: typeof storage.getProgressPercentage === "function"
+        ? storage.getProgressPercentage()
+        : 0
+    })
     }
   }
 
@@ -2001,6 +2048,7 @@ class Player extends BaseEntity {
       // can't craft terrains outside of peaceful mode
       return
     }
+
 
     const isSuccess = storage.craft(item, this.inventory.storage)
     if (!isSuccess) return
@@ -2424,6 +2472,7 @@ class Player extends BaseEntity {
     this.fovTileHits = this.sector.fovManager.calculateFov(this)
     this.determineVisiblePlayers()
     this.determineVisibleCorpses()
+    this.determineVisibleMobs()
   }
 
   hasSameViewDistance(player, otherPlayer) {
@@ -2476,6 +2525,28 @@ class Player extends BaseEntity {
     }
   }
 
+  determineVisibleMobs() {
+    let prevVisibleMobs = this.visibleMobs
+
+    let visibleMobs = this.getVisibleMobs()
+
+    // visible before. hidden now.
+    for (let id in prevVisibleMobs) {
+      if (!visibleMobs[id]) {
+        let mob = prevVisibleMobs[id]
+        this.removeVisibleMob(mob)
+      }
+    }
+
+    // hidden before. visible now.
+    for (let id in visibleMobs) {
+      if (!prevVisibleMobs[id]) {
+        let mob = visibleMobs[id]
+        this.addVisibleMob(mob)
+      }
+    }
+  }
+
   determineVisibleCorpses() {
     let prevVisibleCorpses = this.visibleCorpses
 
@@ -2521,6 +2592,16 @@ class Player extends BaseEntity {
     this.onVisiblePlayerRemoved(player)
   }
 
+  addVisibleMob(mob) {
+    this.visibleMobs[mob.getId()] = mob
+    this.onVisibleMobAdded(mob)
+  }
+
+  removeVisibleMob(mob) {
+    delete this.visibleMobs[mob.getId()]
+    this.onVisibleMobRemoved(mob)
+  }
+
   onVisibleCorpseAdded(corpse) {
     corpse.addPlayerViewership(this)
     this.addChangedCorpses(corpse)
@@ -2539,6 +2620,16 @@ class Player extends BaseEntity {
   onVisiblePlayerRemoved(player) {
     player.removePlayerViewership(this)
     this.addRemovedPlayers(player)
+  }
+
+  onVisibleMobAdded(mob) {
+    mob.addPlayerViewership(this)
+    this.addChangedMobs(mob)
+  }
+
+  onVisibleMobRemoved(mob) {
+    mob.removePlayerViewership(this)
+    this.addRemovedMobs(mob)
   }
 
   sendChangedPlayersToClient() {
@@ -2565,6 +2656,18 @@ class Player extends BaseEntity {
     this.clearChangedCorpses()
   }
 
+  sendChangedMobsToClient() {
+    if (Object.keys(this.changedMobs).length > 0) {
+      this.getSocketUtil().emit(this.getSocket(), "EntityUpdated", { mobs: this.changedMobs })
+    }
+
+    if (Object.keys(this.removedMobs).length > 0) {
+      this.getSocketUtil().emit(this.getSocket(), "EntityUpdated", { mobs: this.removedMobs })
+    }
+
+    this.clearChangedMobs()
+  }
+
   clearChangedPlayers() {
     this.changedPlayers = {}
     this.removedPlayers = {}
@@ -2573,6 +2676,11 @@ class Player extends BaseEntity {
   clearChangedCorpses() {
     this.changedCorpses = {}
     this.removedCorpses = {}
+  }
+
+  clearChangedMobs() {
+    this.changedMobs = {}
+    this.removedMobs = {}
   }
 
   addChangedPlayers(entity) {
@@ -2611,6 +2719,24 @@ class Player extends BaseEntity {
     this.sector.addChangedPlayers(this)
   }
 
+  addChangedMobs(entity) {
+    // temp replacement solution for 09af920ee20c8d06ac82d33719aeabb7e5bd824c
+    // maybe remove or fix properly in future
+    if (isNaN(entity.x) || isNaN(entity.y)) return
+
+    this.changedMobs[entity.id] = entity
+    this.sector.addChangedPlayers(this)
+  }
+
+  addRemovedMobs(entity) {
+    // temp replacement solution for 09af920ee20c8d06ac82d33719aeabb7e5bd824c
+    // maybe remove or fix properly in future
+    if (isNaN(entity.x) || isNaN(entity.y)) return
+
+    this.removedMobs[entity.id] = { id: entity.id, clientMustDelete: true }
+    this.sector.addChangedPlayers(this)
+  }
+
   getVisiblePlayers() {
     let visible = {}
 
@@ -2635,6 +2761,22 @@ class Player extends BaseEntity {
       let isVisible = this.calculateEntityVisible(corpse)
       if (isVisible) {
         visible[corpse.getId()] = corpse
+      }
+    }
+
+    return visible
+  }
+
+  getVisibleMobs() {
+    let visible = {}
+
+    let mobs = this.sector.mobTree.search(this.getCameraBoundingBox())
+
+    for (var i = 0; i < mobs.length; i++) {
+      let mob = mobs[i]
+      let isVisible = this.calculateEntityVisible(mob)
+      if (isVisible) {
+        visible[mob.getId()] = mob
       }
     }
 
@@ -2708,15 +2850,16 @@ class Player extends BaseEntity {
   onHitEntity(entity, hit) {
     if (this.isControllingGhost()) return
 
-    if(entity.getType() === Protocol.definition().BuildingType.MiasmaGate) { //miasma gate
+    if (entity.getType() === Protocol.definition().BuildingType.MiasmaGate) {
       this.removeEffect('miasma')
     }
-    // does nothing by default
+
     if (entity.hasCategory("door") && entity.isAutomatic()) {
       if (!this.sector.isTutorial() && !entity.isOwnedBy(this)) return
       if (!entity.isHitPassable(hit)) return
+
       if (!entity.isOpen) {
-        entity.openFor(3000)
+        entity.openFor(3000, this)
       }
     }
   }
@@ -3123,6 +3266,10 @@ class Player extends BaseEntity {
     this.changedCorpses = {}
     this.removedCorpses = {}
 
+    this.visibleMobs = {}
+    this.changedMobs = {}
+    this.removedMobs = {}
+
     this.lastChatTimestamp = 0
     this.screenshotTaken = 0
     this.container = this.sector
@@ -3162,6 +3309,11 @@ class Player extends BaseEntity {
     this.state = 0
     this.experience = 0
     this.score = 0
+  }
+
+  setArrow() {
+    this.arrowList = JSON.stringify(this.game.playerArrows[this.name])
+    this.onStateChanged("arrowList")
   }
 
   getTurnSpeed() {
@@ -3218,6 +3370,8 @@ class Player extends BaseEntity {
   }
 
   onPressKeyChanged(pressedKey) {
+    if (!pressedKey) return
+
     let char = String.fromCharCode(pressedKey).toLowerCase()
 
     this.game.triggerEvent("PlayerKeyboard", {
@@ -3873,15 +4027,15 @@ class Player extends BaseEntity {
   }
 
   consumeRage() {
-    const isFiveSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * 5) === 0
-    if (!isFiveSecondInterval) return
+    const isOneSecondInterval = this.game.timestamp % Constants.physicsTimeStep === 0
+    if (!isOneSecondInterval) return
 
     if (!this.hasEffect("rage")) return
 
     let effectDuration = this.game.timestamp - this.getEffectCreatedAt("rage")
     let effectDurationInSeconds = Math.floor(effectDuration / Constants.physicsTimeStep)
 
-    if (effectDurationInSeconds >= 60) {
+    if (effectDurationInSeconds >= this.getEffectDuration("rage")) {
       this.removeRage()
     }
   }
@@ -4063,7 +4217,6 @@ class Player extends BaseEntity {
 
     if (this.itemSwitchAllowActionTime) {
       if (currentTime > this.itemSwitchAllowActionTime) {
-        // seconds delay after switching weapons
         this.itemSwitchAllowActionTime = null
         return true
       } else {
@@ -4488,7 +4641,7 @@ class Player extends BaseEntity {
     message = i18n.t(this.locale, message)
     options.message = message
     this.getSocketUtil().emit(this.getSocket(), "ErrorMessage", options)
-  }
+  } 
 
   showChatError(message) {
     this.getSocketUtil().emit(this.getSocket(), "ServerChat", { message: "%error%" + message })
@@ -4999,8 +5152,9 @@ class Player extends BaseEntity {
   }
 
   setScore(amount) {
+    let prevScore = this.score
     this.score = amount
-    this.onScoreChanged()
+    this.onScoreChanged(prevScore, this.score)
   }
 
   increaseScore(amount) {
@@ -5480,7 +5634,15 @@ class Player extends BaseEntity {
     const oldItem = this.inventory.get(prevIndex)
     const item = this.inventory.get(newIndex)
     if (oldItem && oldItem.isFireArmOrThrowableOrMelee()) {
-      this.itemSwitchAllowActionTime = this.lastActionTime + oldItem.getCooldownInMilliseconds()
+      const newActionTime = this.lastActionTime + oldItem.getCooldownInMilliseconds()
+      if (this.sector.getSetting("isOverclockEnabled")) {
+        this.itemSwitchAllowActionTime = newActionTime
+      } else {
+        this.itemSwitchAllowActionTime = Math.max(
+          this.itemSwitchAllowActionTime || 0,
+          newActionTime
+        )
+      }
     }
     this.setHandEquipment(item)
   }
@@ -5645,14 +5807,14 @@ getMaxSpeed() {
 
       if (data.isGlobal) {
         LOG.info("globalchat> " + this.name + ": " + message)
-        let data = { username: this.name, message: message }
+        let data = { username: this.name, message: message, prefixesList:JSON.stringify(this.game.playerChatPrefixes||{})}
         if (this.isLoggedIn()) {
           data.uid = this.getUid()
         }
         this.game.sendToMatchmaker({ event: "GlobalClientChat", data: data })
       } else {
         LOG.info("[" + this.game.getSectorUid() + "] chat> " + this.name + ": " + message)
-        let data = { playerId: this.id, message: message, username: this.name, isTeam: isTeamChat }
+        let data = { playerId: this.id, message: message, username: this.name, isTeam: isTeamChat,prefixesList:JSON.stringify(this.game.playerChatPrefixes||{})}
         if (this.isLoggedIn()) {
           data.uid = this.getUid()
         }
@@ -5967,6 +6129,15 @@ getMaxSpeed() {
     this.changedRooms = {}
   }
 
+  ping(id) {
+    let data = {
+      playerId: this.getId(),
+      player: this.getName(),
+      pingId: parseInt(id)
+    }
+    this.game.triggerEvent("PlayerPinged", data)
+  }
+
 }
 Object.assign(Player.prototype, Upgradable.prototype)
 Object.assign(Player.prototype, PlayerCommon.prototype, {
@@ -6124,7 +6295,7 @@ Object.assign(Player.prototype, Destroyable.prototype, {
     {
       this.removePendingItem()
     }
-
+    
     this.getSocketUtil().broadcast(this.game.getSocketIds(), "PlayerDestroyed", { id: this.id, canRespawn: this.canRespawn(), restartCooldown: this.getRespawnCooldown()  })
     EventBus.dispatch(`${this.game.getId()}:entity:died:${this.getId()}`, this)
 

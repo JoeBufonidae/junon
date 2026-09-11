@@ -42,7 +42,8 @@ class PowerNetwork extends ProducerConsumerNetwork {
   storePower(producer) {
     let storage
 
-    if (producer.entity.hasCategory("power_storage") && !producer.entity.isResourceFull("power")) {
+    if ((producer.entity.hasCategory("power_storage") && !producer.entity.isResourceFull("power")) ||
+      (this.getGame().isNight && producer.entity.getTypeName() === "SolarPanel")) {
       storage = producer
       // should only select batteries
       //   storage = Object.values(this.storages).find((storage) => {

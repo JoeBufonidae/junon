@@ -5,9 +5,11 @@ const Protocol = require('../../common/util/protocol')
 class Timer extends BaseCommand {
   getUsage() {
     return [
+      "Manages timers",
       "/timer list",
-      "/timer start [name] [duration]",
-      "/timer stop [name]"
+      "/timer start [name] [duration] [tick]",
+      "/timer stop [name]",
+      "ex: /timer start Intermission 15 1"
     ]
   }
   
@@ -22,14 +24,14 @@ class Timer extends BaseCommand {
     switch(subcommand) {
       case "list":
         let result = Object.values(this.game.timers).map((timer) => {
-          return `${timer.name} duration: ${timer.duration} tick: ${timer.tick}\n`
+          return `${timer.name} Duration: ${timer.duration} Tick: ${timer.tick} Every: ${timer.every}\n`
         })
         if (!result) {
           caller.showChatSuccess("No timers")
         } else {
           caller.showChatSuccess(result)
         }
-
+ 
         break
 
       case "start":
@@ -41,18 +43,20 @@ class Timer extends BaseCommand {
           return
         }
 
-        let duration = parseInt(args[2])
+        let duration = parseFloat(args[2])
         if (isNaN(duration) || duration < 0) {
           caller.showChatError("invalid duration")
           return
         }
+        let tick = parseFloat(args[3]) || 1
 
         this.game.addTimer({
           name: name,
-          duration: duration
+          duration: duration,
+          every: tick,
         })
 
-        caller.showChatSuccess("Timer " + name + " started. duration: " + duration + "s")
+        caller.showChatSuccess("Timer " + name + " started. Duration: " + duration + "s. Every: "+(tick))
         break
 
       case "stop":

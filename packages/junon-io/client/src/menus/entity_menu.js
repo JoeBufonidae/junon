@@ -326,7 +326,8 @@ class EntityMenu extends BaseMenu {
 
       SocketUtil.emit("ButtonClick", { 
         name: button.dataset.name,
-        entityId: this.selectedEntity && this.selectedEntity.id
+        entityId: this.selectedEntity && this.selectedEntity.id,
+        entityName: this.selectedEntity.name
       })
 
       switch(button.dataset.action) {
@@ -400,6 +401,7 @@ class EntityMenu extends BaseMenu {
     }
     
     this.el.querySelector(".entity_action").innerHTML = "" // reset
+    this.el.querySelector('.entity_color').innerText = ""
 
     
     if (this.game.shouldShowDebugDetails()) {
@@ -425,7 +427,8 @@ class EntityMenu extends BaseMenu {
       const isFloorOrWall = entity.hasCategory && (entity.hasCategory('platform') || entity.hasCategory('wall') || entity.hasCategory('custom_colors'))
 
       if (isFloorOrWall && entity.data && entity.data.colorIndex > 37) {
-        this.el.querySelector('.entity_color').innerText = ClientHelper.toHex(entity.data.colorIndex - 38)
+        this.el.querySelector(".debug_container").style.display = 'block'
+        this.el.querySelector('.entity_color').innerText = "color: " + ClientHelper.toHex(entity.data.colorIndex - 38)
       }
     }
 

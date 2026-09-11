@@ -266,15 +266,33 @@ enum BuildingType {
   MiasmaGate = 272;
   CabbageSeed = 273;
   Cabbage = 274;
-  FrameArmor = 275;
-  SuitWorkstation = 276;
-  SpeedAttachment = 277;
-  ArmorBoostAttachment = 278;
-  HealthBoostAttachment = 279;
-  MeleeSpeedAttachment = 280;
-  KnockbackAttachment = 281;
-  MeleeDamageAttachment = 282;
-  SuitReconstructor = 283;
+  Ak47 = 275;
+  BoltActionRifle = 276;
+  GrenadeLauncher = 277;
+  Minigun = 278;
+  Uzi = 279;
+  SmallAirlock = 280;
+  HeavyRifle = 281;
+  ShockGrenade = 282;
+  Bayonet = 283;
+  Kukri = 284;
+  SmallWoodTable = 285;
+  LowWall = 286;
+  NeonSign = 287;
+  CircuitBoardPrinter = 288;
+  Window = 289;
+  ArmoredWindow = 290;
+  Revitalizer = 291;
+  Dispenser = 292;
+  FrameArmor = 293;
+  SuitWorkstation = 294;
+  SpeedAttachment = 295;
+  ArmorBoostAttachment = 296;
+  HealthBoostAttachment = 297;
+  MeleeSpeedAttachment = 298;
+  KnockbackAttachment = 299;
+  MeleeDamageAttachment = 300;
+  SuitReconstructor = 301;
 }
 
 enum TerrainType {
@@ -325,6 +343,9 @@ enum ProjectileType {
   BlueLaser = 26;
   Dynamite = 27;
   MiningExplosion = 28;
+  MinigunBullet = 29;
+  ShockGrenade = 30;
+  Shockwave = 31;
 }
 
 enum MobStatus {

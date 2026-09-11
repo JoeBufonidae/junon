@@ -4,7 +4,8 @@ class SetStatus extends BaseCommand {
     getUsage() {
         return [
             "Sets this sector's visibility to public or private",
-            "/setstatus [public/private]"
+            "/setstatus [public/private]",
+            "ex: /setstatus public"
         ]
     }
 
@@ -15,7 +16,8 @@ class SetStatus extends BaseCommand {
     perform(caller, args) {
         let status = args[0]
 
-        if(!caller || !caller.isPlayer()) return
+        // if(!caller || !caller.isPlayer()) return
+        // Commented cuz of didn't work in command block and useless
 
         if(status == "public") {
             caller.sector.setIsPrivate(false)

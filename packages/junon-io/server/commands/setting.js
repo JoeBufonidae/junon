@@ -5,9 +5,10 @@ const Protocol = require('../../common/util/protocol')
 class Setting extends BaseCommand {
   getUsage() {
     return [
+      "Configures the settings of the colony",
       "/setting [key] [value]",
-      "i.e. /setting isChatEnabled false",
-      "Guide: https://pastebin.com/raw/4jsmPjws"
+     "Guide: https://pastebin.com/raw/4jsmPjws",
+      "ex: /setting isChatEnabled false",
     ]
   }
 
@@ -37,6 +38,17 @@ class Setting extends BaseCommand {
       if (value > 0 && value <= 5) {
         this.sector.setMiningSpeed(value)
         player.showChatSuccess("miningSpeed set to " + value)
+      }
+      return
+    }
+
+    if (key === 'lighting') {
+      value = parseInt(value)
+      if (value > 50 && value <= 100) {
+        this.game.isLightingCustom = value
+        player.showChatSuccess("lighting set to " + value)
+      } else {
+        this.game.isLightingCustom = 0
       }
       return
     }

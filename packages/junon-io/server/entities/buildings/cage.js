@@ -6,7 +6,7 @@ class Cage extends Wall {
   updateRoom() {
     // dont
   }
-
+  //maybe this ^ or this ↓ will fix mobs not shooting into other rooms through cages
   partitionRoom() {
     // dont
   }
@@ -17,6 +17,10 @@ class Cage extends Wall {
     }
 
     return this.isOwnedBy(player)
+  }
+
+  isPenetrable() {
+    return true
   }
 
   getConstantsTable() {

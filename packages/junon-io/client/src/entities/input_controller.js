@@ -265,6 +265,7 @@ class InputController {
 
     let keyCode = ClientHelper.getKeycode(event)
     delete this.heldKeys[keyCode]
+    this.pressedKey = 0
 
     if (this.isFocusedOnInput(event)) return
 
