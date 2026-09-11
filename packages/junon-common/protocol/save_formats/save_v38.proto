@@ -199,7 +199,6 @@ message Item {
   uint32 count = 3;
   uint32 index = 4;
   ItemInstance instance = 5;
-  repeated AttachmentData attachmentData = 6;
 }
 
 message Pickup {
@@ -207,12 +206,6 @@ message Pickup {
   Item item = 2;
   uint32 x = 3;
   uint32 y = 4;
-}
-
-message AttachmentData {
-  uint32 id = 1;
-  uint32 type = 2;
-  uint32 tier = 3;
 }
 
 message ItemInstance {
@@ -343,6 +336,7 @@ message Player {
   uint32 gold = 23;
   uint32 roleType = 24;
   uint32 score = 25;
+}
 
 message PlayerData {
   string uid = 1;
