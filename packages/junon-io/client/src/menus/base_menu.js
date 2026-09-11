@@ -47,13 +47,19 @@ class BaseMenu {
   initInventorySlotListener(el) {
     if (this.game.main.isMobile) {
       el.addEventListener("touchstart", this.onInventoryTouchStart.bind(this), true)
-      el.addEventListener("touchmove", this.onInventoryTouchMove.bind(this), true)
-      el.addEventListener("touchend", this.onInventoryTouchEnd.bind(this), true)
+
+      if (el.dataset.displaySlot !== "true") {
+        el.addEventListener("touchmove", this.onInventoryTouchMove.bind(this), true)
+        el.addEventListener("touchend", this.onInventoryTouchEnd.bind(this), true)
+      }
     } else {
       el.addEventListener("mouseover", this.onInventoryMouseover.bind(this), true)
       el.addEventListener("mouseout", this.onInventoryMouseout.bind(this), true)
-      el.addEventListener("mousedown", this.onInventoryMouseDown.bind(this), true)
-      el.addEventListener("mouseup", this.onInventoryMouseUp.bind(this), true)
+
+      if (el.dataset.displaySlot !== "true") {
+        el.addEventListener("mousedown", this.onInventoryMouseDown.bind(this), true)
+        el.addEventListener("mouseup", this.onInventoryMouseUp.bind(this), true)
+      }
     }
   }
 
@@ -544,7 +550,13 @@ class BaseMenu {
     if (!storageEl) return
 
     Array.from(storageEl.querySelectorAll(".inventory_slot")).forEach((inventorySlot) => {
-      let isNotDraggableMirror = inventorySlot.className.indexOf("draggable-mirror") === -1
+      if (inventorySlot.dataset.installedAttachment === "true") {
+        return
+      }//in the future make this more generic
+
+      let isNotDraggableMirror =
+        inventorySlot.className.indexOf("draggable-mirror") === -1
+
       if (isNotDraggableMirror) {
         this.game.resetInventorySlot(inventorySlot)
       }

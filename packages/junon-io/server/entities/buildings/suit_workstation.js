@@ -1,4 +1,5 @@
 const BaseProcessor = require("./base_processor")
+const BaseBuilding = require("./base_building")
 const Protocol = require('../../../common/util/protocol')
 const Attachments = require("./../equipments/armor/attachments")
 const Constants = require('../../../common/constants')
@@ -17,39 +18,60 @@ class SuitWorkstation extends BaseProcessor {
     return Protocol.definition().BuildingType.SuitWorkstation
   }
 
+  startProcessing(action) {
+    if (this.isProcessing) return false
+    if (!this.isProcessable()) return false
+
+    this.progress = 0
+    this.processingAction = action
+    this.addProcessor()
+
+    return true
+  }
+
   onStorageChanged(item, index) {
-    super.onStorageChanged(item, index)
+    BaseBuilding.prototype.onStorageChanged.call(this, item, index)
 
     this.setBuildingContent(this.getStorageContentType())
   }
 
-  getStorageContentType() {
-    const outputIndex = (typeof this.getOutputStorageIndex === "function")
-      ? this.getOutputStorageIndex()
-      : 3
+getStorageContentType() {
+  const armor = this.get(0)
+  const attachment = this.get(1)
 
-    const armor = this.get(outputIndex) || this.get(0)
-    const attachment = this.get(1)
+  if (!armor && !attachment) return ""
 
-    // Nothing in the workstation
-    if (!armor && !attachment) return ""
+  const armorType = armor ? armor.type.toString() : ""
+  const suitColor = armor && armor.instance ? armor.instance.content : ""
+  const color = suitColor || ""
+  const attachmentType = attachment ? attachment.getType().toString() : ""
 
-    const armorType = armor
-      ? armor.type.toString()
-      : ""
+  let installedAttachments = ""
 
-    const suitColor = armor && armor.instance
-      ? armor.instance.content
-      : ""
+  if (
+    armor &&
+    armor.instance &&
+    Array.isArray(armor.instance.attachments)
+  ) {
+    installedAttachments = armor.instance.attachments
+      .map(attachment => {
+        if (typeof attachment.getType === "function") {
+          return attachment.getType()
+        }
 
-    const color = suitColor || ""
-
-    const attachmentType = attachment
-      ? attachment.getType().toString()
-      : ""
-
-    return [armorType, color, attachmentType].join(":")
+        return attachment.type || attachment.id
+      })
+      .filter(type => type !== undefined && type !== null)
+      .join(",")
   }
+
+  return [
+    armorType,
+    color,
+    attachmentType,
+    installedAttachments
+  ].join(":")
+}
 
   // Helper to get item in slot
   getInputSlot(index) {
@@ -75,26 +97,42 @@ class SuitWorkstation extends BaseProcessor {
 
     this.progress = 0
 
+    const inputItems = this.getInputItems(this.getInputStorageIndices())
     const outputItem = this.createOutputItem()
-    if (outputItem) {
-      this.storeAt(this.getOutputStorageIndex(), outputItem)
-      
-      // Consume the input items
-      const inputItems = this.getInputItems(this.getInputStorageIndices())
-      if (inputItems[0]) inputItems[0].consume()
-      if (inputItems[1]) inputItems[1].consume()
-      const attData = Attachments.forType(inputItems[1].getType())
-      if (attData && attData.tier >= 4 && inputItems[2]) {
-        inputItems[2].consume()
-      }
+
+    if (!outputItem) return
+
+    const attachmentType = inputItems[1]
+      ? inputItems[1].getType()
+      : null
+
+    const attData = attachmentType
+      ? Attachments.forType(attachmentType)
+      : null
+
+    // Consume inputs FIRST
+    if (inputItems[0]) inputItems[0].consume()
+    if (inputItems[1]) inputItems[1].consume()
+
+    if (attData && attData.tier >= 4 && inputItems[2]) {
+      inputItems[2].consume()
     }
+
+    // Put completed armor into the normal suit slot
+    this.storeAt(0, outputItem)
   }
 
   executeTurn() {
-    const isThreeSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * 3) === 0
-    if (!isThreeSecondInterval) return
+    const isOneSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * 1) === 0
+    if (!isOneSecondInterval) return
 
     this.increaseProgress()
+  }
+
+  interact(player, action) {
+    if (action === "add") {
+      this.startProcessing("add")
+    }
   }
 
   // Validation logic
@@ -102,23 +140,36 @@ class SuitWorkstation extends BaseProcessor {
     const inputItems = this.getInputItems(this.getInputStorageIndices())
     const armor = inputItems[0]
     const attachment = inputItems[1]
-    
+
     if (!armor || !attachment) return false
-    if (!armor.isArmor) return false
-    if (typeof armor.isArmor !== 'function') return false
+    if (typeof armor.isArmor !== "function") return false
     if (!armor.isArmor()) return false
-    
-    // Ensure attachments is initialized
-    if (!Array.isArray(armor.attachments)) armor.attachments = []
+
+    const armorInstance = armor.instance
+    if (!armorInstance) return false
+
+    if (!Array.isArray(armorInstance.attachments)) {
+      armorInstance.attachments = []
+    }
 
     const klass = armor.getKlass(armor.type)
     const constants = klass.prototype.getConstants()
-    const maxSlots = constants.attachmentSlots
-    if (armor.attachments.length >= maxSlots) return false
+    const maxSlots = constants.attachmentSlots || 0
 
-    const attData = Attachments.forType(attachment.getType())
-    if (!attData) return false
-    if (armor.attachments.find(a => a.getType() === attachment.getType())) return false
+    if (armorInstance.attachments.length >= maxSlots) return false
+
+    if (
+      armorInstance.attachments.find(
+        a => a.getType() === attachment.getType()
+      )
+    ) {
+      return false
+    }
+
+    if (!attachment.isAttachment()) return false
+
+    return true
+  }
     /*
     // Magnet requirement for high tier
     const attTier = attData.tier || 1
@@ -126,9 +177,6 @@ class SuitWorkstation extends BaseProcessor {
       if (!magnet || magnet.tier < attTier) return false
     }
     */
-    return true
-  }
-
   canStoreInBuilding(index, item) {
     if (!item) return true // Allow removing items)
     if (index === 0) {
@@ -171,6 +219,7 @@ class SuitWorkstation extends BaseProcessor {
     const inputItems = this.getInputItems(this.getInputStorageIndices())
     const armorItem = inputItems[0]
     const attachmentItem = inputItems[1]
+
     if (!armorItem || !attachmentItem) return null
 
     const armorInstance = armorItem.instance
@@ -180,41 +229,50 @@ class SuitWorkstation extends BaseProcessor {
     if (!AttachmentKlass) return null
 
     const attachmentType = attachmentItem.getType()
+
     const attWrapper = {
       id: attachmentType,
       type: attachmentType,
       getType: () => attachmentType,
-      getName: () => (attachmentItem.getTypeName ? attachmentItem.getTypeName() : ""),
-      tier: AttachmentKlass.tier || (AttachmentKlass.prototype && AttachmentKlass.prototype.tier) || 1,
-      modifiers: (AttachmentKlass.prototype && AttachmentKlass.prototype.modifiers) || {},
+      getName: () =>
+        attachmentItem.getTypeName
+          ? attachmentItem.getTypeName()
+          : "",
+      tier:
+        AttachmentKlass.tier ||
+        (AttachmentKlass.prototype && AttachmentKlass.prototype.tier) ||
+        1,
+      modifiers:
+        (AttachmentKlass.prototype && AttachmentKlass.prototype.modifiers) || {},
       isAttachment: () => true,
+
       applyEffect(player) {
         return AttachmentKlass.prototype.applyEffect.call(this, player)
       },
+
       removeEffect(player) {
         return AttachmentKlass.prototype.removeEffect.call(this, player)
       }
     }
 
-    // Clone the item and its equipment instance so consuming the input won't zero the output
     const newItem = Object.create(Object.getPrototypeOf(armorItem))
     Object.assign(newItem, armorItem)
     newItem.count = 1
-    newItem.attachmentData = [{
-      id: attachmentType,
-      type: attachmentType,
-      tier: AttachmentKlass.tier || (AttachmentKlass.prototype && AttachmentKlass.prototype.tier) || 1
-    }]
 
     const newInstance = Object.create(Object.getPrototypeOf(armorInstance))
     Object.assign(newInstance, armorInstance)
-    newInstance.attachments = Array.isArray(armorInstance.attachments) ? armorInstance.attachments.slice() : []
+
+    newInstance.attachments = Array.isArray(armorInstance.attachments)
+      ? armorInstance.attachments.slice()
+      : []
+
     if (typeof newInstance.addAttachment === "function") {
       newInstance.addAttachment(attWrapper)
     } else {
       newInstance.attachments.push(attWrapper)
     }
-    if (typeof newInstance.updateStatsFromAttachments === 'function') {
+
+    if (typeof newInstance.updateStatsFromAttachments === "function") {
       newInstance.updateStatsFromAttachments()
     }
 

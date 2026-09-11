@@ -6334,12 +6334,12 @@
     "SuitWorkstation": {
       "parent": "Buildings.BaseProcessor",
       "width": 64,
-      "height": 128,
+      "height": 192,
       "hasMenu": true,
       "storageCount": 4,
       "categories": {"producer": true},
       "isInteractable": true,
-      "menuDescription": "Adds attachments to suits.",
+      "menuDescription": "Add/remove attachments from suits.",
       "requirements": {
         "IronBar": 30,
         "CircuitBoard": 10,
@@ -6357,7 +6357,7 @@
         "health": "+25",
         "count": "+25"
       },
-      "description": "Adds attachments to suits"
+      "description": "Add and remove attachments from suits"
     },
     "SuitReconstructor": {
       "parent": "Buildings.BaseProcessor",

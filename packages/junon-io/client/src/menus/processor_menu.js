@@ -128,7 +128,10 @@ class ProcessorMenu extends BaseMenu {
     storageDiv.dataset.storageId = ""
     this.storageId = null
 
-    Array.from(this.el.querySelectorAll(".inventory_slot")).forEach(slot => {
+    Array.from(this.el.querySelectorAll(".processor_storage .inventory_slot")).forEach(slot => {
+      if (slot.dataset.displaySlot === "true") return
+      if (!slot.querySelector("img")) return
+
       this.game.resetInventorySlot(slot)
     })
 

@@ -254,7 +254,7 @@ class Game {
     this.friendRequestMenu = new Menus.FriendRequestMenu(this, document.querySelector("#friend_request_menu"))
     this.badgeMenu = new Menus.BadgeMenu(this, document.querySelector("#badge_menu"))
     this.attachmentMenu = new Menus.AttachmentMenu(this, document.querySelector("#attachment_menu"))
-
+    this.suitWorkstationMenu = new Menus.SuitWorkstationMenu(this, document.querySelector("#processor_menu"))
 
     this.visitColonyMenu = this.main.gameExplorer
 
@@ -390,7 +390,7 @@ class Game {
     const dragDelay = 150
 
     const draggable = new Draggable(containers, {
-      draggable: '.inventory_slot',
+      draggable: '.inventory_slot:not([data-display-slot="true"])',
       delay: dragDelay,
       placedTimeout: 100
     })

@@ -1,8 +1,10 @@
 const BaseBuilding = require("./base_building")
+const SocketUtil = require("./../../util/socket_util")
 const Protocol = require("./../../../../common/util/protocol")
 const Constants = require("./../../../../common/constants.json")
 const Equipments = require("./../equipments/index")
 const Attachments = require("./../equipments/armor/attachments")
+
 
 class SuitWorkstation extends BaseBuilding {
   constructor(game, data, isEquipDisplay) {
@@ -38,19 +40,19 @@ class SuitWorkstation extends BaseBuilding {
     this.armorEquipContainer = new PIXI.Container()
     this.armorEquipContainer.name = "ArmorEquipment"
     this.armorEquipContainer.pivot.x = Constants.tileSize / 2
-    this.armorEquipContainer.pivot.y = Constants.tileSize / 2 - 28
+    this.armorEquipContainer.pivot.y = Constants.tileSize / 2 + 5
     this.armorEquipContainer.rotation = Math.PI
-    this.armorEquipContainer.scale.x = 3.0
-    this.armorEquipContainer.scale.y = 3.0
+    this.armorEquipContainer.scale.x = 1.8
+    this.armorEquipContainer.scale.y = 1.8
     sprite.addChild(this.armorEquipContainer)
 
     this.attachmentContainer = new PIXI.Container()
     this.attachmentContainer.name = "Attachment"
-    this.attachmentContainer.pivot.x = Constants.tileSize / 2 + 35
-    this.attachmentContainer.pivot.y = Constants.tileSize / 2 - 25
+    this.attachmentContainer.pivot.x = Constants.tileSize / 2 + 37
+    this.attachmentContainer.pivot.y = Constants.tileSize / 2 - 65
     this.attachmentContainer.rotation = 90 * Math.PI
-    this.attachmentContainer.scale.x = 2.5
-    this.attachmentContainer.scale.y = 2.5
+    this.attachmentContainer.scale.x = 1.8
+    this.attachmentContainer.scale.y = 1.8
     sprite.addChild(this.attachmentContainer)
 
 
@@ -65,27 +67,63 @@ class SuitWorkstation extends BaseBuilding {
     return [0, 3]
   }
 
+  openMenu() {
+    this.game.suitWorkstationMenu.open(this)
+  }
+  
+  updateStorageInventory(data) {
+    super.updateStorageInventory(data)
+
+    if (this.game.suitWorkstationMenu) {
+      const armor = this.storage && this.storage[0]
+
+      if (
+        armor &&
+        armor.instance &&
+        Array.isArray(armor.instance.attachments)
+      ) {
+        const types = armor.instance.attachments
+          .map(attachment => {
+            if (typeof attachment.getType === "function") {
+              return attachment.getType()
+            }
+
+            return attachment.type || attachment.id
+          })
+          .filter(type => type !== undefined && type !== null)
+
+        this.game.suitWorkstationMenu.updateInstalledAttachments(types)
+      }
+    }
+  }
+
   onContentChanged() {
-    // Remove existing armor
     if (this.armor) {
       this.armor.remove()
       this.armor = null
     }
 
-    // Remove existing attachment
     if (this.attachment) {
       this.attachment.remove()
       this.attachment = null
     }
 
-    if (!this.content) return
+    if (!this.content) {
+      if (this.game.suitWorkstationMenu) {
+        this.game.suitWorkstationMenu.updateInstalledAttachments([])
+      }
+      return
+    }
 
     const parts = this.content.split(":")
     const suitType = parts[0]
     const color = parts[1]
     const attachmentType = parts[2]
+    const installedAttachmentTypes =
+      parts.length > 3 && parts[3]
+        ? parts[3].split(",").filter(Boolean)
+        : []
 
-    // Build armor if one exists
     if (suitType) {
       const armorData = {
         x: 0,
@@ -96,10 +134,12 @@ class SuitWorkstation extends BaseBuilding {
         }
       }
 
-      this.armor = Equipments.forType(suitType).build(this.game, armorData)
+      this.armor = Equipments.forType(suitType).build(
+        this.game,
+        armorData
+      )
     }
 
-    // Build attachment if one exists
     if (attachmentType) {
       const attachmentData = {
         x: 0,
@@ -111,26 +151,53 @@ class SuitWorkstation extends BaseBuilding {
         .forType(attachmentType)
         .build(this.game, attachmentData)
     }
+
+    if (this.game.suitWorkstationMenu) {
+      this.game.suitWorkstationMenu.updateInstalledAttachments(
+        installedAttachmentTypes
+      )
+    }
   }
 
-  openMenu() {
-    let options = {}
-    this.game.processorMenu.open(
-      "Suit Workstation",
-      this,
-      this.getMenuDescription(),
-      false,
-      "",
-      options
-    )
+  getStorageContentType() {
+    const outputIndex = (typeof this.getOutputStorageIndex === "function")
+      ? this.getOutputStorageIndex()
+      : 3
+
+    const armor = this.get(0)
+    const attachment = this.get(1)
+
+    if (!armor && !attachment) return ""
+
+    const armorType = armor ? armor.type.toString() : ""
+    const suitColor = armor && armor.instance
+      ? armor.instance.content
+      : ""
+
+    const color = suitColor || ""
+    const attachmentType = attachment
+      ? attachment.getType().toString()
+      : ""
+
+    let installedAttachments = ""
+
+    if (armor && Array.isArray(armor.attachments)) {
+      installedAttachments = armor.attachments.map(attachment => {
+        if (typeof attachment.getType === "function") {
+          return attachment.getType()
+        }
+
+        return attachment.type || attachment.id
+      }).filter(type => type !== undefined && type !== null).join(",")
+    }
+
+    return [armorType, color, attachmentType, installedAttachments].join(":")
   }
 
   onPostEquip() {
-    // Listen for alteration success
     this.game.socketUtil.on("SuitAlterationSuccess", (data) => {
       if (data.armorId) {
         this.game.showNotification("Suit alteration successful!")
-        // Optionally update local armor data
       }
     })
   }

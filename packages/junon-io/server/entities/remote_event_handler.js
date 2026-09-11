@@ -408,6 +408,14 @@ class RemoteEventHandler {
       name: data.name
     })
   }
+  onSuitWorkstationAction(player, data, socket) {
+    const workstation = player.game.getEntity(data.entityId)
+
+    if (!workstation) return
+    if (workstation.getType() !== Protocol.definition().BuildingType.SuitWorkstation) return
+
+    workstation.startProcessing(data.action)
+  }
   onEditTexture(player, data, socket) {
     let item = player.game.getEntity(data.entityId)
     if (item) {
