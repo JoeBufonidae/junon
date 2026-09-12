@@ -97,8 +97,9 @@ class SuitStation extends BaseBuilding {
   }
 
   isOxygenItem(item) {
-    if (!item) return false
-    return item.instance && item.instance.hasOxygen()
+    if (!item || !item.instance) return false
+    if (typeof item.instance.hasOxygen !== "function") return false
+    return item.instance.hasOxygen()
   }
 
   getConstantsTable() {
