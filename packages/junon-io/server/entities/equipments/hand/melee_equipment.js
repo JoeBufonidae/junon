@@ -139,8 +139,13 @@ class MeleeEquipment extends HandEquipment {
     })
 
     if (knockback <= 0) return
-    if (typeof target.enableCustomVelocity !== "function" || typeof target.applyForce !== "function") return
+    //if (typeof target.enableCustomVelocity !== "function" || typeof target.applyForce !== "function") return
+    if (typeof target.applyForce !== "function") return
 
+    if (target.constructor.name !== "Player") {
+      knockback *= 0.5
+    }
+    
     target.enableCustomVelocity()
 
     const dx = target.getX() - attacker.getX()
@@ -150,6 +155,15 @@ class MeleeEquipment extends HandEquipment {
     const x = dx === 0 && dy === 0 ? knockback : (dx / distance) * knockback
     const y = dx === 0 && dy === 0 ? 0 : (dy / distance) * knockback
 
+
+    console.log(
+  "KNOCKBACK",
+  "attacker:", attacker.getX(), attacker.getY(),
+  "target:", target.getX(), target.getY(),
+  "force:", x, y,
+  "target velocity:", target.body.velocity[0], target.body.velocity[1]
+)
+    target.isKnockedBack = true
     target.applyForce([x, y])
   }
 

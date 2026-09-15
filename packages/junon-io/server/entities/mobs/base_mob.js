@@ -1007,18 +1007,6 @@ this.setNameColor(data.nameColor)
     return true
   }
 
-  applyKnockBackVelocity() {
-    if (this.shouldKnockBack) {
-      this.body.velocity[0] = -this.direction * this.getSpeed() // knockback
-    } else {
-      this.body.velocity[0] = this.direction * this.getSpeed()
-    }
-
-    if (this.shouldKnockBack && this.isOnGround) {
-      this.shouldKnockBack = false // landed, so reset knockback
-    }
-  }
-
   ensureNoOverlap() {
     const collidedMobs = this.sector.mobTree.search(this)
     collidedMobs.forEach((mob) => {
@@ -1639,18 +1627,21 @@ this.setNameColor(data.nameColor)
       return
     }
 
-    if (this.isCustomVelocity) {
-      this.body.velocity[0] = 0
-      this.body.velocity[1] = 0
-      return
-    }
+    // if (this.isCustomVelocity) {
+    //   this.body.velocity[0] = 0
+    //   this.body.velocity[1] = 0
+    //   // return
+    // }
 
     if (this.attackTarget) { // stop immediately when already attacking
       let targetRadian = Math.atan2(this.attackTarget.getY() - targetEntityToMove.getY(), this.attackTarget.getX() - targetEntityToMove.getX())
 
       targetEntityToMove.steerTowardsAngle(targetRadian)
 
-      targetEntityToMove.stopMoving()
+      // Only stop normal movement when there is no active knockback.
+      if (vec2.len(targetEntityToMove.body.force) < 0.1) {
+        targetEntityToMove.stopMoving()
+      }
 
       return
     }
@@ -1756,6 +1747,11 @@ this.setNameColor(data.nameColor)
     targetEntityToMove.steerTowardsAngle(radian)
 
     let arriveForce = this.getForceFromAngle(radian)
+
+    if (targetEntityToMove.isKnockedBack) {
+      vec2.scale(arriveForce, arriveForce, 0.5)
+    }
+
     targetEntityToMove.applyForce(arriveForce)
 
     if (Math.random() < 0.3) {

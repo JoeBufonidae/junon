@@ -37,6 +37,7 @@ class BaseEntity extends BaseTransientEntity {
     this.changedAttributes = {}
 
     this.onMoveListeners = []
+    this.isKnockedBack = false
 
   }
 
@@ -1137,9 +1138,10 @@ class BaseEntity extends BaseTransientEntity {
   }
 
   decreaseForce() {
-    if (vec2.len(this.body.force) < 0.1 ) {
+    if (vec2.len(this.body.force) < 0.1) {
       this.body.force[0] = 0
       this.body.force[1] = 0
+      this.isKnockedBack = false
       this.disableCustomVelocity()
     } else {
       vec2.scale(this.body.force, this.body.force, 0.80)

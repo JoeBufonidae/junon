@@ -1,5 +1,7 @@
 const BaseMob = require("./base_mob")
 const Constants = require('../../../common/constants.json')
+const p2 = require("p2")
+const vec2 = p2.vec2
 
 class HoverMob extends BaseMob {
 
@@ -33,9 +35,11 @@ class HoverMob extends BaseMob {
       let isClose = this.game.distanceBetween(this, this.attackTarget) <= Constants.tileSize
       let standingPlatform = this.getStandingPlatform()
       let isAboveWall = standingPlatform && standingPlatform.hasCategory("wall")
-      
+      //isAboveWall is not working
       if (!isAboveWall || isClose) {
-        targetEntityToMove.stopMoving()
+        if (!targetEntityToMove.isKnockedBack) {
+          targetEntityToMove.stopMoving()
+        }
         return
       }
     }
@@ -76,6 +80,10 @@ class HoverMob extends BaseMob {
 
     let arriveForce = this.getForceFromAngle(radian)
     let separateForce = this.separate(this.getNeighbors())
+
+    if (targetEntityToMove.isKnockedBack) {
+      vec2.scale(arriveForce, arriveForce, 0.5)
+    }
 
     targetEntityToMove.applyForce(arriveForce)
     targetEntityToMove.applyForce(separateForce)
