@@ -12,6 +12,10 @@ class WoodChair extends BaseBuilding {
     return Protocol.definition().BuildingType.WoodChair
   }
 
+  isCollidable() {
+    return false
+  }
+
 }
 
 module.exports = WoodChair
