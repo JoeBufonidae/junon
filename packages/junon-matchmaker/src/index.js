@@ -964,10 +964,13 @@ class MatchmakerServer {
       let gameServerSocket = this.gameServerSockets[server.host]
       let sectorId
 
-      if (data.isTutorial || global.isOffline) {
+      if (!data.isTutorial) {
+        uid = await this.getUidFromRequest(data.idToken, data.uid)
+      }
+
+      if (data.isTutorial || (global.isOffline && !uid)) {
         sectorId = base64id.generateId()
       } else {
-        uid = await this.getUidFromRequest(data.idToken, data.uid)
         let sectorData = {}
 
         if (data.name) {
