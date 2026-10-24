@@ -725,7 +725,7 @@ class Main {
     if (debugMode) {
       return `http://localhost:8001/assets/screenshots/${key}_thumb.jpg`
     } else {
-      return `https://junon.nyc3.cdn.digitaloceanspaces.com/screenshots/${key}_thumb.jpg`
+      return `https://junon-io.nyc3.digitaloceanspaces.com/screenshots/${key}_thumb.jpg`
     }
   }
 
