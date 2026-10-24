@@ -382,7 +382,7 @@ function compileIndex(language) {
       language: language,
       // the deployed site only links to the desktop download now; development
       // builds (npm run client, e2e) still serve the playable client
-      downloadOnly: isProduction,
+      downloadOnly: isProduction && process.env.JUNON_DOWNLOAD_ONLY !== "false",
       test_vm: process.env.TEST_VM,
       assetPath: function(path){
         return manifest[path];
