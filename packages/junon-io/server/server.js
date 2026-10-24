@@ -715,6 +715,7 @@ class Server {
 
       let locals = {
         nodeEnv: env,
+        downloadOnly: false, // the dev web server always serves the playable client
         gameVersion: gameVersion,
         revision: this.gameRevision,
         protocolHash: protocolHash,
