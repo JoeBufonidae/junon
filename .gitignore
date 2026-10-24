@@ -23,3 +23,15 @@ packages/junon-io/playwright-report/
 firebase-debug.log*
 database-debug.log*
 ui-debug.log*
+
+# Secrets and private data - never commit
+*.env
+env_variables*
+*serviceAccount*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
+*.crt
+*.sql
+*.sql.gz
+*.sav
