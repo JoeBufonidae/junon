@@ -35,6 +35,7 @@ const LOG = require('junon-common/logger')
 const queryString = require('querystring')
 const util = require('util')
 const User = require("junon-common/db/user")
+const ModeratorGiveableBadges = require("junon-common/moderator_giveable_badges")
 const SectorModel = require("junon-common/db/sector")
 const Favorite = require("junon-common/db/favorite")
 const IpBan = require("junon-common/db/ip_ban")
@@ -360,7 +361,8 @@ class MatchmakerServer {
     let modIds = [
       "5t1H4HSXgGRzCw0isgiwxBf2cXn2", 
       "jEleFj7LAVhfv8FwLEKejEj6ESx2",
-      "UBdPAUeJBfZfUycLhl3508aAgVH2"
+      "UBdPAUeJBfZfUycLhl3508aAgVH2",
+      "x2QYp2Ei6TZdynUxXXUVzsKlhKl1"
     ]
 
     if (modIds.indexOf(uid) !== -1) {
@@ -610,8 +612,14 @@ class MatchmakerServer {
           }
 
           if(!body.username) {
-            let data = { error: "Missing username of event winner."}
+            let data = { error: "Missing username."}
             res.end(JSON.stringify(data))
+            return
+          }
+
+          let badge = ModeratorGiveableBadges.find((entry) => entry.id === body.badgeId)
+          if (!badge) {
+            res.end(JSON.stringify({error: "Invalid badge."}))
             return
           }
 
@@ -625,20 +633,17 @@ class MatchmakerServer {
             return;
           }
 
-          if(!user.badges) {
-            user.badges = "ev"
-            res.end(JSON.stringify({success: body.username + " was given event badge."}))
-            return
-          }
-          if(user.badges.split(',').indexOf("ev") != -1) {
-            res.end(JSON.stringify({success: body.username + " already has the event badge"}))
+          let userBadges = user.badges ? user.badges.split(',').filter(Boolean) : []
+          if(userBadges.indexOf(badge.id) !== -1) {
+            res.end(JSON.stringify({success: body.username + " already has the " + badge.name + " badge."}))
             return
           }
 
-          user.badges += ",ev"
-          user.save();
+          userBadges.push(badge.id)
+          user.badges = userBadges.join(',')
+          await user.save()
 
-          res.end(JSON.stringify({success: body.username + " was given the event badge."}))
+          res.end(JSON.stringify({success: body.username + " was given the " + badge.name + " badge."}))
         }
         catch(e) {
           ExceptionReporter.captureException(e)
