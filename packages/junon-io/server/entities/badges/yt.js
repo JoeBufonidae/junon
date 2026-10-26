@@ -8,8 +8,8 @@ class Youtube extends BaseBadge {
         return 'Youtube'
     }
 
-    async isQualified(player) {
-        return false
+    isQualified(player) {
+        return false;
     }
 
     getImageUrl() {
@@ -17,7 +17,7 @@ class Youtube extends BaseBadge {
     }
 
     getDescription() {
-        return 'Given by a moderator to recognize YouTube creators.'
+        return 'Have the youtuber role in the junon.io Discord by meeting the criteria.'
     }
 
     getColor() {

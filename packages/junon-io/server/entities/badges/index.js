@@ -5,6 +5,9 @@ Badges.OG = require('./og')
 Badges.Scrooge = require('./scrooge')
 Badges.Event = require('./event')
 Badges.Youtube = require('./yt')
+Badges.Contributor = require('./contrib')
+Badges.Developer = require('./dev')
+Badges.Minigame = require('./minigame')
 
 let idToName = new Map()
 for(let i in Badges) {
