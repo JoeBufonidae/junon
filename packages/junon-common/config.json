@@ -32,7 +32,7 @@
     }
   },
   "staging": {
-    "googleAnalyticsId": "UA-53143804-3",
+    "googleAnalyticsId": "",
     "matchmakerUrl": "https://matchmaker-staging.junon.io:3000/",
     "matchmakerWebsocketUrl": "wss://matchmaker-staging.junon.io:3000/",
     "matchmakerGameServerWebsocketUrl": "ws://matchmaker-staging.junon.io:2095/",
@@ -47,7 +47,7 @@
     }
   },
   "production": {
-    "googleAnalyticsId": "UA-53143804-3",
+    "googleAnalyticsId": "",
     "matchmakerUrl": "https://matchmaker.junon.io/",
     "matchmakerWebsocketUrl": "wss://matchmaker.junon.io/",
     "matchmakerGameServerWebsocketUrl": "ws://matchmaker.junon.io:2095/",

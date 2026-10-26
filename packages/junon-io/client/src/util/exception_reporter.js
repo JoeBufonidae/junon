@@ -8,7 +8,7 @@ const ExceptionReporter = {
     // https://github.com/quasarframework/quasar/issues/2233
     
     Sentry.init({ 
-      dsn: 'https://51a838887e50448d8a5370ff84c2932c@sentry.io/1467965', 
+      dsn: 'https://8679a5bdd4cec8869a4a12f25408bfee@o4512320633896960.ingest.us.sentry.io/4512320790069248', 
       release: ["junon-io@", window.revision].join(""),
       maxBreadcrumbs: 100,
       integrations: [dedupeIntegration],

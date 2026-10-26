@@ -943,6 +943,7 @@ class Main {
   initAnalytics() {
     // google analytics
     const trackingId = Config[env].googleAnalyticsId
+    if (!trackingId) { window.gtag = function(){}; return } // analytics off: keep gtag() calls harmless
 
     document.write('<script async src="https://www.googletagmanager.com/gtag/js?id=' + trackingId + '"></script>')
     window.dataLayer = window.dataLayer || []
