@@ -321,8 +321,8 @@ class MatchmakerServer {
 
     if (isSSL) {
       app = uws.SSLApp({
-        key_file_name:  "/root/certbot/tls.key",
-        cert_file_name: "/root/certbot/tls.crt"
+        key_file_name:  process.env.TLS_KEY_FILE || "/root/certbot/tls.key",
+        cert_file_name: process.env.TLS_CERT_FILE || "/root/certbot/tls.crt"
       })
     } else {
       app = uws.App()
