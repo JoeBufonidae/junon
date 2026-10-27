@@ -1,0 +1,11 @@
+{
+  "version": "v0.8.1.alpha",
+  "date": "October 27, 2026",
+  "title": "More Badges - By IAmA_User",
+  "content": {
+    "features": [
+      "Added new badges, dev, contributor, youtube, minigame creator, and moderator which will be handed out in coming days.",
+      "Removed former mods from code."
+    ]
+  }
+}
