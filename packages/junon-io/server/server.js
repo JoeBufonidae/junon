@@ -262,7 +262,8 @@ class Server {
 
   getSystemdServiceIndex() {
     let systemctlStatus = require('child_process').execSync(`systemctl status ${process.pid}`).toString()
-    let index = systemctlStatus.match(/junon-io@(\d+).service/)[1]
+    let match = systemctlStatus.match(/junon-io@(\d+).service/)
+    let index = match ? match[1] : (process.env.JUNON_INSTANCE_INDEX || "1")
     return index
   }
 
@@ -275,7 +276,7 @@ class Server {
     if (debugMode) {
       unixSocket = process.env.HOME + "/liveness_probe"
     } else {
-      unixSocket = "/var/run/liveness_probe_" + this.systemdIndex
+      unixSocket = (process.env.LIVENESS_SOCKET_DIR || "/var/run") + "/liveness_probe_" + this.systemdIndex
     }
 
     if (fs.existsSync(unixSocket)) {
