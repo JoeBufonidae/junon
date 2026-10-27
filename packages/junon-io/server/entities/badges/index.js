@@ -8,6 +8,7 @@ Badges.Youtube = require('./yt')
 Badges.Contributor = require('./contrib')
 Badges.Developer = require('./dev')
 Badges.Minigame = require('./minigame')
+Badges.Moderator = require('./mod')
 
 let idToName = new Map()
 for(let i in Badges) {
