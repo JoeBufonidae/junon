@@ -359,8 +359,7 @@ class MatchmakerServer {
 
     let modIds = [
       "5t1H4HSXgGRzCw0isgiwxBf2cXn2", 
-      "jEleFj7LAVhfv8FwLEKejEj6ESx2",
-      "UBdPAUeJBfZfUycLhl3508aAgVH2"
+      "jEleFj7LAVhfv8FwLEKejEj6ESx2"
     ]
 
     if (modIds.indexOf(uid) !== -1) {
@@ -601,7 +600,7 @@ class MatchmakerServer {
             res.end(JSON.stringify(data));
             return
           }
-
+//here
           let isMod = await this.isMod(body.idToken) 
           if (!isMod) {
             let data = {error: "Invalid credentials." }
@@ -1013,7 +1012,7 @@ class MatchmakerServer {
 
       if (uid) {
         if (uid === "jEleFj7LAVhfv8FwLEKejEj6ESx2" ||
-            uid === "8LuO6XRih2dRNfvtjaS2TwnLWzm1") {
+            uid === "5t1H4HSXgGRzCw0isgiwxBf2cXn2") {
           maxRowCount = 256
           maxColCount = 256
         }

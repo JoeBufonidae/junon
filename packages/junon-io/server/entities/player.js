@@ -519,9 +519,8 @@ class Player extends BaseEntity {
 
     this.score = data.score || 0
 
-    // kuroro
     if (this.isGameDev()) {
-      if (this.name === 'kuroro') {
+      if (this.name === 'BigTforLife') {
         this.isAdminMode = true
       }
     } else if (this.isMod()) {
@@ -686,12 +685,12 @@ class Player extends BaseEntity {
   }
 
   isMod() {
-    return this.uid === 'nPu0Js7belaeI6UdSz6AkPBdUkw2' // tobor1
+    return this.uid === '5t1H4HSXgGRzCw0isgiwxBf2cXn2' 
   }
 
   isGameDev() {
     return this.uid === 'jEleFj7LAVhfv8FwLEKejEj6ESx2' ||
-           this.uid === '8LuO6XRih2dRNfvtjaS2TwnLWzm1'
+           this.uid === '5t1H4HSXgGRzCw0isgiwxBf2cXn2'
   }
 
   createSurvivalTool() {
