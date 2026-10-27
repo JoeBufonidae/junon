@@ -50,20 +50,20 @@
                 <% let changeLog = changeLogs[0] %>
                 <div>
                     <p class='date'><%= changeLog.date %></p>
-                    <% if (changeLog.content.bugs.length > 0) { %>
+                    <% let bugs = changeLog.content && Array.isArray(changeLog.content.bugs) ? changeLog.content.bugs.slice(0,1) : [] %>
+                    <% if (bugs.length > 0) { %>
                         <ul>
-                            <% changeLog.content.bugs = changeLog.content.bugs.slice(0,1) %>
-                            <% for (let i = 0; i < changeLog.content.bugs.length; i++) { %>
-                                <% let bug = changeLog.content.bugs[i] %>
+                            <% for (let i = 0; i < bugs.length; i++) { %>
+                                <% let bug = bugs[i] %>
                                 <li><%= bug %></li>                    
                             <% } %>
                         </ul>
                     <% } %>
-                    <% if (changeLog.content.features.length > 0) { %>
+                    <% let features = changeLog.content && Array.isArray(changeLog.content.features) ? changeLog.content.features.slice(0,2) : [] %>
+                    <% if (features.length > 0) { %>
                         <ul>
-                            <% changeLog.content.features = changeLog.content.features.slice(0,2) %>
-                            <% for (let i = 0; i < changeLog.content.features.length; i++) { %>
-                                <% let feature = changeLog.content.features[i] %>
+                            <% for (let i = 0; i < features.length; i++) { %>
+                                <% let feature = features[i] %>
                                 <li><%= feature %></li>                    
                             <% } %>
                         </ul>
