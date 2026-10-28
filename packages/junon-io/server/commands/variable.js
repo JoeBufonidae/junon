@@ -52,7 +52,8 @@ class Variable extends BaseCommand {
       "seconds": true,
       "$storageId": true,
       "$storageType": true,
-      "$itemType": true
+      "$itemType": true,
+      "variables": true
     }
   }
 

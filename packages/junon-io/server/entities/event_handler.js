@@ -16,7 +16,7 @@ class EventHandler {
     this.sector = sector
     this.game = sector.game
     this.triggers = {}
-    this.variables = {}
+    this.variables = { variables: "" }
     this.scoreIndexByPlayer = {}
     this.logs = []
     this.commandDelay = 0
@@ -686,17 +686,37 @@ class EventHandler {
   }
 
   hasReachedMaxVariableCount() {
-    return Object.keys(this.variables).length >= 10000
+    return Object.keys(this.variables).filter((key) => key !== "variables").length >= 10000
+  }
+
+  updateVariableList() {
+    const reservedNames = new Set([
+      "player", "playerId", "playerRole", "entityId", "entityType",
+      "count", "itemType", "message", "attackingPlayer",
+      "attackingPlayerRole", "attackingMob", "killingPlayer",
+      "killingPlayerRole", "killingMob", "type", "remaining", "team",
+      "region", "previous", "current", "delta", "corpseType", "corpseId",
+      "foodType", "mobType", "seconds", "$storageId", "$storageType",
+      "$itemType", "variables"
+    ])
+
+    this.variables.variables = Object.keys(this.variables)
+      .filter((key) => !reservedNames.has(key))
+      .join(" ")
   }
 
   loadVariables(variables) {
     for (let key in variables) {
+      if (key === "variables") continue
       this.variables[key] = variables[key]
     }
+    this.updateVariableList()
   }
 
   setVariable(key, value) {
+    if (key === "variables") return
     this.variables[key] = value
+    this.updateVariableList()
   }
 
   getVariable(key) {
@@ -708,7 +728,9 @@ class EventHandler {
   }
 
   removeVariable(key) {
+    if (key === "variables") return
     delete this.variables[key]
+    this.updateVariableList()
   }
 
   addTrigger(data) {
