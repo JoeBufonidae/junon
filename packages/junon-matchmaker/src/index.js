@@ -1458,6 +1458,9 @@ class MatchmakerServer {
         case "MatchFilter":
           this.onMatchFilter(data, socket)
           break
+        case "SetCurrentSector":
+          socket.sectorId = data && data.sectorId ? data.sectorId : null
+          break
         case "RequestSectorList":
           this.rateLimit("onRequestSectorList", socket, () => {
             this.onRequestSectorList(data, socket)

@@ -345,16 +345,25 @@ class Region {
     this.broadcastMessage(chatMessage)
   }
 
+  isGlobalChatEnabledForSocket(socket) {
+    if (!socket.sectorId) return true
+
+    let sector = this.getExistingSector(socket.sectorId)
+    return !sector || !sector.data || sector.data.isGlobalChatEnabled !== false
+  }
+
   sendChatHistory(socket) {
-    this.matchmaker.socketUtil.emit(socket, "ChatHistory", this.chatHistory)
+    let history = this.isGlobalChatEnabledForSocket(socket) ? this.chatHistory : []
+    this.matchmaker.socketUtil.emit(socket, "ChatHistory", history)
   }
 
   broadcastMessage(chatMessage) {
     for (let socketId in this.sockets) {
       let socket = this.sockets[socketId]
+      if (!this.isGlobalChatEnabledForSocket(socket)) continue
 
       this.matchmaker.socketUtil.emit(socket, "ServerChat", chatMessage)
-    }    
+    }
   }
 
   unregisterPlayerCreateGame(data) {

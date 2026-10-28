@@ -25,6 +25,33 @@ class ChatMenu extends BaseMenu {
     document.querySelector(".global_chat_tab .chat_tab_label").innerText = i18n.t("Global")
   }
 
+  updateGlobalTabVisibility() {
+    const tab = document.querySelector(".global_chat_tab")
+    if (!tab) return
+
+    const settings = this.game.sector && this.game.sector.settings
+    const disabled = this.game.isTutorial() ||
+      !this.game.isLoggedIn() ||
+      this.game.isPvP() ||
+      (settings && settings.isGlobalChatEnabled === false)
+
+    tab.style.display = disabled ? "none" : "block"
+
+    if (disabled) {
+      this.chatHistory["global"].innerHTML = ""
+
+      if (this.chatGroup === "global") {
+        this.chatGroup = "local"
+        document.querySelectorAll(".chat_tab.selected").forEach((selected) => {
+          selected.classList.remove("selected")
+        })
+        const localTab = document.querySelector(".chat_tab[data-chat='local']")
+        if (localTab) localTab.classList.add("selected")
+        this.showChatHistory("local")
+      }
+    }
+  }
+
   requestChatHistory() {
     let region = this.game.main.region
     this.game.sendToMatchmaker({ event: "RequestChatHistory", data: { region: region } })
@@ -171,6 +198,7 @@ class ChatMenu extends BaseMenu {
     SocketUtil.emit("ClientChat", { message: text, isGlobal: this.isGlobalChat(), isTeam: this.isTeamChat() })
 
     if (text.length > 0) {
+      this.clearUnreadCount(this.chatGroup)
       this.commandHistory.unshift(text)
     }
 
@@ -390,11 +418,7 @@ class ChatMenu extends BaseMenu {
       this.chatHideTween.stop()
     }
 
-    if (this.game.isTutorial() || !this.game.isLoggedIn() || this.game.isPvP()) {
-      document.querySelector(".global_chat_tab").style.display = 'none'
-    } else {
-      document.querySelector(".global_chat_tab").style.display = 'block'
-    }
+    this.updateGlobalTabVisibility()
 
     if (this.game.isPvP()) {
       document.querySelector(".team_chat_tab").style.display = 'inline-block'

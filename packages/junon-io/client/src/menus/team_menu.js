@@ -77,6 +77,8 @@ class TeamMenu extends BaseMenu {
 
     this.el.querySelector("#enable_chat").addEventListener("click", this.onEnableChatClick.bind(this), true)
     this.el.querySelector("#disable_chat").addEventListener("click", this.onDisableChatClick.bind(this), true)
+    this.el.querySelector("#enable_global_chat").addEventListener("click", this.onEnableGlobalChatClick.bind(this), true)
+    this.el.querySelector("#disable_global_chat").addEventListener("click", this.onDisableGlobalChatClick.bind(this), true)
 
     this.el.querySelector("#enable_infinite_ammo").addEventListener("click", this.onEnableInfiniteAmmoClick.bind(this), true)
     this.el.querySelector("#disable_infinite_ammo").addEventListener("click", this.onDisableInfiniteAmmoClick.bind(this), true)
@@ -240,6 +242,15 @@ class TeamMenu extends BaseMenu {
           this.el.querySelector("#enable_chat").checked = true
         } else {
           this.el.querySelector("#disable_chat").checked = true
+        }
+      }
+
+      if (name === 'isGlobalChatEnabled') {
+        let value = settings[name]
+        if (value) {
+          this.el.querySelector("#enable_global_chat").checked = true
+        } else {
+          this.el.querySelector("#disable_global_chat").checked = true
         }
       }
 
@@ -617,6 +628,32 @@ class TeamMenu extends BaseMenu {
         action: 'editSetting',
         sectorId: this.game.sector.uid,
         key: 'isChatEnabled',
+        value: 'false'
+      })
+    }
+  }
+
+  onEnableGlobalChatClick(e) {
+    e.preventDefault()
+
+    if (e.target.value === 'yes') {
+      SocketUtil.emit("SectorAction", {
+        action: 'editSetting',
+        sectorId: this.game.sector.uid,
+        key: 'isGlobalChatEnabled',
+        value: 'true'
+      })
+    }
+  }
+
+  onDisableGlobalChatClick(e) {
+    e.preventDefault()
+
+    if (e.target.value === 'no') {
+      SocketUtil.emit("SectorAction", {
+        action: 'editSetting',
+        sectorId: this.game.sector.uid,
+        key: 'isGlobalChatEnabled',
         value: 'false'
       })
     }

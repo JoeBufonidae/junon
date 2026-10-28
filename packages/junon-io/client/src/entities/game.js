@@ -2073,6 +2073,7 @@ class Game {
   }
 
   displayHomePage() {
+    this.sendToMatchmaker({ event: "SetCurrentSector", data: { sectorId: null } })
     this.removeDataFromPreviousGame()
     this.player = null
     this.isActive = false
@@ -2210,6 +2211,7 @@ class Game {
 
     this.teamMenu.updateColonySettings(data.settings)
     this.sector.setSettings(data.settings)
+    this.chatMenu.updateGlobalTabVisibility()
 
     if (data.hasOwnProperty("gameMode")) {
       this.sector.setGameMode(data.gameMode)
@@ -4039,6 +4041,7 @@ arrow.style.setProperty('--arrow-color',realColor)
 
     this.playerId = data.playerId
     this.initSector(data.sector)
+    this.sendToMatchmaker({ event: "SetCurrentSector", data: { sectorId: data.sector.uid } })
     this.sector.initPlayers(data)
     this.sector.setSettings(data.sector.settings)
 
@@ -4352,6 +4355,7 @@ arrow.style.setProperty('--arrow-color',realColor)
     // if I just Joined (need to cleanup prior)
     this.removeDataFromPreviousGame()
     this.initSector(data.sector)
+    this.sendToMatchmaker({ event: "SetCurrentSector", data: { sectorId: data.sector.uid } })
 
     this.initSidebar(data.sidebar)
 

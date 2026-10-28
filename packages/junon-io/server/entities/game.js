@@ -2706,6 +2706,7 @@ async setGameMode(gameMode) {
       occupancy: this.sector.getOccupancyPercentage(),
       screenshots: this.sector.screenshots,
       gameMode: this.getGameMode(),
+      isGlobalChatEnabled: this.sector.settings.isGlobalChatEnabled,
       isPrivate: this.sector.isPrivate,
       maxPlayers: this.getMaxPlayers(),
       language: this.language

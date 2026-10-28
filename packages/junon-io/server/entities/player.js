@@ -5744,6 +5744,11 @@ class Player extends BaseEntity {
       })
 
       if (data.isGlobal) {
+        if (this.sector.settings.isGlobalChatEnabled === false) {
+          this.showError("Global chat is disabled in this world", { isWarning: true })
+          return
+        }
+
         LOG.info("globalchat> " + this.name + ": " + message)
         let data = { username: this.name, message: message, prefixesList:JSON.stringify(this.game.playerChatPrefixes||{})}
         if (this.isLoggedIn()) {

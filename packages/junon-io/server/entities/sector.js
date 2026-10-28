@@ -389,6 +389,7 @@ initSettings(entities) {
     isHungerEnabled: true,
     isOxygenEnabled: true,
     isChatEnabled: true,
+    isGlobalChatEnabled: true,
     isInfiniteAmmo: false,
     isInfinitePower: false,
     isCorpseEnabled: true,
@@ -821,6 +822,10 @@ initSettings(entities) {
         settings: this.settings
       })
 
+      if (key === "isGlobalChatEnabled") {
+        this.game.sendSectorInfoToMatchmaker()
+      }
+
       if (key === "isSpectateAllowed") {
         if (value === false) {
           this.game.forEachPlayer((player) => {
@@ -836,7 +841,7 @@ initSettings(entities) {
   canEditSetting(key) {
     if(this.gameMode === 'hardcore' || !this.gameMode) return false;
     if(this.gameMode === 'survival') {
-      let allowedSettingChanges = ['isPvPAllowed',"isFovMode", "isZoomAllowed", "showMiniMap", "showPlayerList", "isChatEnabled", "isPlayerSavingEnabled", "isGravityEnabled", "isSpectateAllowed"]
+      let allowedSettingChanges = ['isPvPAllowed',"isFovMode", "isZoomAllowed", "showMiniMap", "showPlayerList", "isChatEnabled", "isGlobalChatEnabled", "isPlayerSavingEnabled", "isGravityEnabled", "isSpectateAllowed"]
 
       if(allowedSettingChanges.indexOf(key) === -1) return false;
     }
