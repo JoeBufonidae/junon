@@ -117,7 +117,7 @@ class Team extends BaseTransientEntity {
   }
 
   isMaxRoleCountReached() {
-    return this.getRoleCount() >= 20
+    return this.getRoleCount() >= 1000
   }
 
   getRoleCount() {
