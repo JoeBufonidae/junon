@@ -2073,6 +2073,13 @@ img[src=""] {
     word-break: break-word;
 }
 
+#chat_group_tab_container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
 .chat_tab {
     display: inline-block;
     color: white;

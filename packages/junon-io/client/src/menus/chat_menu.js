@@ -22,7 +22,7 @@ class ChatMenu extends BaseMenu {
   }
 
   setGlobalTabRegion() {
-    document.querySelector(".global_chat_tab .chat_tab_label").innerText = i18n.t("Global") + " " + this.game.main.getRegionName()
+    document.querySelector(".global_chat_tab .chat_tab_label").innerText = i18n.t("Global")
   }
 
   requestChatHistory() {
@@ -393,7 +393,7 @@ class ChatMenu extends BaseMenu {
     if (this.game.isTutorial() || !this.game.isLoggedIn() || this.game.isPvP()) {
       document.querySelector(".global_chat_tab").style.display = 'none'
     } else {
-      document.querySelector(".global_chat_tab").style.display = 'none'
+      document.querySelector(".global_chat_tab").style.display = 'block'
     }
 
     if (this.game.isPvP()) {
