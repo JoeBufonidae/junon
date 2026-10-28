@@ -492,6 +492,45 @@ enum SoundType {
   Eating = 3;
   Alert = 4;
   Meeting = 5;
+  Airlock = 6;
+  Anotherplanet = 7;
+  AssaultRifle = 8;
+  BlockPlace = 9;
+  Bubble = 10;
+  Burning = 11;
+  Cannon = 12;
+  DeepLaser = 13;
+  Drill = 14;
+  EnemyInvasion = 15;
+  Explosion = 16;
+  Flame = 17;
+  GasRelease = 18;
+  Gunshot_2 = 19;
+  Gunshot_3 = 20;
+  Gunshot_b = 21;
+  LightLaser = 22;
+  MachineGun = 23;
+  MachineGun_2 = 24;
+  MachineGun_2_b = 25;
+  MeleeDamage = 26;
+  MetalGrind = 27;
+  MinigunBullet = 28;
+  Missile = 29;
+  Peaceful = 30;
+  Pistol = 31;
+  PlaceObject = 32;
+  PlasmaGun = 33;
+  Raid = 34;
+  Raid_2 = 35;
+  RailGun = 36;
+  RockGrind = 37;
+  SaberOne = 38;
+  SaberTwo = 39;
+  Shotgun = 40;
+  Silencer = 41;
+  Td = 42;
+  Tesla = 43;
+  WaterStep = 44;
 }
 
 enum RoleType {

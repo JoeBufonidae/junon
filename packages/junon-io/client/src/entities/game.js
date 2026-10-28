@@ -66,6 +66,7 @@ class Game {
   initPersistentVariables() {
     this.armorTextures = {}
     this.loadedSounds = {}
+    this.loadingSounds = {}
   }
 
   addMutedPlayer(name) {
@@ -802,13 +803,16 @@ class Game {
   }
 
   playSoundLazyDownload(name, options = {}) {
-    if (!this.loadedSounds[name]) {
-      this.loadSound(name, () => {
-        this.playSound(name, options)
-      })
-    } else {
-      this.playSound(name, options)
+    if (this.loadedSounds[name]) {
+      return this.playSound(name, options)
     }
+
+    if (this.loadingSounds[name]) {
+      this.loadingSounds[name].callbacks.push(() => this.playSound(name, options))
+      return
+    }
+
+    this.loadSound(name, () => this.playSound(name, options))
   }
 
   playSound(name, options = {}) {
@@ -875,19 +879,43 @@ class Game {
   }
 
   loadSound(name, cb) {
-    let sound = new Howl({
-      src: ['/assets/sounds/' + name + '.mp3'],
-      volume: 0.5,
-      onload: () => {
-        this.loadedSounds[name] = true
-        cb()
-      },
-      onend: () => {
-        this.removeCurrentSound(name)
-      }
+    let sound = this.sounds[name]
+    let loading = this.loadingSounds[name]
+
+    if (this.loadedSounds[name]) {
+      if (cb) cb()
+      return
+    }
+
+    if (loading) {
+      if (cb) loading.callbacks.push(cb)
+      return
+    }
+
+    if (!sound) {
+      sound = this.createSound(name)
+      this.sounds[name] = sound
+    }
+
+    this.loadingSounds[name] = {
+      callbacks: cb ? [cb] : []
+    }
+
+    sound.once('load', () => {
+      this.loadedSounds[name] = true
+      let callbacks = this.loadingSounds[name]?.callbacks || []
+      delete this.loadingSounds[name]
+      callbacks.forEach(callback => callback())
     })
 
-    this.sounds[name] = sound
+    sound.once('loaderror', (id, error) => {
+      console.error('Failed to load sound "' + name + '":', error)
+      delete this.loadingSounds[name]
+    })
+
+    if (sound.state() === 'unloaded') {
+      sound.load()
+    }
   }
 
   createSound(name) {
@@ -1933,7 +1961,7 @@ class Game {
     if (clientSoundName === "meeting") {
       this.playMeetingMusic()
     } else {
-      this.playSound(clientSoundName)
+      this.playSoundLazyDownload(clientSoundName)
     }
   }
 
