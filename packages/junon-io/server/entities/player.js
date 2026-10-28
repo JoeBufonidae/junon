@@ -5738,11 +5738,6 @@ class Player extends BaseEntity {
 
       this.lastMessage = message
 
-      this.game.triggerEvent("PlayerMessage", {
-        message: message,
-        player: this.getName()
-      })
-
       if (data.isGlobal) {
         if (this.sector.settings.isGlobalChatEnabled === false) {
           this.showError("Global chat is disabled in this world", { isWarning: true })
@@ -5756,6 +5751,11 @@ class Player extends BaseEntity {
         }
         this.game.sendToMatchmaker({ event: "GlobalClientChat", data: data })
       } else {
+        this.game.triggerEvent("PlayerMessage", {
+          message: message,
+          player: this.getName()
+        })
+
         LOG.info("[" + this.game.getSectorUid() + "] chat> " + this.name + ": " + message)
         let data = { playerId: this.id, message: message, username: this.name, isTeam: isTeamChat,prefixesList:JSON.stringify(this.game.playerChatPrefixes||{})}
         if (this.isLoggedIn()) {
