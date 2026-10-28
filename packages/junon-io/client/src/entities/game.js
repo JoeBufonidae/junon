@@ -5446,6 +5446,10 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.applyMyInputs()
     this.sector.executeTurn()
 
+    if (this.craftMenu && typeof this.craftMenu.closeIfOutOfRange === "function") {
+      this.craftMenu.closeIfOutOfRange()
+    }
+
     if (this.player) {
       this.player.executeTurn()
     }

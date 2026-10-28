@@ -1416,6 +1416,22 @@ class BaseBuilding extends BaseEntity {
     return "collisionGroup.Building"
   }
 
+  getInteractDistance() {
+    const buildingType = Protocol.definition().BuildingType
+    const type = this.getType()
+
+    if (type === buildingType.Stove ||
+        type === buildingType.ButcherTable) {
+      return Constants.tileSize * 2
+    }
+
+    if (type === buildingType.Bed) {
+      return Constants.tileSize
+    }
+
+    return Constants.tileSize * 10
+  }
+
   getType() {
     throw new Error("must implement BaseBuilding.getType")
   }

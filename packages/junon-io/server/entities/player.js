@@ -22,6 +22,7 @@ const Blueprint = require("./blueprint")
 const Ship = require("./ship")
 const Projectiles = require("./projectiles/index")
 const Equipments = require("./equipments/index")
+const Bars = require("./bars/index")
 const Item = require("./item")
 const Pickup = require("./pickup")
 const Camera = require("./camera")
@@ -2013,6 +2014,60 @@ class Player extends BaseEntity {
 
   craft(data) {
     const storage = this.getStorage(data.storageId)
+    if (!storage) return
+
+    // Validate station-based crafting on the server; client menu restrictions
+    // are not security checks. Keep the deprecated shipyard's behavior unchanged.
+    const sourceStorage = data.sourceStorageId ? this.getStorage(data.sourceStorageId) : null
+    const shipyardType = Protocol.definition().BuildingType.ShipyardConstructor
+    const isDeprecatedShipyard = sourceStorage &&
+      typeof sourceStorage.getType === "function" &&
+      sourceStorage.getType() === shipyardType
+
+    if (!isDeprecatedShipyard) {
+      if (data.sourceStorageId && !sourceStorage) return
+
+      // Bars require a furnace even if the client omits the station ID.
+      if (Bars.forType(data.type) && !sourceStorage) return
+
+      if (sourceStorage) {
+        // A supplied source must be a real crafting building that accepts this
+        // recipe. This also prevents using an arbitrary building as a crafter.
+        if (typeof sourceStorage.isBuildingStorage !== "function" ||
+            !sourceStorage.isBuildingStorage() ||
+            typeof sourceStorage.isCraftingStorage !== "function" ||
+            !sourceStorage.isCraftingStorage() ||
+            typeof sourceStorage.canCraft !== "function" ||
+            !sourceStorage.canCraft(data.type)) return
+
+        // Use the same per-building interaction range as normal interactions.
+        const distance = this.game.distanceBetween(this, sourceStorage)
+        if (distance >= sourceStorage.getInteractDistance()) {
+          this.showError("Too far away from " + Helper.getTypeNameById(sourceStorage.getType()), { isWarning: true })
+          return
+        }
+
+        // Reject a station interaction if another obstacle blocks the path.
+        const raycast = this.getContainer().raycast(
+          this.getX(),
+          this.getY(),
+          sourceStorage.getX(),
+          sourceStorage.getY(),
+          distance,
+          this
+        )
+        if (raycast && raycast.entity !== sourceStorage) return
+
+        // Station-based crafting must respect the station's power requirement.
+        if (typeof sourceStorage.hasMetPowerRequirement === "function" &&
+            !sourceStorage.hasMetPowerRequirement()) return
+
+        // Bars may only be produced by a furnace, not another station.
+        if (Bars.forType(data.type) &&
+            sourceStorage.getType() !== Protocol.definition().BuildingType.Furnace) return
+      }
+    }
+
     if (storage.hasCategory("power_consumer") && !storage.isPowered) return
     if (!storage.isCraftingStorage()) return
     if (storage.isFull(data.type)) {

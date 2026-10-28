@@ -5,6 +5,7 @@ const GeminiScrollbar = require('gemini-scrollbar')
 // const SimpleBar = require("simplebar")
 // const PerfectScrollbar = require("perfect-scrollbar")
 const Constants = require("./../../../common/constants.json")
+const Protocol = require("./../../../common/util/protocol")
 
 
 class CraftMenu extends BaseMenu {
@@ -16,6 +17,22 @@ class CraftMenu extends BaseMenu {
     if (!this.craftType) return
 
     this.showProductInfo(this.craftType)    
+  }
+
+  closeIfOutOfRange() {
+    if (!this.isOpen() || !this.sourceStorageId ||
+        this.sourceStorageId === Constants.inventoryStorageId) return
+    if (!this.game.player || !this.game.sector) return
+
+    const sourceStorage = this.game.sector.getEntity(this.sourceStorageId)
+    if (!sourceStorage || typeof sourceStorage.getInteractDistance !== "function") return
+
+    const buildingType = Protocol.definition().BuildingType
+    if (sourceStorage.getType() === buildingType.ShipyardConstructor) return
+
+    if (this.game.distanceBetween(this.game.player, sourceStorage) >= sourceStorage.getInteractDistance()) {
+      this.close()
+    }
   }
 
   getStorage() {
