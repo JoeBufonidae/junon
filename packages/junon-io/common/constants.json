@@ -4331,8 +4331,12 @@
       "categories": {"melee_damage": true},
       "sprite": {
         "position": {
-          "x": 53,
-          "y": -8
+          "x": 50,
+          "y": 0
+        },
+        "scale": {
+          "x": 1.15,
+          "y": 1
         },
         "anchor": 0,
         "rotation": 90

@@ -5,7 +5,7 @@ const Protocol = require("./../../../../../common/util/protocol")
 class Katana extends MeleeEquipment {
 
   getSpritePath() {
-    return 'katana_reskin.png'
+    return 'katana.png'
   }
 
   getType() {
