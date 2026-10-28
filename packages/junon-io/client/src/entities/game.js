@@ -67,6 +67,8 @@ class Game {
     this.armorTextures = {}
     this.loadedSounds = {}
     this.loadingSounds = {}
+    this.commandSounds = {}
+    this.cancelledCommandSoundIds = new Set()
   }
 
   addMutedPlayer(name) {
@@ -878,7 +880,7 @@ class Game {
     }
   }
 
-  loadSound(name, cb) {
+  loadSound(name, cb, onError) {
     let sound = this.sounds[name]
     let loading = this.loadingSounds[name]
 
@@ -889,6 +891,7 @@ class Game {
 
     if (loading) {
       if (cb) loading.callbacks.push(cb)
+      if (onError) loading.errorCallbacks.push(onError)
       return
     }
 
@@ -898,7 +901,8 @@ class Game {
     }
 
     this.loadingSounds[name] = {
-      callbacks: cb ? [cb] : []
+      callbacks: cb ? [cb] : [],
+      errorCallbacks: onError ? [onError] : []
     }
 
     sound.once('load', () => {
@@ -910,7 +914,9 @@ class Game {
 
     sound.once('loaderror', (id, error) => {
       console.error('Failed to load sound "' + name + '":', error)
+      let errorCallbacks = this.loadingSounds[name]?.errorCallbacks || []
       delete this.loadingSounds[name]
+      errorCallbacks.forEach(callback => callback(error))
     })
 
     if (sound.state() === 'unloaded') {
@@ -1573,6 +1579,8 @@ class Game {
     SocketUtil.on("NPCServerMessage", this.onNPCServerMessage.bind(this))
     SocketUtil.on("RailDestinations", this.onRailDestinations.bind(this))
     SocketUtil.on("PlaySound", this.onPlaySound.bind(this))
+    SocketUtil.on("PlayCommandSound", this.onPlayCommandSound.bind(this))
+    SocketUtil.on("StopCommandSound", this.onStopCommandSound.bind(this))
     SocketUtil.on("ScreenshotUpdated", this.onScreenshotUpdated.bind(this))
     SocketUtil.on("AccountBalance", this.onAccountBalance.bind(this))
     SocketUtil.on("FavoriteUpdated", this.onFavoriteUpdated.bind(this))
@@ -1952,6 +1960,74 @@ class Game {
 
   onRailDestinations(data) {
     this.railStopMenu.renderDestinations(data)
+  }
+
+  onPlayCommandSound(data) {
+    const commandSoundId = String(data.commandSoundId)
+
+    if (this.cancelledCommandSoundIds.has(commandSoundId)) {
+      this.cancelledCommandSoundIds.delete(commandSoundId)
+      return
+    }
+
+    const soundName = Helper.camelToSnakeCase(Helper.getSoundNameById(data.id))
+
+    this.loadSound(soundName, () => {
+      if (this.cancelledCommandSoundIds.has(commandSoundId)) {
+        this.cancelledCommandSoundIds.delete(commandSoundId)
+        return
+      }
+
+      const sound = this.sounds[soundName]
+      if (!sound) {
+        SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+        return
+      }
+
+      try {
+        const playbackId = sound.play()
+        const active = {
+          soundName,
+          playbackId,
+          onEnd: null
+        }
+        active.onEnd = () => {
+          if (this.commandSounds[commandSoundId] !== active) return
+          delete this.commandSounds[commandSoundId]
+          sound.off("end", active.onEnd, playbackId)
+          SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+        }
+        this.commandSounds[commandSoundId] = active
+        sound.on("end", active.onEnd, playbackId)
+      } catch (e) {
+        console.error(e)
+        SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+      }
+    }, () => {
+      this.cancelledCommandSoundIds.delete(commandSoundId)
+      SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+    })
+  }
+
+  onStopCommandSound(data) {
+    const commandSoundId = String(data.commandSoundId)
+    const active = this.commandSounds[commandSoundId]
+
+    if (active) {
+      const sound = this.sounds[active.soundName]
+      if (sound) {
+        try {
+          if (active.onEnd) sound.off("end", active.onEnd, active.playbackId)
+          sound.stop(active.playbackId)
+        } catch (e) {
+          console.error(e)
+        }
+      }
+      delete this.commandSounds[commandSoundId]
+    } else {
+      // The sound may still be loading, or its play event may arrive later.
+      this.cancelledCommandSoundIds.add(commandSoundId)
+    }
   }
 
   onPlaySound(data) {

@@ -144,6 +144,9 @@ message MessageWrapper {
     DialogueUpdated DialogueUpdated = 151;
     RoundStarted RoundStarted = 152;
     EndVote EndVote = 153;
+    PlayCommandSound PlayCommandSound = 186;
+    StopCommandSound StopCommandSound = 187;
+    CommandSoundFinished CommandSoundFinished = 188;
     ProgressCircle ProgressCircle = 154;
     StartRound StartRound = 155;
     TeamAssignmentChanged TeamAssignmentChanged = 156;
@@ -482,6 +485,19 @@ message AccountBalance {
 
 message PlaySound {
   SoundType id = 1;  
+}
+
+message PlayCommandSound {
+  SoundType id = 1;
+  string commandSoundId = 2;
+}
+
+message StopCommandSound {
+  string commandSoundId = 1;
+}
+
+message CommandSoundFinished {
+  string commandSoundId = 1;
 }
 
 message SendMoney {

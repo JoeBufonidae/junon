@@ -669,9 +669,31 @@ class RemoteEventHandler {
     }
     player.restartCharacter()
   }
+  onCommandSoundFinished(player, data, socket) {
+    if (!player || !player.game || !player.game.commandSoundInstances) return
+
+    const id = String(data.commandSoundId)
+    const instance = player.game.commandSoundInstances.get(id)
+    if (!instance || !instance.pendingSocketIds || !instance.pendingSocketIds.has(socket.id)) return
+
+    instance.pendingSocketIds.delete(socket.id)
+    if (instance.pendingSocketIds.size === 0) {
+      player.game.commandSoundInstances.delete(id)
+    }
+  }
+
   onClientDisconnect(socket) {
     const player = this.getPlayerForSocket(socket)
     if (player) {
+      const instances = player.game.commandSoundInstances
+      if (instances) {
+        for (const [id, instance] of instances) {
+          if (instance.pendingSocketIds) instance.pendingSocketIds.delete(socket.id)
+          if (instance.pendingSocketIds && instance.pendingSocketIds.size === 0) {
+            instances.delete(id)
+          }
+        }
+      }
       let duration = player.getSessionDuration()
       LOG.info(player.name + " disconnected. session duration: " + Helper.stringifyTimeShort(duration))
       player.resetControls()
