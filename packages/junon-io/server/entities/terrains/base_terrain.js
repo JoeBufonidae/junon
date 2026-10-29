@@ -460,6 +460,11 @@ class BaseTerrain  {
   sync(data) {
     this.health = data.health
     this.effects = data.effects
+
+    if (this.getEffectLevel("fire") > 0) {
+      this.setEffectCreatedAt("fire", this.game.timestamp)
+      this.onEffectAdded("fire")
+    }
   }
 
   removeListener() {
