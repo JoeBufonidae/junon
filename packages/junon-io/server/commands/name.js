@@ -76,11 +76,19 @@ class Name extends BaseCommand {
       case "set":
         name = args.slice(2).join(" ")
         name = this.cleanName(name)
-        entity.setName(name)
+        if (entity.isMob()) {
+          entity.editName(name)
+        } else {
+          entity.setName(name)
+        }
         caller.showChatSuccess(entity.getName())
         break
       case "remove":
-        entity.setName("")
+        if (entity.isMob()) {
+          entity.editName("")
+        } else {
+          entity.setName("")
+        }
         caller.showChatSuccess("removed name from " + entity.id)
         break
       case "setcolor":
