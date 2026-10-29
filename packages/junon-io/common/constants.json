@@ -6951,16 +6951,16 @@
       "height": 32,
       "categories": {"rail":true,"rail_track":true,"instant_build":true},
       "isPassable": true,
-      "isFlamable": false,
+      "isFlamable": true,
       "minimapColor": "#483d8b",
       "cost": {
         "gold": 50
       },
       "requirements": {
-        "IronBar": 5
+        "IronBar": 2
       },
       "stats": {
-        "health": 250,
+        "health": 200,
         "count": 125
       },
       "upgrade": {

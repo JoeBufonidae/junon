@@ -59,9 +59,9 @@ class RailTrack extends BaseBuilding {
     super.breakBuilding(lastBreaker)
   }
 
-  setHealth() {
-    // cannot be damaged  
-  }
+  // setHealth() {
+  //   // cannot be damaged  
+  // }
 
   getNextJunction(direction) {
     let maxIteration = this.getContainer().getRowCount()
