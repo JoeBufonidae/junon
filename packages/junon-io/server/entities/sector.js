@@ -3103,7 +3103,7 @@ initSettings(entities) {
       let entity = this.flames[entityId]
       if(!entity.effects.fire || entity.isRemoved) {
         delete this.flames[entityId]
-        return;
+        continue;
       } 
       this.safeGrowFire(entity)
     }
