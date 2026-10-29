@@ -8,6 +8,14 @@ class Raven extends HoverMob {
     return Protocol.definition().MobType.Raven
   }
 
+  getAttackPositionSearchRings() {
+    return 12
+  }
+
+  getAttackPositionStuckTimeout() {
+    return Constants.physicsTimeStep * 30
+  }
+
   getConstantsTable() {
     return "Mobs.Raven"
   }
@@ -21,6 +29,11 @@ class Raven extends HoverMob {
   }
 
   performAttack(attackTarget) {
+    const targetDistance = this.game.distanceBetween(this, attackTarget)
+    if (this.isObstacleBlockingTarget(attackTarget, targetDistance)) {
+      return
+    }
+
     let absoluteAngleTowardsAttackTarget = Math.atan2(attackTarget.getY() - this.getY(), attackTarget.getX() - this.getX())
     let absoluteDegTowardsAttackTarget = Math.floor(absoluteAngleTowardsAttackTarget * (180 / Math.PI))
     if (this.game.normalizeAngleDeg(this.getAngle()) !== this.game.normalizeAngleDeg(absoluteDegTowardsAttackTarget)) {
