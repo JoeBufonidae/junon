@@ -1764,7 +1764,7 @@
         "reload": 500,
         "health": 50,
         "damage": 20,
-        "range": 512,
+        "range": 256,
         "los": 718
       },
       "isArmored": true,
@@ -1794,7 +1794,7 @@
         "speed": 4,
         "reload": 250,
         "health": 1500,
-        "damage": 25,
+        "damage": 15,
         "range": 512,
         "los": 1024
       },
