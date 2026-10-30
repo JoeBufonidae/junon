@@ -5437,6 +5437,7 @@
         "health": 50,
         "count": 100
       },
+      "isAirtight": true,
       "upgrade": {
         "health": "+100",
         "count": "+25"
@@ -5459,6 +5460,7 @@
         "health": 150,
         "count": 100
       },
+      "isAirtight": true,
       "upgrade": {
         "health": "+100",
         "count": "+25"
