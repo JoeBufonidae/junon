@@ -1792,7 +1792,7 @@
       "height": 96,
       "stats": {
         "speed": 4,
-        "reload": 250,
+        "reload": 1000,
         "health": 1500,
         "damage": 15,
         "range": 512,
