@@ -678,7 +678,6 @@ class RemoteEventHandler {
 
     instance.pendingSocketIds.delete(socket.id)
     if (instance.pendingSocketIds.size === 0) {
-      if (instance.timeout) clearTimeout(instance.timeout)
       player.game.commandSoundInstances.delete(id)
     }
   }
@@ -691,7 +690,6 @@ class RemoteEventHandler {
         for (const [id, instance] of instances) {
           if (instance.pendingSocketIds) instance.pendingSocketIds.delete(socket.id)
           if (instance.pendingSocketIds && instance.pendingSocketIds.size === 0) {
-            if (instance.timeout) clearTimeout(instance.timeout)
             instances.delete(id)
           }
         }
