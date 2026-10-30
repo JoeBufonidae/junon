@@ -18,6 +18,15 @@ class Terminal extends BaseBuilding {
     // }
   }
 
+  onPowerChanged() {
+    super.onPowerChanged()
+
+    let menu = this.game.terminalMenu
+    if (menu && menu.isOpen() && menu.entity === this) {
+      menu.render()
+    }
+  }
+
   isUserImposter() {
     let result = false
     

@@ -26,8 +26,17 @@ class TerminalMenu extends BaseMenu {
     this.render()
   }
 
+  hasPower() {
+    return !!(this.entity && (
+      this.entity.isPowered ||
+      this.game.sector.settings.isInfinitePower
+    ))
+  }
+
   onTerminalChatInputKeyup(e) {
     if (e.which === 13) {
+      if (!this.hasPower()) return
+
       let chat = this.chatInput.value
       this.chatInput.value = ""
       SocketUtil.emit("InteractTarget", { id: this.entity.id, action: "chat", content: chat })
@@ -58,6 +67,8 @@ class TerminalMenu extends BaseMenu {
   }
 
   onTerminalChatSendClick(e) {
+    if (!this.hasPower()) return
+
     let chat = this.chatInput.value
     this.chatInput.value = ""
     SocketUtil.emit("InteractTarget", { id: this.entity.id, action: "chat", content: chat })
@@ -65,6 +76,11 @@ class TerminalMenu extends BaseMenu {
 
   render() {
     this.el.querySelector(".terminal_chat_content").innerHTML = this.getChatContent()
+
+    let sendButton = this.el.querySelector(".terminal_chat_send_btn")
+    let hasPower = this.hasPower()
+    sendButton.dataset.disabled = hasPower ? "false" : "true"
+    sendButton.disabled = !hasPower
 
     if (this.game.isMiniGame() && this.isUserImposter()) {
       if (!this.game.terminalMenu.isChoiceSubmitted) {
@@ -95,7 +111,12 @@ class TerminalMenu extends BaseMenu {
 
 
   getChatContent() {
+    if (!this.hasPower()) {
+      return this.createChatEntry(i18n.t('[ERROR] Failed to connect: Insufficient Power'))
+    }
+
     let result = ""
+
     for (var i = 0; i < this.game.sector.terminalMessages.length; i++) {
       let msg = this.game.sector.terminalMessages[i]
       let el = this.createChatEntry(msg)
@@ -110,9 +131,13 @@ class TerminalMenu extends BaseMenu {
   }
 
   addTerminalMessage(message) {
-    let el = this.createChatEntry(message)
-    this.chatContent.innerHTML += el
-    this.chatContent.scrollTop = this.chatContent.scrollHeight
+    if (!this.entity) return
+
+    this.chatContent.innerHTML = this.getChatContent()
+
+    if (this.hasPower()) {
+      this.chatContent.scrollTop = this.chatContent.scrollHeight
+    }
   }
 
   onTerminalChoiceClick(e) {

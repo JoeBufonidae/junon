@@ -6,6 +6,8 @@ class Terminal extends BaseBuilding {
 
   interact(user, action, content) {
     if (action === 'chat') {
+      if (!this.hasMetPowerRequirement()) return
+
       if (user.isPlayer()) {
         let maxChatLength = 100
         let message = content
