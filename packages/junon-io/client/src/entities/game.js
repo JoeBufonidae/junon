@@ -1626,8 +1626,8 @@ class Game {
 
   onBadgeEquipped(data) {
     try {
-      let tint = Number("0x" + data.badge.color);
-      this.sector.players[data.playerId].sprite.children[1].children[0].tint = tint;
+      let player = this.sector.players[data.playerId]
+      player.setBadgeColor(data.badge.color)
     }
     catch (e) {
       //server sent this before the player was initialized

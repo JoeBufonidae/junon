@@ -216,6 +216,7 @@ class Player extends BaseEntity {
         return
       }
       this.badge = badge
+      this.badgeColor = badge.getColor()
       this.getSocketUtil().broadcast(this.game.getSocketIds(), "BadgeEquipped", {
         badge: {
           name: badge.getName(),

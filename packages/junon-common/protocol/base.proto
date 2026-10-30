@@ -1450,6 +1450,7 @@ message Player {
   bool isAngleLocked = 34;
   bool isHidden = 35;
   uint32 viewDistance = 36;
+  string badgeColor = 37;
 }
 
 message DragTargetRef {

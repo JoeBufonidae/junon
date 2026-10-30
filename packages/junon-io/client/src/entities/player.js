@@ -36,6 +36,7 @@ class Player extends BaseEntity {
     this.initPlayerCommon()
     this.initDestroyable()
     this.initVariables(data)
+    this.setBadgeColor(this.badgeColor)
     this.setTeam(data.team)
     this.initVisionLight()
 
@@ -427,6 +428,7 @@ class Player extends BaseEntity {
     this.level = data.level
     this.health = data.health
     this.name = data.name
+    this.badgeColor = data.badgeColor || 'ffffff'
 
     this.clientJoinTime = Date.now()
   }
@@ -1001,8 +1003,16 @@ class Player extends BaseEntity {
       align: 'center',
       spriteContainer: container
     })
+    this.setBadgeColor(this.badgeColor)
 
     return container
+  }
+
+  setBadgeColor(color) {
+    this.badgeColor = color || 'ffffff'
+    if (this.usernameText && this.usernameText.sprite) {
+      this.usernameText.sprite.tint = Number('0x' + this.badgeColor)
+    }
   }
 
   getCollisionGroup() {
