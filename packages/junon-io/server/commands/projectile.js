@@ -2,12 +2,15 @@ const BaseCommand = require("./base_command")
 const Constants = require("../../common/constants")
 const Protocol = require('../../common/util/protocol')
 const EntityGroup = require("./../entities/entity_group")
+const Projectiles = require("./../entities/projectiles")
+const Helper = require("../../common/helper")
 
 class Projectile extends BaseCommand {
 
   getUsage() {
     return [
-      "Fires a projectile in a certain location",
+      "Fires a projectile in a certain location.",
+      "/projectile list - list available projectiles",
       "/projectile [type] [row] [col]",
       "ex: /projectile poison_gas 5 5"
     ]
@@ -18,10 +21,30 @@ class Projectile extends BaseCommand {
   }
 
   isEnabled() {
-    return false
+    return true
+  }
+
+  getProjectileEntries() {
+    return Object.keys(Projectiles)
+      .filter((name) => name !== "forType" && typeof Projectiles[name] === "function")
+      .map((name) => Helper.camelToSnakeCase(name))
+      .sort((a, b) => a.localeCompare(b))
+  }
+
+  listProjectiles(caller) {
+    caller.showChatSuccess("Available projectiles:")
+    const projectiles = this.getProjectileEntries()
+    for (let i = 0; i < projectiles.length; i += 12) {
+      caller.showChatSuccess(projectiles.slice(i, i + 12).join(", "))
+    }
   }
 
   perform(caller, args) {
+    if (String(args[0] || "").toLowerCase() === "list") {
+      this.listProjectiles(caller)
+      return
+    }
+
     const type = args[0]
     const row = parseInt(args[1])
     const col = parseInt(args[2])
