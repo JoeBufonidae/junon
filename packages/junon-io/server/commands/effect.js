@@ -101,14 +101,17 @@ let duration = parseFloat(args[3]) || undefined
       }
 
       if (args[2]) {
-        let targetEffect = args[2]
-        if (allowedEffects.indexOf(targetEffect) === -1) {
+        let targetEffect = args[2].toLowerCase()
+        if (allowedEffects.indexOf(targetEffect) === -1 && targetEffect !== "web") {
           player.showChatError("No such effect " + targetEffect)
           return
         }
 
         entities.forEach((entity) => {
           entity.removeEffect(targetEffect)
+          if (targetEffect === "paralyze") {
+            entity.removeEffect("web")
+          }
         })
       } else {
         entities.forEach((entity) => {
