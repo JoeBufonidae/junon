@@ -90,7 +90,7 @@ class Item extends BaseTransientEntity {
   }
 
   getMaxStack() {
-    if (this.isGold()) return 100000
+    //if (this.isGold()) return 100000
 
     return Constants.maxStackCount
   }
