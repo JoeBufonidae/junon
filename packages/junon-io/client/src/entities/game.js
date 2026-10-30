@@ -68,6 +68,7 @@ class Game {
     this.loadedSounds = {}
     this.loadingSounds = {}
     this.commandSounds = {}
+    this.pendingCommandSoundIds = new Set()
     this.cancelledCommandSoundIds = new Set()
   }
 
@@ -1970,17 +1971,25 @@ class Game {
       return
     }
 
+    this.pendingCommandSoundIds.add(commandSoundId)
+    const finish = () => {
+      this.pendingCommandSoundIds.delete(commandSoundId)
+      this.cancelledCommandSoundIds.delete(commandSoundId)
+      SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+    }
+
     const soundName = Helper.camelToSnakeCase(Helper.getSoundNameById(data.id))
 
     this.loadSound(soundName, () => {
       if (this.cancelledCommandSoundIds.has(commandSoundId)) {
         this.cancelledCommandSoundIds.delete(commandSoundId)
+        this.pendingCommandSoundIds.delete(commandSoundId)
         return
       }
 
       const sound = this.sounds[soundName]
       if (!sound) {
-        SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+        finish()
         return
       }
 
@@ -1995,17 +2004,16 @@ class Game {
           if (this.commandSounds[commandSoundId] !== active) return
           delete this.commandSounds[commandSoundId]
           sound.off("end", active.onEnd, playbackId)
-          SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+          finish()
         }
         this.commandSounds[commandSoundId] = active
         sound.on("end", active.onEnd, playbackId)
       } catch (e) {
         console.error(e)
-        SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+        finish()
       }
     }, () => {
-      this.cancelledCommandSoundIds.delete(commandSoundId)
-      SocketUtil.emit("CommandSoundFinished", { commandSoundId })
+      finish()
     })
   }
 
@@ -2024,8 +2032,9 @@ class Game {
         }
       }
       delete this.commandSounds[commandSoundId]
-    } else {
-      // The sound may still be loading, or its play event may arrive later.
+      this.pendingCommandSoundIds.delete(commandSoundId)
+    } else if (this.pendingCommandSoundIds.has(commandSoundId)) {
+      // The play event arrived, but the sound is still loading.
       this.cancelledCommandSoundIds.add(commandSoundId)
     }
   }

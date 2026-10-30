@@ -95,17 +95,26 @@ class Sound extends BaseCommand {
     return { error: "Provide an entity ID/name or both row and column coordinates." }
   }
 
+  clearPlaybackTimeout(instance) {
+    if (instance && instance.timeout) {
+      clearTimeout(instance.timeout)
+      instance.timeout = null
+    }
+  }
+
   ensurePlaybackState() {
     if (!this.game.commandSoundInstances) {
       this.game.commandSoundInstances = new Map()
       this.game.nextCommandSoundId = 0
     }
 
-    // Expire stale records (e.g. a client never reports completion).
+    // Fallback cleanup for stale records created before the timeout was scheduled.
     const now = Date.now()
     for (const [id, instance] of this.game.commandSoundInstances) {
       if (now - instance.createdAt <= 5 * 60 * 1000) continue
+      this.clearPlaybackTimeout(instance)
       instance.targets.forEach((targetPlayer) => {
+        if (!instance.pendingSocketIds.has(targetPlayer.getSocketId())) return
         this.getSocketUtil().emit(targetPlayer.getSocket(), "StopCommandSound", {
           commandSoundId: id
         })
@@ -191,6 +200,11 @@ class Sound extends BaseCommand {
       targets.push(targetPlayer)
     })
 
+    if (targets.length === 0) {
+      this.error(caller, "No players were in range; no sound was played.")
+      return
+    }
+
     this.ensurePlaybackState()
     const commandSoundId = String(++this.game.nextCommandSoundId)
     const instance = {
@@ -205,16 +219,27 @@ class Sound extends BaseCommand {
 
     this.game.commandSoundInstances.set(commandSoundId, instance)
 
+    // Never leave a playback registered forever if a client fails to report completion.
+    instance.timeout = setTimeout(() => {
+      if (this.game.commandSoundInstances.get(commandSoundId) !== instance) return
+
+      instance.targets.forEach((targetPlayer) => {
+        if (!instance.pendingSocketIds.has(targetPlayer.getSocketId())) return
+        this.getSocketUtil().emit(targetPlayer.getSocket(), "StopCommandSound", {
+          commandSoundId
+        })
+      })
+
+      this.game.commandSoundInstances.delete(commandSoundId)
+      instance.timeout = null
+    }, 5 * 60 * 1000)
+
     targets.forEach((targetPlayer) => {
       this.getSocketUtil().emit(targetPlayer.getSocket(), "PlayCommandSound", {
         id: sound.id,
         commandSoundId
       })
     })
-
-    if (targets.length === 0) {
-      this.error(caller, "No players were in range; no sound was played.")
-    }
   }
 
   stopCommandSounds(caller, args) {
@@ -250,11 +275,13 @@ class Sound extends BaseCommand {
       if (origin && instance.originKey !== origin.key) continue
 
       instance.targets.forEach((targetPlayer) => {
+        if (!instance.pendingSocketIds.has(targetPlayer.getSocketId())) return
         this.getSocketUtil().emit(targetPlayer.getSocket(), "StopCommandSound", {
           commandSoundId: id
         })
       })
 
+      this.clearPlaybackTimeout(instance)
       this.game.commandSoundInstances.delete(id)
       stopped++
     }
