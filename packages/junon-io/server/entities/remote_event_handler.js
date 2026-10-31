@@ -419,6 +419,7 @@ class RemoteEventHandler {
       if (!item.hasInstance()) return
       let isSpaceSuit = item.type == Protocol.definition().BuildingType.SpaceSuit
       if (isSpaceSuit && data.hasOwnProperty("colorIndex")) {
+        if (item.instance !== player.getArmorEquipment()) return
         if (player.sector.shouldAllowSuitChanged()) {
           let colorLabel = player.game.getSuitColorByIndex(data.colorIndex)
           item.instance.setContent(colorLabel)
