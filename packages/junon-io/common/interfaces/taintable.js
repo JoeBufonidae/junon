@@ -151,6 +151,7 @@ Taintable.prototype = {
   },
 
   addPoison(customduration) {
+    if (typeof this.isImmuneTo === "function" && this.isImmuneTo("poison")) return
     this.setEffectLevel("poison", 1, customduration)
   },
 

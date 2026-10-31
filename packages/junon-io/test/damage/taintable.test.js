@@ -127,6 +127,25 @@ describe('add*/remove* convenience wrappers', () => {
     expect(unit.getEffectLevel('poison')).toEqual(0)
   })
 
+  test('addPoison does not affect entities immune to poison', () => {
+    const unit = new Unit()
+    unit.isImmuneTo = jest.fn(category => category === 'poison')
+
+    unit.addPoison()
+
+    expect(unit.isImmuneTo).toHaveBeenCalledWith('poison')
+    expect(unit.getEffectLevel('poison')).toEqual(0)
+  })
+
+  test('addPoison still affects entities that are not immune to poison', () => {
+    const unit = new Unit()
+    unit.isImmuneTo = jest.fn(() => false)
+
+    unit.addPoison()
+
+    expect(unit.getEffectLevel('poison')).toEqual(1)
+  })
+
   test('addWeb/addParalyze/addFear/addInvisible/addHaste/addDrunk/addMiasma/addSpin/addSmoke/addRage all set level 1', () => {
     const unit = new Unit()
     const pairs = [

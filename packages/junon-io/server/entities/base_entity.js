@@ -1443,7 +1443,10 @@ class BaseEntity extends BaseTransientEntity {
         const isThreeSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * 3) === 0
     if (!isOneSecondInterval) return
 
-    if (this.isImmuneTo("poison")) return
+    if (this.isImmuneTo("poison")) {
+      if (this.hasEffect("poison")) this.removeEffect("poison")
+      return
+    }
 
     const poisonDuration = this.getEffectDuration("poison") * Constants.physicsTimeStep
 
