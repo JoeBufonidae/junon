@@ -4,6 +4,14 @@ const BaseBuilding = require("./base_building")
 
 class Sign extends BaseBuilding {
 
+  setBuildingContent(content) {
+    let oldContent = this.content
+    if (this.content !== content) {
+      this.content = content
+      this.onBuildingContentChanged(oldContent, this.content)
+    }
+  }
+
   setHealth(newHealth) {
     if (this.game.isPvP()) return super.setHealth(newHealth)
 
