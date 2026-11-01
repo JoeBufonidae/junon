@@ -92,10 +92,21 @@ class BaseMob extends BaseEntity {
     let players = this.sector.playerTree.search(boundingBox)
     for (var i = 0; i < players.length; i++) {
       let player = players[i]
-      if (player.calculateEntityVisible(this)) {
+      if (player.calculateEntityVisible(this) && !player.visibleMobs[this.getId()]) {
         player.addVisibleMob(this)
       }
     }
+  }
+
+  updatePlayerViewerships() {
+    for (let id in this.playerViewerships) {
+      let player = this.playerViewerships[id]
+      if (!player.calculateEntityVisible(this)) {
+        player.removeVisibleMob(this)
+      }
+    }
+
+    this.addNewlyVisibleMobToPlayers()
   }
 
   initBehavior() {
@@ -1997,6 +2008,10 @@ this.setNameColor(data.nameColor)
   
   onGridPositionChanged() {
     this.trackRegions()
+
+    if (this.sector.isFovMode()) {
+      this.updatePlayerViewerships()
+    }
 
     this.game.triggerEvent("MobMove", {
       entityId: this.getId(),

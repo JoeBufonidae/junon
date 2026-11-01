@@ -750,9 +750,16 @@ class BaseMob extends BaseEntity {
 
   setAngle(angle) {
     if (this.angle !== angle) {
+      const isInitialAngle = typeof this.angle === "undefined"
       this.angle = angle
       const baseRotationOffset = this.getBaseRotationOffset()
-      this.instructToRotate(this.getRadAngle() + baseRotationOffset)
+      const rotation = this.getRadAngle() + baseRotationOffset
+
+      if (isInitialAngle) {
+        this.getRotatableSprite().rotation = rotation
+      } else {
+        this.instructToRotate(rotation)
+      }
     }
   }
 
