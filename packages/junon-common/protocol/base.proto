@@ -1219,6 +1219,7 @@ message PlayerInput {
   int32 angle = 2;
   bool  idle = 3;
   uint32 pressedKey = 4;
+  string pressedKeyName = 5;
 }
 
 message RequestGame {

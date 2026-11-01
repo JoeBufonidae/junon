@@ -69,6 +69,22 @@ describe('protobuf field presence', () => {
     expect(data.hasOwnProperty('controlKeys')).toBe(false)
   })
 
+  it('preserves browser key names through the PlayerInput protocol', () => {
+    const arrow = roundTrip(protocol, 'PlayerInput', {
+      controlKeys: 0,
+      pressedKey: 38,
+      pressedKeyName: 'arrowup'
+    })
+    expect(arrow.pressedKeyName).toBe('arrowup')
+
+    const punctuation = roundTrip(protocol, 'PlayerInput', {
+      controlKeys: 0,
+      pressedKey: 49,
+      pressedKeyName: '!'
+    })
+    expect(punctuation.pressedKeyName).toBe('!')
+  })
+
   it('routes a desktop client holding no keys to the desktop branch', () => {
     // Player#updateInput branches on exactly this check, and treats a missing
     // controlKeys as mobile input.

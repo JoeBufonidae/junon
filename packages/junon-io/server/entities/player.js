@@ -3346,10 +3346,12 @@ class Player extends BaseEntity {
     this.spawnPosition = { x: this.getX(), y: this.getY() }
   }
 
-  onPressKeyChanged(pressedKey) {
-    if (!pressedKey) return
+  onPressKeyChanged(pressedKey, pressedKeyName) {
+    if (!pressedKey && !pressedKeyName) return
 
-    let char = String.fromCharCode(pressedKey).toLowerCase()
+    let char = typeof pressedKeyName === 'string' && pressedKeyName.length > 0
+      ? pressedKeyName
+      : String.fromCharCode(pressedKey).toLowerCase()
 
     this.game.triggerEvent("PlayerKeyboard", {
       playerId: this.id,
@@ -3367,9 +3369,11 @@ class Player extends BaseEntity {
       let prevActionOn = (this.controlKeys >> (actionKeyBitIndex - 1)) % 2 === 1
 
       this.controlKeys = data.controlKeys
-      if (this.pressedKey !== data.pressedKey) {
+      const pressedKeyName = data.pressedKeyName || ''
+      if (this.pressedKey !== data.pressedKey || this.pressedKeyName !== pressedKeyName) {
         this.pressedKey = data.pressedKey
-        this.onPressKeyChanged(this.pressedKey)
+        this.pressedKeyName = pressedKeyName
+        this.onPressKeyChanged(this.pressedKey, this.pressedKeyName)
       }
 
       let currActionOff = (this.controlKeys >> (actionKeyBitIndex - 1)) % 2 === 0

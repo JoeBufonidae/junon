@@ -65,6 +65,8 @@ class InputController {
     this.canvas = document.getElementById("game_canvas")
     this.controlKeys = 0
     this.heldKeys = {}
+    this.pressedKey = 0
+    this.pressedKeyName = ''
 
     this.inputSequenceNumber = 0
     this.moveAngle = 0
@@ -267,6 +269,7 @@ class InputController {
     let keyCode = ClientHelper.getKeycode(event)
     delete this.heldKeys[keyCode]
     this.pressedKey = 0
+    this.pressedKeyName = ''
 
     if (this.isFocusedOnInput(event)) return
 
@@ -462,6 +465,9 @@ class InputController {
     this.heldKeys[keyCode] = true
 
     this.pressedKey = keyCode
+    this.pressedKeyName = typeof event.key === 'string' && event.key.length > 0
+      ? event.key
+      : String.fromCharCode(keyCode)
 
     const controlTarget = this.player
 

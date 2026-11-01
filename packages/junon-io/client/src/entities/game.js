@@ -2989,7 +2989,7 @@ class Game {
 
   displayError(msg, options = {}) {
     msg = i18n.t(msg)
-console.log(options)
+
 
     let textContent
     if (options.isTitle) {
@@ -5799,11 +5799,12 @@ arrow.style.setProperty('--arrow-color',realColor)
     document.querySelector("#player_quick_inventory_menu").style.display = 'none'
   }
 
-  isInputSameAsPrevious(controlKeys, moveAngle, idle, pressedKey) {
+  isInputSameAsPrevious(controlKeys, moveAngle, idle, pressedKey, pressedKeyName) {
     if (this.main.isMobile) {
       return this.lastMoveAngle === moveAngle && this.lastIdle === idle
     } else {
       if (this.lastPressedKey !== pressedKey) return false
+      if (this.lastPressedKeyName !== pressedKeyName) return false
       return this.lastControlKeys === controlKeys
     }
   }
@@ -5823,8 +5824,26 @@ arrow.style.setProperty('--arrow-color',realColor)
     // check what keys are held
     const controlKeys = this.inputController.controlKeys
     const pressedKey = this.inputController.pressedKey
+    const pressedKeyName = this.inputController.pressedKeyName
     const moveAngle = this.inputController.moveAngle
     const idle = this.inputController.idle
+
+    const inputChanged = !this.isInputSameAsPrevious(controlKeys, moveAngle, idle, pressedKey, pressedKeyName)
+
+    // Send keyboard input before mining/action/pan branches can return early.
+    if (inputChanged) {
+      if (this.main.isMobile) {
+        SocketUtil.emit("PlayerInput", { angle: moveAngle, idle: idle })
+      } else {
+        SocketUtil.emit("PlayerInput", { controlKeys: controlKeys, pressedKey: pressedKey, pressedKeyName: pressedKeyName })
+      }
+
+      this.lastPressedKey = pressedKey
+      this.lastPressedKeyName = pressedKeyName
+      this.lastControlKeys = controlKeys
+      this.lastMoveAngle = moveAngle
+      this.lastIdle = idle
+    }
 
     if (player.isMining()) {
       if (player.canAct()) {
@@ -5835,22 +5854,9 @@ arrow.style.setProperty('--arrow-color',realColor)
       player.performAction()
     }
 
-    if (this.isInputSameAsPrevious(controlKeys, moveAngle, idle, pressedKey)) return
-
     if (this.isPanMode) {
       return this.panViaControl()
     }
-
-    if (this.main.isMobile) {
-      SocketUtil.emit("PlayerInput", { angle: moveAngle, idle: idle })
-    } else {
-      SocketUtil.emit("PlayerInput", { controlKeys: controlKeys, pressedKey: pressedKey })
-    }
-
-    this.lastPressedKey = pressedKey
-    this.lastControlKeys = controlKeys
-    this.lastMoveAngle = moveAngle
-    this.lastIdle = idle
   }
 
   getCoordFromMouse(clientX, clientY) {
