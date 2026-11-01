@@ -11,8 +11,8 @@ class FireExtinguisher extends HandEquipment {
 
     let distance = Constants.tileSize
 
-    let firstPoint  = player.game.pointFromDistance(player.getX(), player.getY(), distance * 1, player.getRadAngle())
-    let secondPoint = player.game.pointFromDistance(player.getX(), player.getY(), distance * 2, player.getRadAngle())
+    let firstPoint  = player.game.pointFromDistance(player.getX(), player.getY(), distance * 2.75, player.getRadAngle())
+    let secondPoint = player.game.pointFromDistance(player.getX(), player.getY(), distance * 3.75, player.getRadAngle())
     // let thirdPoint  = player.game.pointFromDistance(player.getX(), player.getY(), distance * 4, player.getRadAngle())
 
     let points = [firstPoint, secondPoint]
