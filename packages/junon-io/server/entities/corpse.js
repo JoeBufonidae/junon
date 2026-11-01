@@ -397,6 +397,14 @@ class Corpse extends BaseEntity {
     this.getSector().insertEntityToTreeByName(this, "units")
   }
 
+  onEffectRemoved(effect) {
+    if (effect === "fire") {
+      this.burnCounter = 0
+    }
+
+    BaseEntity.prototype.onEffectRemoved.call(this, effect)
+  }
+
   applyFireDamage() {
     this.burnCounter += 1
     if (this.burnCounter >= this.BURN_TO_ASH_THRESHOLD) {
@@ -432,6 +440,10 @@ Object.assign(Corpse.prototype, ShipMountable.prototype, {
 
 
 Object.assign(Corpse.prototype, Destroyable.prototype, {
+  isDestroyed() {
+    return false
+  },
+
   getMaxHealth() {
     return 1
   }
