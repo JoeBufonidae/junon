@@ -2893,7 +2893,22 @@ class Player extends BaseEntity {
     let relativeBox = this.getPaddedRelativeBox()
     const hits = this.getContainer().structureMap.hitTestTile(relativeBox)
     hits.forEach((hit) => {
-      if (hit.entity) this.onHitEntity(hit.entity, hit)
+      if (hit.entity && hit.entity.getType() !== Protocol.definition().BuildingType.MiasmaGate) {
+        this.onHitEntity(hit.entity, hit)
+      }
+    })
+
+    this.checkPreciseInteractables()
+  }
+
+  checkPreciseInteractables() {
+    if (!this.getContainer().isSector()) return
+
+    const hits = this.getContainer().structureMap.hitTestTile(this.getRelativeBox())
+    hits.forEach((hit) => {
+      if (hit.entity && hit.entity.getType() === Protocol.definition().BuildingType.MiasmaGate) {
+        this.removeEffect('miasma')
+      }
     })
   }
 
@@ -2904,10 +2919,6 @@ class Player extends BaseEntity {
 
   onHitEntity(entity, hit) {
     if (this.isControllingGhost()) return
-
-    if (entity.getType() === Protocol.definition().BuildingType.MiasmaGate) {
-      this.removeEffect('miasma')
-    }
 
     if (entity.hasCategory("door") && entity.isAutomatic()) {
       if (!this.sector.isTutorial() && !entity.isOwnedBy(this)) return

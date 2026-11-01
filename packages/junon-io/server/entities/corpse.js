@@ -372,8 +372,20 @@ class Corpse extends BaseEntity {
       this.getSocketUtil().broadcast(this.sector.getSocketIds(), "ChunkPositionChanged", { row: options.chunkRow, col: options.chunkCol, entityId: this.getId() })
     }
 
-
+    this.checkPreciseInteractables()
     this.onStateChanged()
+  }
+
+  checkPreciseInteractables() {
+    if (!this.getContainer().isSector()) return
+
+    let relativeBox = this.getRelativeBox()
+    const hits = this.getContainer().structureMap.hitTestTile(relativeBox)
+    hits.forEach((hit) => {
+      if (hit.entity && hit.entity.getType() === Protocol.definition().BuildingType.MiasmaGate) {
+        this.removeEffect('miasma')
+      }
+    })
   }
 
   getStandingPlatform() {
