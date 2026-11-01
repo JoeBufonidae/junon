@@ -12,6 +12,10 @@ class RangeEquipment extends HandEquipment {
     this.user.holdHands()
   }
 
+  isCurrentHandEquipment() {
+    return this.user.getHandEquipment() === this
+  }
+
   getAnimationTween() {
     const ms = 400
 
@@ -35,10 +39,17 @@ class RangeEquipment extends HandEquipment {
       }, ms)
       .easing(TWEEN.Easing.Quadratic.Out)
       .onUpdate(() => {
+        if (!this.isCurrentHandEquipment()) return
+
         this.sprite.x = pos.weaponX
         this.user.hands.x = pos.handsX
       })
       .onComplete(() => {
+        if (!this.isCurrentHandEquipment()) {
+          this.isAnimating = false
+          return
+        }
+
         new TWEEN.Tween(pos)
           .to({ 
             weaponX: startWeaponX,
@@ -46,11 +57,16 @@ class RangeEquipment extends HandEquipment {
           }, ms)
           .easing(TWEEN.Easing.Quadratic.In)
           .onUpdate(() => {
+            if (!this.isCurrentHandEquipment()) return
+
             this.sprite.x = pos.weaponX
             this.user.hands.x = pos.handsX
           })
           .onComplete(() => {
             this.isAnimating = false
+
+            if (!this.isCurrentHandEquipment()) return
+
             this.onAttackAnimationComplete()
           })
           .start()
