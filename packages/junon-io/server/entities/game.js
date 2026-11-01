@@ -2399,7 +2399,7 @@ async setGameMode(gameMode) {
       sector: player.sector,
       inventory: player.inventory,
       equipIndex: player.equipIndex,
-      players: player.sector.players,
+      players: player.sector.isFovMode() && !player.shouldSkipFov() ? player.visiblePlayers : player.sector.players,
       teams: this.getVisibleTeams(),
       gold: player.gold,
       oxygen: player.getOxygen(),

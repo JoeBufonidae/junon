@@ -508,7 +508,7 @@ class Chunk {
     let terrains  = this.sector.getTerrainsByChunk(this)
     let buildings = this.getBuildings()
     let pickups = this.sector.getPickupsByChunk(this)
-    let mobs = this.sector.getMobsByChunk(this)
+    let mobs = []
 
     let players = []
     let corpses = []

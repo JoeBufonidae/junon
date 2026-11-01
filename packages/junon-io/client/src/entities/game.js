@@ -4839,7 +4839,9 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.showPlayerJoinGameMessage(data.player.name)
     if (!this.sector) return
 
-    this.sector.syncWithServerForGroups(["players"], { players: [data.player] })
+    if (!this.sector.isFovMode()) {
+      this.sector.syncWithServerForGroups(["players"], { players: [data.player] })
+    }
     this.sector.addToOriginalPlayers(data.player)
   }
 

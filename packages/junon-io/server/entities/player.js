@@ -786,6 +786,10 @@ class Player extends BaseEntity {
 
     this.repositionOnPlayerTree()
 
+    if (this.sector.isFovMode() && !this.shouldSkipFov()) {
+      this.assignFov()
+    }
+
     this.updateCurrentUser()
 
     if (this.sector.getUid().match("PnGkJd5xZsb0v")) {
@@ -2227,7 +2231,7 @@ class Player extends BaseEntity {
         playerId: this.id,
         inventory: this.inventory,
         sector: sector,
-        players: sector.players,
+        players: sector.isFovMode() && !this.shouldSkipFov() ? this.visiblePlayers : sector.players,
         equipIndex: this.equipIndex
       })
     }
