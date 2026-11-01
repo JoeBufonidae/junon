@@ -80,6 +80,12 @@ class Kill extends BaseCommand {
     entities.forEach((entity) => {
       if (!entity.isBuilding || !entity.isMob || !entity.isCorpse) {
         // invalid entity type, missing functions. skip
+      } else if (
+        entity.isBuilding() &&
+        (entity.getType() === Protocol.definition().BuildingType.Window ||
+          entity.getType() === Protocol.definition().BuildingType.ArmoredWindow)
+      ) {
+        entity.remove({ suppressLowWall: true })
       } else if (entity.isMob() || entity.isBuilding() || entity.isCorpse()) {
         entity.remove()
       } else if (entity.isPlayer()) {

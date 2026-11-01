@@ -23,8 +23,8 @@ class Window extends Wall {
   return this.isOwnedBy(player)
   }
 
-  remove() {
-    if (this.isDismantled) {
+  remove(options = {}) {
+    if (this.isDismantled || options.suppressLowWall) {
       super.remove()
       return
     }
