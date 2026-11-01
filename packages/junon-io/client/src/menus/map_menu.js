@@ -436,14 +436,49 @@ class MapMenu extends BaseMenu {
   }
 
   removeStructure(entity) {
-    this.getTerrainContextList().forEach((ctx) => {
-      let widthInTiles = entity.getRotatedWidth() / Constants.tileSize
-      let heightInTiles = entity.getRotatedHeight() / Constants.tileSize
+    let widthInTiles = entity.getRotatedWidth() / Constants.tileSize
+    let heightInTiles = entity.getRotatedHeight() / Constants.tileSize
+    let upperLeftRow = entity.getUpperLeftRow()
+    let upperLeftCol = entity.getUpperLeftCol()
 
-      ctx.clearRect(entity.getUpperLeftCol() * this.zoomMultiplier, 
-                    entity.getUpperLeftRow() * this.zoomMultiplier, 
-                    widthInTiles * this.zoomMultiplier, 
+    this.getTerrainContextList().forEach((ctx) => {
+      ctx.clearRect(upperLeftCol * this.zoomMultiplier,
+                    upperLeftRow * this.zoomMultiplier,
+                    widthInTiles * this.zoomMultiplier,
                     heightInTiles * this.zoomMultiplier)
+    })
+
+    // Restore the terrain that was hidden beneath the removed structure.
+    // Keep the same layer order used when terrain is initially drawn.
+    let terrainMaps = [
+      this.game.sector.undergroundMap,
+      this.game.sector.groundMap,
+      this.game.sector.map
+    ]
+
+    let wallsToRedraw = []
+
+    for (let row = upperLeftRow; row < upperLeftRow + heightInTiles; row++) {
+      for (let col = upperLeftCol; col < upperLeftCol + widthInTiles; col++) {
+        terrainMaps.forEach((terrainMap) => {
+          let terrain = terrainMap.get(row, col)
+          if (terrain && typeof terrain.drawMinimap === "function") {
+            terrain.drawMinimap()
+          }
+        })
+
+        // A window can be replaced by a low wall in the same tile.
+        // Redraw walls after the terrain so the terrain restoration
+        // does not cover their minimap color.
+        let wall = this.game.sector.armorMap.get(row, col)
+        if (wall && wall.hasCategory("wall") && !wallsToRedraw.includes(wall)) {
+          wallsToRedraw.push(wall)
+        }
+      }
+    }
+
+    wallsToRedraw.forEach((wall) => {
+      this.assignStructure(wall)
     })
   }
 
