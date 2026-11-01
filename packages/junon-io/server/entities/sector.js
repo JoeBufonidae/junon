@@ -866,6 +866,35 @@ initSettings(entities) {
           chunkSubscriptions[chunkId].sendAllToClient(player)
         }
       })
+    } else if (key === 'isFovMode' && value === true) {
+      this.forEachPlayer((player) => {
+        if (player.shouldSkipFov()) return
+
+        player.assignFov()
+
+        let chunkSubscriptions = player.getChunkSubscriptions()
+        for (let chunkId in chunkSubscriptions) {
+          let chunk = chunkSubscriptions[chunkId]
+
+          this.getPlayersByChunk(chunk).forEach((entity) => {
+            if (entity.getId() !== player.getId() && !player.visiblePlayers[entity.getId()]) {
+              player.addRemovedPlayers(entity)
+            }
+          })
+
+          this.getCorpsesByChunk(chunk).forEach((entity) => {
+            if (!player.visibleCorpses[entity.getId()]) {
+              player.addRemovedCorpses(entity)
+            }
+          })
+
+          this.getMobsByChunk(chunk).forEach((entity) => {
+            if (!player.visibleMobs[entity.getId()]) {
+              player.addRemovedMobs(entity)
+            }
+          })
+        }
+      })
     }
   }
 
