@@ -246,9 +246,7 @@ class Game {
   executeCommand(caller, message, delay = 0) {
     message = message.substr(1) // remove / character
 
-    // remove spaces inside brackets
-    // https://stackoverflow.com/a/16644618
-    message = message.replace(/\s+(?=[^[\]]*\])/g, "")
+    message = message.replace(/\[([^\]]*)\]/g, (match, selector) => `[${selector.replace(/\s+/g, '')}]`)
     const tokens = message.split(/\s+/)
     const commandName = tokens.shift()
     const args = tokens.filter((token) => { return token.length > 0 })
