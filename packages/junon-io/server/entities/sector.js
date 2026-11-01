@@ -859,6 +859,13 @@ initSettings(entities) {
       if (!this.settings['isBloodEnabled']) {
         this.removeAllBlood()
       }
+    } else if (key === 'isFovMode' && value === false) {
+      this.forEachPlayer((player) => {
+        let chunkSubscriptions = player.getChunkSubscriptions()
+        for (let chunkId in chunkSubscriptions) {
+          chunkSubscriptions[chunkId].sendAllToClient(player)
+        }
+      })
     }
   }
 
