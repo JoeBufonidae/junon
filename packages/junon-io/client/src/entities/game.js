@@ -122,6 +122,7 @@ class Game {
     this.upstreamIntervals = []
     this.maxUpstreamIntervals = []
     this.resolution = 1
+    this.hasServerZoomOverride = false
     this.latencyCalculateIntervalInSeconds = 10
     this.ticksSincePacket = 0
     this.isServerShutdownInProgress = false
@@ -1534,6 +1535,7 @@ class Game {
     SocketUtil.on("RepairStarted", this.onRepairStarted.bind(this))
     SocketUtil.on("RenderStorage", this.onRenderStorage.bind(this))
     SocketUtil.on("Teleport", this.onTeleport.bind(this))
+    SocketUtil.on("SetZoom", this.onSetZoom.bind(this))
     SocketUtil.on("ErrorMessage", this.onErrorMessage.bind(this))
     SocketUtil.on("MineralCapacityReached", this.onMineralCapacityReached.bind(this))
     SocketUtil.on("ShowStarMap", this.onShowStarMap.bind(this))
@@ -1763,7 +1765,17 @@ class Game {
     } else if (data.group === 'buildings') {
       this.sector.setBuildingCustomStats(data.type, data.stats)
     } else if (data.group === 'entities') {
-      this.sector.setEntityCustomStats(data.type, data.stats)
+      const stats = Object.assign({}, data.stats)
+
+      // Zero means the optional zoom limit was not supplied.
+      if (Number.isFinite(data.minZoom) && data.minZoom > 0) {
+        stats.minZoom = data.minZoom
+      }
+      if (Number.isFinite(data.maxZoom) && data.maxZoom > 0) {
+        stats.maxZoom = data.maxZoom
+      }
+
+      this.sector.setEntityCustomStats(data.type, stats)
     } else if (data.group === 'items') {
       this.sector.setItemCustomStats(data.type, data.stats)
     }
@@ -3223,6 +3235,7 @@ class Game {
     if (!this.player) return
 
     if (this.sector.isZoomAllowed()) return
+    if (this.hasServerZoomOverride) return
 
     const nativeResolution = {
       width: 1280,
@@ -3306,7 +3319,14 @@ class Game {
 
     this.updateServerUpdateRate(this.getScreenWidth(), this.getScreenHeight())
 
-    SocketUtil.emit('WindowResized', { screenWidth: this.getScreenWidth(), screenHeight: this.getScreenHeight(), isZoom: options.zoom })
+    SocketUtil.emit('WindowResized', {
+      screenWidth: this.getScreenWidth(),
+      screenHeight: this.getScreenHeight(),
+      isZoom: options.zoom,
+      zoomLevel: 1 / this.resolution,
+      minZoom: this.MIN_ZOOM_LEVEL,
+      maxZoom: this.MAX_ZOOM_LEVEL
+    })
   }
 
   getScreenWidth() {
@@ -5283,6 +5303,20 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.buildActionMenu.alpha = 0
   }
 
+  onSetZoom(data) {
+    if (Number.isFinite(Number(data.minZoom)) && Number(data.minZoom) > 0) {
+      this.MIN_ZOOM_LEVEL = Math.max(0.1, Math.min(10, Number(data.minZoom)))
+    }
+    if (Number.isFinite(Number(data.maxZoom)) && Number(data.maxZoom) > 0) {
+      this.MAX_ZOOM_LEVEL = Math.max(this.MIN_ZOOM_LEVEL, Math.min(10, Number(data.maxZoom)))
+    }
+
+    // Preserve server-issued zooms against automatic resolution adjustments.
+    this.hasServerZoomOverride = true
+    clearTimeout(this.updateCanvasResolutionTimeout)
+    this.zoom(Number(data.level), true)
+  }
+
   onZoomOutBtnClick() {
     this.zoomOut()
   }
@@ -5326,10 +5360,13 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.zoom(targetZoomLevel)
   }
 
-  zoom(level) {
+  zoom(level, force) {
+    if (!Number.isFinite(level)) return
+    level = Math.max(this.MIN_ZOOM_LEVEL, Math.min(this.MAX_ZOOM_LEVEL, level))
+
     let resolution = { resolution: this.resolution }
 
-    if (!this.sector.isZoomAllowed()) return
+    if (!force && !this.sector.isZoomAllowed()) return
 
     window.zoomEnabled = false // dont allow another zoom until this one is finished
 

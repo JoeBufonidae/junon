@@ -61,6 +61,9 @@ class Player extends BaseEntity {
     this.sessionId = socket.sessionId
     this.remoteAddress = Helper.getSocketRemoteAddress(socket)
     this.fingerprint = data.fingerprint
+    this.zoomLevel = 1
+    this.minZoom = 0.5
+    this.maxZoom = 3
 
     if (this.sector.isZoomAllowed()) {
       this.screenWidth = this.socket.screenWidth
@@ -5139,6 +5142,9 @@ class Player extends BaseEntity {
     if (this.sector.isZoomAllowed()) {
       this.screenWidth = data.screenWidth
       this.screenHeight = data.screenHeight
+      if (Number.isFinite(Number(data.zoomLevel))) this.zoomLevel = Number(data.zoomLevel)
+      if (Number.isFinite(Number(data.minZoom))) this.minZoom = Number(data.minZoom)
+      if (Number.isFinite(Number(data.maxZoom))) this.maxZoom = Number(data.maxZoom)
     }
     this.requestNewChunks()
   }

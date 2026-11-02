@@ -179,6 +179,7 @@ message MessageWrapper {
     TriggerPlayerMenu TriggerPlayerMenu = 183;
     RevitalizerActivate RevitalizerActivate = 184;
     VendingPriceChange VendingPriceChange = 185;
+    SetZoom SetZoom = 189;
   }
 }
 
@@ -319,6 +320,8 @@ message CustomStats {
   string group = 1;
   uint32 type = 2;
   map<string, uint32> stats = 3;
+  float minZoom = 4;
+  float maxZoom = 5;
 }
 
 message ButtonUpdated {
@@ -1610,4 +1613,13 @@ message WindowResized {
   uint32 screenWidth = 1;
   uint32 screenHeight = 2;
   bool isZoom = 3;
+  float zoomLevel = 4;
+  float minZoom = 5;
+  float maxZoom = 6;
+}
+
+message SetZoom {
+  float level = 1;
+  float minZoom = 2;
+  float maxZoom = 3;
 }

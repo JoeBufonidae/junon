@@ -440,6 +440,26 @@ class EventHandler {
     return player.hunger
   }
 
+  getZoom(playerId) {
+    let player = this.getPlayer(playerId)
+    if (!player) return 0
+    return Number.isFinite(player.zoomLevel) ? player.zoomLevel : 1
+  }
+
+  getMaxZoom(playerId) {
+    let player = this.getPlayer(playerId)
+    if (!player) return 0
+    const stats = this.sector.entityCustomStats[player.id] || {}
+    return stats.maxZoom != null ? stats.maxZoom : (player.maxZoom || 3)
+  }
+
+  getMinZoom(playerId) {
+    let player = this.getPlayer(playerId)
+    if (!player) return 0
+    const stats = this.sector.entityCustomStats[player.id] || {}
+    return stats.minZoom != null ? stats.minZoom : (player.minZoom || 0.5)
+  }
+
   getOwner(entityId) {
     let entity = this.game.getEntity(entityId)
     if (!entity) return ""
@@ -1554,6 +1574,9 @@ class EventHandler {
       "$getSpeed": true,
       "$getOxygen": true,
       "$getHunger": true,
+      "$getZoom": true,
+      "$getMaxZoom": true,
+      "$getMinZoom": true,
       "$getMaxHealth": true,
       "$getMaxStamina": true,
       "$getMaxOxygen": true,

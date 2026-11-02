@@ -106,8 +106,21 @@ class Stat extends BaseCommand {
       if (!entity.isMob() && !entity.isBuilding() && !entity.isPlayer() && !entity.isItem()) return
       let stat = this.getEntityStat(entity)
       this.modifyStat(stat, keyValueMap, caller)
-      if(stat.usage != null && entity.instance.usage != null) entity.instance.setUsage(stat.usage)
+      if (entity.isPlayer() && stat.minZoom > stat.maxZoom) {
+        caller.showChatError("minZoom cannot be greater than maxZoom")
+        return
+      }
+      if (!entity.isPlayer() && stat.usage != null && entity.instance && entity.instance.usage != null) {
+        entity.instance.setUsage(stat.usage)
+      }
       this.sector.setCustomEntityStat(entity.id, stat)
+      if (entity.isPlayer()) {
+        entity.emitSocket("SetZoom", {
+          level: entity.zoomLevel || 1,
+          minZoom: stat.minZoom,
+          maxZoom: stat.maxZoom
+        })
+      }
       caller.showChatSuccess(this.formatEntityStat(entity))
     }
   }
@@ -118,9 +131,14 @@ class Stat extends BaseCommand {
         let value
         if (keyValueMap[key] && keyValueMap[key][0] === '*') {
           // multiplier
-          value = stat[key] * parseInt(keyValueMap[key].slice(1))
+          const multiplier = (key === "minZoom" || key === "maxZoom")
+            ? parseFloat(keyValueMap[key].slice(1))
+            : parseInt(keyValueMap[key].slice(1))
+          value = stat[key] * multiplier
         } else {
-          value = parseInt(keyValueMap[key])
+          value = (key === "minZoom" || key === "maxZoom")
+            ? parseFloat(keyValueMap[key])
+            : parseInt(keyValueMap[key])
         }
         
         if (this.isStatValid(key, value)) {
@@ -147,6 +165,8 @@ class Stat extends BaseCommand {
       return "[1-10000]"
     } else if (key === 'usage') {
       return "[0-10000]"
+    } else if (key === 'minZoom' || key === 'maxZoom') {
+      return "[0.1-10]"
     }
   }
 
@@ -168,6 +188,9 @@ class Stat extends BaseCommand {
         return parseInt(value) >= 1 && parseInt(value) <= 10000
       case 'usage':
         return parseInt(value) >= 0 && parseInt(value) <= 10000
+      case 'minZoom':
+      case 'maxZoom':
+        return parseFloat(value) >= 0.1 && parseFloat(value) <= 10
       default: return;
     }
   }
@@ -217,6 +240,15 @@ class Stat extends BaseCommand {
   }
 
   getEntityStat(entity) {
+    if (entity.isPlayer()) {
+      const custom = this.sector.entityCustomStats[entity.id] || {}
+      return {
+        health: custom.health != null ? custom.health : entity.getMaxHealth(),
+        minZoom: custom.minZoom != null ? custom.minZoom : (entity.minZoom || 0.5),
+        maxZoom: custom.maxZoom != null ? custom.maxZoom : (entity.maxZoom || 3)
+      }
+    }
+
     if (this.sector.entityCustomStats[entity.id]) {
       return this.sector.entityCustomStats[entity.id]
     }
@@ -318,7 +350,10 @@ class Stat extends BaseCommand {
 
     if (this.sector.entityCustomStats[entity.id]) {
       if (entity.isPlayer()) {
-        stats['health'] = this.sector.entityCustomStats[entity.id].health
+        const custom = this.sector.entityCustomStats[entity.id]
+        stats['health'] = custom.health
+        stats['minZoom'] = custom.minZoom != null ? custom.minZoom : (entity.minZoom || 0.5)
+        stats['maxZoom'] = custom.maxZoom != null ? custom.maxZoom : (entity.maxZoom || 3)
       } else if (entity.isMob()) {
         stats['health'] = this.sector.entityCustomStats[entity.id].health
         stats['damage'] = this.sector.entityCustomStats[entity.id].damage
@@ -353,6 +388,8 @@ class Stat extends BaseCommand {
         }
       } else if (entity.isPlayer()) {
         stats['health'] = entity.getMaxHealth()
+        stats['minZoom'] = entity.minZoom || 0.5
+        stats['maxZoom'] = entity.maxZoom || 3
       } else if (entity.isWeapon()) {
         stats['damage'] = entity.getDamage()
         stats['range'] = entity.getAttackRange()

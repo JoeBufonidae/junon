@@ -686,10 +686,19 @@ initSettings(entities) {
 
   setCustomEntityStat(id, stats) {
     this.entityCustomStats[id] = stats
+
+    const broadcastStats = Object.assign({}, stats)
+    const minZoom = broadcastStats.minZoom
+    const maxZoom = broadcastStats.maxZoom
+    delete broadcastStats.minZoom
+    delete broadcastStats.maxZoom
+
     this.getSocketUtil().broadcast(this.game.getSocketIds(), "CustomStats", {
       group: "entities",
       type: id,
-      stats: stats
+      stats: broadcastStats,
+      minZoom: Number.isFinite(minZoom) ? minZoom : 0,
+      maxZoom: Number.isFinite(maxZoom) ? maxZoom : 0
     })
   }
 
