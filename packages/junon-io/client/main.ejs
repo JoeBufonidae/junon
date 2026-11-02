@@ -18,6 +18,10 @@
         <a href="/privacy.html" target="_blank" id='privacy_link'><%= t('Privacy') %></a>
         <a href="/rules.html" target="_blank" id='rules_link'><%= t('Rules') %></a>
         <a href="/credits.html" target="_blank" id='credits_link'><%= t('Credits') %></a>
+        <br>
+        <a class='discord_link' href="https://discord.gg/T6rPXtw" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+            <img src="/assets/images/background/discord_small_icon.png" alt="" />
+        </a>
     </div>
     <div id='username_form_container' class='modal_menu'>
         <div id='username_form_description'>Choose a username</div>
@@ -97,31 +101,32 @@
     <div class='middle_container'>
         <div class='home_user_action_container'>
             <div class='home_action_row'>
-                <div class='default_play_btn btn'>
-                    <span><%= t('New Game') %></span>
-                    <div class="play_spinner lds-ring"><div></div><div></div><div></div><div></div></div>
+                <div id='language_selector'>
+                        <img src="/assets/images/language_icon.png" class="language_icon" />
+
+                    <select id='language_select'>
+                        <option value='en'>English</option>
+                        <option value='ru'>Русский</option>
+                        <option value='ja'>日本語</option>
+                    </select>
                 </div>
 
-                <div class='tutorial_menu_btn btn'>
-                    <span><%= t('Tutorial') %></span>
-                    <div class="play_spinner lds-ring"><div></div><div></div><div></div><div></div></div>
+                <div class='home_primary_actions'>
+                    <div class='default_play_btn btn'>
+                        <span><%= t('New Game') %></span>
+                        <div class="play_spinner lds-ring"><div></div><div></div><div></div><div></div></div>
+                    </div>
+                    <div class='tutorial_menu_btn btn'>
+                        <span><%= t('Tutorial') %></span>
+                        <div class="play_spinner lds-ring"><div></div><div></div><div></div><div></div></div>
+                    </div>
                 </div>
 
                 <div class='settings_menu_btn btn'>
+                    <span>Settings</span>
                     <img src="/assets/images/settings_icon.png" />
                 </div>
             </div>
-
-            <div id='language_selector'>
-                <img src="/assets/images/language_icon.png" class='language_icon' />
-                <select id='language_select'>
-                    <option value='en'>English</option>
-                    <option value='ru'>Русский</option>
-                    <option value='ja'>日本語</option>
-                </select>
-            </div>
-
-            <a class='discord_link' href="https://discord.gg/T6rPXtw" target="_blank"><img src="/assets/images/background/discord_small_icon.png"></a>
 
             <button class='open_ban_list_btn ui_btn'>Manage Bans</button>
             <button class="open_event_badges_btn ui_btn" style="display:none;margin-top: 20px;background-color: #bf5036; font-family: 'cc'">Give badge</button>
@@ -180,12 +185,6 @@
         </div>
     </div>
 
-    <div id='desktop_transition_section'>
-        <div id='desktop_transition_notice'>
-            Junon.io is now an app! Multiplayer games can be invited with a room code.
-            The Windows and Linux desktop versions are available now: <a href="https://simpleyuji.itch.io/junonio" target="_blank" rel="noopener noreferrer">Download Junon.io on itch.io</a>.
-        </div>
-    </div>
     
     <div id='background'></div>
 

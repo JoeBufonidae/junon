@@ -1180,15 +1180,19 @@ body {
 }
 
 #game_caption {
-    width: 245px;
+    width: max-content;
+    max-width: calc(100vw - 20px);
+    white-space: nowrap;
     margin: auto;
     color: #aaa;
     text-shadow: #c7fcfc 0px 0px 15px;
+    padding: 16px 0;
+    box-sizing: border-box;
     margin-top: 0px;
-    margin-bottom: 10px;
+    margin-bottom: 28px;
     /*color: #7dffda;*/
     color: white;
-    font-size: 38px;
+    font-size: 46px;
     font-family: PixelForce;
 }
 
@@ -1196,13 +1200,15 @@ body {
     position: absolute;
     top: 20px;
     width: 140px;
+    box-sizing: border-box;
     font-size: 17px;
     right: 15px;
     text-align: right;
 }
 
 .home_user_action_container {
-    padding-bottom: 20px;
+    padding: 20px 0;
+    background-color: rgba(34, 34, 34, 0.94);
 }
 
 #home_footer a {
@@ -1215,6 +1221,32 @@ body {
 #home_footer a:hover {
     color: #863401;
 }
+
+#home_footer a.discord_link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 30px;
+    box-sizing: border-box;
+    margin: 8px 5px 0 auto;
+    padding: 4px;
+    border-radius: 6px;
+    background-color: #5865F2;
+}
+
+#home_footer a.discord_link:hover {
+    color: white;
+    background-color: #4752C4;
+}
+
+#home_footer a.discord_link img {
+    display: block;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
 
 #game_caption.dead {
     font-size: 48px;
@@ -4535,6 +4567,7 @@ html[lang='ja'] #total_online_count {
 
 .browse_games_container {
     padding: 5px;
+    background-color: rgba(34, 34, 34, 0.72);
 }
 
 .main_menu_navigator .browse_games_container {
@@ -7533,8 +7566,9 @@ html[lang='ja'] .game_mode_name {
 }
 
 #language_selector {
-    display: inline-block;
-    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
 }
 
 .total_task_stat {
@@ -8124,7 +8158,7 @@ body.imposter_mode .minigame_poster {
     width: calc(100% - 600px);
     margin: auto;
     position: relative;
-    background-color: #222;
+    background-color: transparent;
 }
 
 #desktop_transition_section {
@@ -8187,7 +8221,13 @@ body.imposter_mode .minigame_poster {
 }
 
 .home_action_row {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 24px;
+    box-sizing: border-box;
     margin-bottom: 10px;
 }
 
@@ -8246,12 +8286,33 @@ body.imposter_mode .minigame_poster {
 }
 
 .discord_link {
-    display: block;
-    margin: 10px auto 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-left: 0;
+    padding: 7px 12px;
+    border-radius: 6px;
+    background-color: #5865F2;
+    color: white;
+    font-family: 'cc';
+    font-size: 18px;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    transition: background-color 0.15s ease;
+}
+
+.discord_link:hover {
+    background-color: #4752C4;
+    color: white;
 }
 
 .discord_link img {
-    width: 32px;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
 }
 
 .new_colony_name_input {
@@ -9233,4 +9294,266 @@ body.moderator .team_entry_row .ban_world_btn {
     width: 100vw;
     height: 120vh;
     object-fit: cover;
+}
+
+
+/* Homepage top menu layout */
+.home_action_row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.home_action_row #language_selector {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 15px;
+}
+
+.home_primary_actions {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.home_action_row > .settings_menu_btn {
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 15px;
+}
+
+
+/* Homepage Settings button */
+.home_action_row > .settings_menu_btn {
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 15px;
+    width: 150px;
+    min-width: 150px;
+    height: 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 20px !important;
+    line-height: normal;
+    white-space: nowrap;
+}
+
+.home_action_row > .settings_menu_btn span {
+    order: 1;
+    display: inline;
+    position: static;
+    float: none;
+    line-height: normal;
+    transform: none;
+    white-space: nowrap;
+}
+
+.home_action_row > .settings_menu_btn img {
+    order: 2;
+    display: block;
+    position: static;
+    float: none;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+}
+
+.home_action_row > .settings_menu_btn {
+    width: 150px;
+    min-width: 150px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    gap: 7px;
+}
+
+.home_action_row > .settings_menu_btn span {
+    order: 1;
+    display: inline-block;
+    white-space: nowrap;
+    line-height: 1;
+    transform: none;
+}
+
+.home_action_row > .settings_menu_btn img {
+    order: 2;
+    display: block;
+    flex: 0 0 28px;
+}
+
+
+/* Definitive homepage Settings button layout */
+#welcome_container .home_action_row > .settings_menu_btn {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px;
+    width: 150px;
+    min-width: 150px;
+    height: 40px;
+    box-sizing: border-box;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    white-space: nowrap;
+}
+
+#welcome_container .home_action_row > .settings_menu_btn span {
+    display: inline-block !important;
+    position: static !important;
+    float: none !important;
+    order: 1;
+    line-height: 1 !important;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+#welcome_container .home_action_row > .settings_menu_btn img {
+    display: block !important;
+    position: static !important;
+    float: none !important;
+    order: 2;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+}
+
+/* Match Settings typography and reduce horizontal padding */
+#welcome_container .home_action_row > .settings_menu_btn {
+    font-family: 'cc' !important;
+    font-size: 28px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+
+/* Match homepage language selector to the button theme */
+.home_action_row #language_selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 8px;
+    background-color: rgb(94, 66, 42);
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.home_action_row #language_selector select {
+    background-color: rgb(94, 66, 42);
+    color: #fff;
+    border: none;
+    outline: none;
+    font-family: 'cc';
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.home_action_row #language_selector select option {
+    background-color: #3a3029;
+    color: #fff;
+}
+
+.home_action_row #language_selector .language_icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+
+/* Mirror the homepage language icon */
+.home_action_row #language_selector .language_icon {
+    transform: scaleX(-1);
+}
+
+.home_action_row #language_selector {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.home_action_row #language_selector select {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.home_action_row #language_selector select {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    text-indent: 0;
+    box-sizing: border-box;
+}
+
+.home_action_row #language_selector {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+/* Balance vertical spacing across the entire homepage action row */
+.home_action_row {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.home_action_row #language_selector {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+.home_action_row {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+.home_action_row {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+/* Reduce actual vertical spacing around the homepage controls */
+.home_user_action_container {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+/* Keep the homepage controls vertically centered in their container */
+.home_user_action_container .home_action_row {
+    margin-bottom: 0 !important;
+}
+
+/* Adjust homepage controls container spacing */
+.home_user_action_container {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+/* Increase homepage controls container spacing */
+.home_user_action_container {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+/* Move the Junon title down an additional 20px */
+#game_caption {
+    translate: 0 20px !important;
+}
+
+/* Enlarge the homepage Junon title */
+#game_caption {
+    font-size: 64px !important;
 }
