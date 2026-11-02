@@ -1552,9 +1552,19 @@ class Player extends BaseEntity {
 
     const building = new buildingKlass(this.game, data)
     this.building  = building
+
+    const colorPicker = this.game.colorPickerMenu
+    const buildingType = building.getType()
+    if (buildingType === Protocol.definition().BuildingType.Floor) {
+      colorPicker.colorIndex = colorPicker.floorColorIndex
+    } else if (buildingType === Protocol.definition().BuildingType.Wall) {
+      colorPicker.colorIndex = colorPicker.wallColorIndex
+    }
+
     this.building.onBuildStart()
 
     this.game.colorPickerMenu.applyBuildingTint(building)
+    this.game.colorPickerMenu.applyBuildingTexture(building)
 
     building.renderAtMousePosition(position.x, position.y)
   }
@@ -1648,8 +1658,8 @@ class Player extends BaseEntity {
       x: gridCoord.x,
       y: gridCoord.y,
       containerId: buildContainer.id,
-      colorIndex: this.building.colorIndex,
-      textureIndex: this.building.textureIndex
+      colorIndex: Number(this.building.colorIndex),
+      textureIndex: Number(this.building.textureIndex)
     }
 
     if (this.building.customHex) {
