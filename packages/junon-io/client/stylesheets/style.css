@@ -9557,3 +9557,60 @@ body.moderator .team_entry_row .ban_world_btn {
 #game_caption {
     font-size: 64px !important;
 }
+
+/* ===== TRANSLUCENT IN-GAME MENUS ===== */
+.modal_menu:not(.loading_modal):not(#username_form_container) {
+    background-color: rgba(17, 17, 17, 0.65);
+}
+
+#entity_menu,
+#chat_player_tooltip,
+#command_block_tooltip,
+#building_menu_tooltip,
+#events_menu {
+    background-color: rgba(17, 17, 17, 0.65);
+}
+
+#tutorial_menu {
+    background-color: rgba(40, 49, 40, 0.72);
+}
+
+#leaderboard_menu {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+#sidebar_menu {
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+#party_container,
+#debug_menu {
+    background-color: rgba(0, 0, 0, 0.70);
+}
+
+/* V menu: specifically target the in-game browse panel, not the homepage. */
+.browse_games_container.in_game_middle_menu {
+    background-color: rgba(34, 34, 34, 0.62) !important;
+}
+
+/* Mini-map */
+#mini_map_menu {
+    background-color: rgba(0, 0, 0, 0.40);
+}
+
+#mini_map_terrain_canvas {
+    background-color: rgba(16, 29, 44, 0.50);
+}
+
+#mini_map_entity_canvas {
+    background: transparent;
+}
+
+#mini_map_player_pos_label {
+    background-color: rgba(0, 0, 0, 0.60);
+}
+
+/* V-menu tab header: 15% opacity */
+.browse_games_container.in_game_middle_menu .game_list_header {
+    background: rgba(34, 34, 34, 0.15) !important;
+}
