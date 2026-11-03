@@ -26,9 +26,9 @@ class ChemistryStation extends BaseBuilding {
   canCraft(type) {
     if (this.isFull()) return false
 
-    const templateList = [Foods.FirstAidKit, Foods.Antidote, Ores.NitroPowder, Equipments.Syringe]
+    const templateList = [Foods.FirstAidKit, Foods.Antidote, Foods.BloodPack, Foods.Stimpack, Ores.Explosives]
 
-    return templateList.find((klass) => { klass.getType() === type })
+    return templateList.some((klass) => klass.prototype.getType() === type)
   }
 
   craft(item, inventoryInput) {

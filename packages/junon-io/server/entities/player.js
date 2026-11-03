@@ -2055,16 +2055,17 @@ class Player extends BaseEntity {
           return
         }
 
-        // Reject a station interaction if another obstacle blocks the path.
-        const raycast = this.getContainer().raycast(
-          this.getX(),
-          this.getY(),
-          sourceStorage.getX(),
-          sourceStorage.getY(),
-          distance,
-          this
-        )
-        if (raycast && raycast.entity !== sourceStorage) return
+        // DISABLED for now:
+        // // Reject a station interaction if another obstacle blocks the path.
+        // const raycast = this.getContainer().raycast(
+        // this.getX(),
+        // this.getY(),
+        // sourceStorage.getX(),
+        // sourceStorage.getY(),
+        // distance,
+        // this
+        // )
+        // if (raycast && raycast.entity !== sourceStorage) return
 
         // Station-based crafting must respect the station's power requirement.
         if (typeof sourceStorage.hasMetPowerRequirement === "function" &&
