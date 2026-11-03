@@ -5869,13 +5869,9 @@ arrow.style.setProperty('--arrow-color',realColor)
 
     const inputChanged = !this.isInputSameAsPrevious(controlKeys, moveAngle, idle, pressedKey, pressedKeyName)
 
-    // Send keyboard input before mining/action/pan branches can return early.
-    if (inputChanged) {
-      if (this.main.isMobile) {
-        SocketUtil.emit("PlayerInput", { angle: moveAngle, idle: idle })
-      } else {
-        SocketUtil.emit("PlayerInput", { controlKeys: controlKeys, pressedKey: pressedKey, pressedKeyName: pressedKeyName })
-      }
+    // Mobile input stays ahead of action handling.
+    if (this.main.isMobile && inputChanged) {
+      SocketUtil.emit("PlayerInput", { angle: moveAngle, idle: idle })
 
       this.lastPressedKey = pressedKey
       this.lastPressedKeyName = pressedKeyName
@@ -5884,13 +5880,34 @@ arrow.style.setProperty('--arrow-color',realColor)
       this.lastIdle = idle
     }
 
-    if (player.isMining()) {
-      if (player.canAct()) {
-        player.mine()
-        return
+    if (player.isMining() && player.canAct()) {
+      // Mining can return early, so send desktop input before mining.
+      if (!this.main.isMobile && inputChanged) {
+        SocketUtil.emit("PlayerInput", { controlKeys: controlKeys, pressedKey: pressedKey, pressedKeyName: pressedKeyName })
+
+        this.lastPressedKey = pressedKey
+        this.lastPressedKeyName = pressedKeyName
+        this.lastControlKeys = controlKeys
+        this.lastMoveAngle = moveAngle
+        this.lastIdle = idle
       }
-    } else if (this.isPerformingAction(controlKeys)) {
+
+      player.mine()
+      return
+    } else if (!player.isMining() && this.isPerformingAction(controlKeys)) {
+      // Let the server receive Act before the held-action state.
       player.performAction()
+    }
+
+    // Send remaining desktop input after action handling.
+    if (!this.main.isMobile && inputChanged) {
+      SocketUtil.emit("PlayerInput", { controlKeys: controlKeys, pressedKey: pressedKey, pressedKeyName: pressedKeyName })
+
+      this.lastPressedKey = pressedKey
+      this.lastPressedKeyName = pressedKeyName
+      this.lastControlKeys = controlKeys
+      this.lastMoveAngle = moveAngle
+      this.lastIdle = idle
     }
 
     if (this.isPanMode) {
