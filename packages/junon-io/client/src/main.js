@@ -373,6 +373,19 @@ class Main {
     this.sessionId = uuidv4()
   }
 
+  getAnonId() {
+    try {
+      let id = window.localStorage.getItem("junon_anon_id")
+      if (!/^[0-9a-f-]{36}$/.test(id || "")) {
+        id = uuidv4()
+        window.localStorage.setItem("junon_anon_id", id)
+      }
+      return id
+    } catch(e) {
+      return null
+    }
+  }
+
   initFingerPrint(cb) {
     FingerprintJS.load().then(fp => {
       fp.get().then(result => {
@@ -1794,6 +1807,11 @@ class Main {
     let matchmakerSocket = this.getMatchmakerSocket()
     if (matchmakerSocket.readyState !== WebSocket.OPEN) return
 
+    if (["Visit", "NewColony", "BootSector", "JoinMiniGame"].indexOf(json.event) !== -1) {
+      let anonId = this.getAnonId()
+      if (anonId) json.data = Object.assign({}, json.data, { anonId: anonId })
+    }
+
     matchmakerSocket.send(JSON.stringify(json))
   }
 
@@ -2035,6 +2053,11 @@ class Main {
 
   async onMatchmakerConnectSuccess() {
     this.isConnectedToMatchmaker = true
+
+    if (!this.visitSent) {
+      this.visitSent = true
+      this.sendToMatchmaker({ event: "Visit", data: {} })
+    }
 
     if (this.isReadyToPresence()) {
       let idToken = await this.getFirebaseIdToken()

@@ -38,6 +38,7 @@ const SectorModel = require("junon-common/db/sector")
 const Favorite = require("junon-common/db/favorite")
 const IpBan = require("junon-common/db/ip_ban")
 const FriendModel = require("junon-common/db/friend")
+const Analytics = require("./analytics")
 const SectorBan = require("junon-common/db/sector_ban")
 const Sequelize = require("sequelize")
 const sequelize = require("junon-common/db/sequelize")
@@ -1438,10 +1439,15 @@ class MatchmakerServer {
       let json = JSON.parse(message)
       let data = json.data
 
+      const trackNames = { Visit: "visit", NewColony: "new_colony", BootSector: "boot_sector", JoinMiniGame: "join_minigame" }
+      if (Object.prototype.hasOwnProperty.call(trackNames, json.event) && data) Analytics.track(trackNames[json.event], data)
+
       switch (json.event) {
         // ping
         case "1":
           this.onPing(data, socket)
+          break
+        case "Visit":
           break
         case "Online":
           this.onPlayerOnline(data, socket)
