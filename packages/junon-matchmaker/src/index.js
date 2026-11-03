@@ -1439,7 +1439,7 @@ class MatchmakerServer {
       let json = JSON.parse(message)
       let data = json.data
 
-      const trackNames = { Visit: "visit", NewColony: "new_colony", BootSector: "boot_sector", JoinMiniGame: "join_minigame" }
+      const trackNames = { Visit: "visit", NewColony: "new_colony", BootSector: "boot_sector", JoinMiniGame: "join_minigame", LoginStarted: "login_started", LoginCompleted: "login_completed", SignInCancelled: "sign_in_cancelled", SignInFailed: "sign_in_failed" }
       if (Object.prototype.hasOwnProperty.call(trackNames, json.event) && data) Analytics.track(trackNames[json.event], data)
 
       switch (json.event) {
@@ -1448,6 +1448,10 @@ class MatchmakerServer {
           this.onPing(data, socket)
           break
         case "Visit":
+        case "LoginStarted":
+        case "LoginCompleted":
+        case "SignInCancelled":
+        case "SignInFailed":
           break
         case "Online":
           this.onPlayerOnline(data, socket)

@@ -386,6 +386,10 @@ class Main {
     }
   }
 
+  trackLogin(eventName) {
+    this.sendToMatchmaker({ event: eventName, data: {} })
+  }
+
   initFingerPrint(cb) {
     FingerprintJS.load().then(fp => {
       fp.get().then(result => {
@@ -1807,7 +1811,7 @@ class Main {
     let matchmakerSocket = this.getMatchmakerSocket()
     if (matchmakerSocket.readyState !== WebSocket.OPEN) return
 
-    if (["Visit", "NewColony", "BootSector", "JoinMiniGame"].indexOf(json.event) !== -1) {
+    if (["Visit", "NewColony", "BootSector", "JoinMiniGame", "LoginStarted", "LoginCompleted", "SignInCancelled", "SignInFailed"].indexOf(json.event) !== -1) {
       let anonId = this.getAnonId()
       if (anonId) json.data = Object.assign({}, json.data, { anonId: anonId })
     }

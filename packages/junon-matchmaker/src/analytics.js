@@ -3,7 +3,7 @@ const os = require("os")
 const path = require("path")
 
 const FILE = process.env.ANALYTICS_FILE || path.join(os.homedir(), "analytics", "events.jsonl")
-const ALLOWED = new Set(["visit", "new_colony", "boot_sector", "join_minigame", "login_completed", "sign_in_failed"])
+const ALLOWED = new Set(["visit", "new_colony", "boot_sector", "join_minigame", "login_started", "login_completed", "sign_in_cancelled", "sign_in_failed"])
 const ID_PATTERN = /^[0-9a-f-]{36}$/
 const MAX_PER_MINUTE = 60
 

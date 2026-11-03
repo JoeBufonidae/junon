@@ -27,6 +27,12 @@ class FirebaseClientHelper {
     // https://stackoverflow.com/a/59722822
   }
 
+  static track(eventName) {
+    try {
+      if (window.main) window.main.trackLogin(eventName)
+    } catch(e) {}
+  }
+
   static signIn(providerName) {
     let provider  
     if (providerName === 'google') {
@@ -42,6 +48,8 @@ class FirebaseClientHelper {
     //   return
     // }
 
+    this.track("LoginStarted")
+
     firebase.auth().signInWithPopup(provider).then((result) => {
       let user = result.user
 
@@ -52,6 +60,9 @@ class FirebaseClientHelper {
   }
 
   static onSignInError(error) {
+    let code = error && error.code
+    this.track(code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request" ? "SignInCancelled" : "SignInFailed")
+
     document.querySelector("#login_btn").style.display = 'none'
     document.querySelector("#social_login_container").style.display = 'none'
 
@@ -60,6 +71,7 @@ class FirebaseClientHelper {
   }
 
   static onSignInSuccessful(user) {
+    this.track("LoginCompleted")
     Cookies.set("uid", user.uid)  
     Cookies.set("email", user.email)  
   }
