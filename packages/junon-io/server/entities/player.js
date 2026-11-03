@@ -2067,9 +2067,10 @@ class Player extends BaseEntity {
         // )
         // if (raycast && raycast.entity !== sourceStorage) return
 
-        // Station-based crafting must respect the station's power requirement.
-        if (typeof sourceStorage.hasMetPowerRequirement === "function" &&
-            !sourceStorage.hasMetPowerRequirement()) return
+        // DISABLED for now: this blanket power check rejected furnaces (they have no power role) on worlds without infinite power. Stations that need power already check it in their own craft(). Remove the // marks to bring it back.
+        // // Station-based crafting must respect the station's power requirement.
+        // if (typeof sourceStorage.hasMetPowerRequirement === "function" &&
+        // !sourceStorage.hasMetPowerRequirement()) return
 
         // Bars may only be produced by a furnace, not another station.
         if (Bars.forType(data.type) &&
