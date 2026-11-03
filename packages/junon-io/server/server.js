@@ -1211,10 +1211,10 @@ class Server {
 
     app.post('/toggle', (res, req) => {
       res.writeHeader('Access-Control-Allow-Origin','*')
-      let token = "aGlkZGVu"
+      let token = process.env.TOGGLE_TOKEN
 
       this.readJson(res, (body) => {
-        if (body.token !== token) return
+        if (!token || body.token !== token) return
 
         let result = this.toggleStatusInMatchmaker()
 
