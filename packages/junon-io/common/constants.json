@@ -12,7 +12,7 @@
   "holdItemIndex": 9999,
   "chunkRowCount": 16,
   "chunkColCount": 16,
-  "fovViewDistance": 384,
+  "fovViewDistance": 1536,
   "maxStorageCount": 48,
   "maxColonyScreenshots": 2,
   "interactDistance": 128,

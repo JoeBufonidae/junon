@@ -2527,14 +2527,15 @@ class Player extends BaseEntity {
   }
 
   assignFov() {
-    this.fovTileHits = this.sector.fovManager.calculateFov(this)
+    this.fovTileHits = this.hasFovImmunity() ? {} : this.sector.fovManager.calculateFov(this)
     this.determineVisiblePlayers()
     this.determineVisibleCorpses()
     this.determineVisibleMobs()
   }
 
   hasSameViewDistance(player, otherPlayer) {
-    return player.getMaxViewDistance() === otherPlayer.getMaxViewDistance()
+    return player.getMaxViewDistance() === otherPlayer.getMaxViewDistance() &&
+      player.hasFovImmunity() === otherPlayer.hasFovImmunity()
   }
 
   determineVisiblePlayers() {
@@ -2812,7 +2813,9 @@ class Player extends BaseEntity {
   getVisibleCorpses() {
     let visible = {}
 
-    let corpses = this.sector.unitTree.search(this.getCameraBoundingBox())
+    let corpses = this.hasFovImmunity()
+      ? this.sector.unitTree.all()
+      : this.sector.unitTree.search(this.getCameraBoundingBox())
 
     for (var i = 0; i < corpses.length; i++) {
       let corpse = corpses[i]
@@ -2828,7 +2831,9 @@ class Player extends BaseEntity {
   getVisibleMobs() {
     let visible = {}
 
-    let mobs = this.sector.mobTree.search(this.getCameraBoundingBox())
+    let mobs = this.hasFovImmunity()
+      ? this.sector.mobTree.all()
+      : this.sector.mobTree.search(this.getCameraBoundingBox())
 
     for (var i = 0; i < mobs.length; i++) {
       let mob = mobs[i]
@@ -2869,8 +2874,17 @@ class Player extends BaseEntity {
   }
 
   isTileVisible(row, col) {
+    if (this.hasFovImmunity()) return true
+
     let tileKey = [row, col].join("-")
     return this.fovTileHits[tileKey]
+  }
+
+  hasFovImmunity() {
+    const custom = this.sector && this.sector.entityCustomStats
+      ? this.sector.entityCustomStats[this.id]
+      : null
+    return !!(custom && custom.fovImmunity === true)
   }
 
   recalculateFovIfHitPresent(hits) {
@@ -2917,7 +2931,7 @@ class Player extends BaseEntity {
 
   shouldSkipFov() {
     if (this.ghost) return true
-    return this.skipFov
+    return this.skipFov || this.hasFovImmunity()
   }
 
   onHitEntity(entity, hit) {
@@ -6062,7 +6076,10 @@ class Player extends BaseEntity {
   }
 
   getMaxViewDistance() {
-    return this.viewDistance || Constants.fovViewDistance
+    const custom = this.sector && this.sector.entityCustomStats
+      ? this.sector.entityCustomStats[this.id]
+      : null
+    return this.viewDistance || (custom && custom.fovRange) || Constants.fovViewDistance
   }
 
   setViewDistance(distance) {

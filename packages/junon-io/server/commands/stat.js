@@ -115,6 +115,7 @@ class Stat extends BaseCommand {
       }
       this.sector.setCustomEntityStat(entity.id, stat)
       if (entity.isPlayer()) {
+        entity.setViewDistance(stat.fovRange)
         entity.emitSocket("SetZoom", {
           level: entity.zoomLevel || 1,
           minZoom: stat.minZoom,
@@ -129,7 +130,12 @@ class Stat extends BaseCommand {
     for (let key in stat) {
       if (keyValueMap[key]) {
         let value
-        if (keyValueMap[key] && keyValueMap[key][0] === '*') {
+        if (key === "fovImmunity") {
+          const raw = String(keyValueMap[key]).toLowerCase()
+          value = raw === "true" || raw === "1" ? true
+            : raw === "false" || raw === "0" ? false
+            : NaN
+        } else if (keyValueMap[key] && keyValueMap[key][0] === '*') {
           // multiplier
           const multiplier = (key === "minZoom" || key === "maxZoom")
             ? parseFloat(keyValueMap[key].slice(1))
@@ -167,10 +173,15 @@ class Stat extends BaseCommand {
       return "[0-10000]"
     } else if (key === 'minZoom' || key === 'maxZoom') {
       return "[0.1-10]"
+    } else if (key === 'fovRange') {
+      return "[1-8192]"
+    } else if (key === 'fovImmunity') {
+      return "[true/false or 1/0]"
     }
   }
 
   isStatValid(key, value) {
+    if (key === 'fovImmunity') return typeof value === "boolean"
     if (isNaN(value)) return false
 
     switch(key) {
@@ -191,6 +202,8 @@ class Stat extends BaseCommand {
       case 'minZoom':
       case 'maxZoom':
         return parseFloat(value) >= 0.1 && parseFloat(value) <= 10
+      case 'fovRange':
+        return Number.isInteger(value) && value >= 1 && value <= 8192
       default: return;
     }
   }
@@ -245,7 +258,9 @@ class Stat extends BaseCommand {
       return {
         health: custom.health != null ? custom.health : entity.getMaxHealth(),
         minZoom: custom.minZoom != null ? custom.minZoom : (entity.minZoom || 0.5),
-        maxZoom: custom.maxZoom != null ? custom.maxZoom : (entity.maxZoom || 3)
+        maxZoom: custom.maxZoom != null ? custom.maxZoom : (entity.maxZoom || 3),
+        fovRange: custom.fovRange != null ? custom.fovRange : entity.getMaxViewDistance(),
+        fovImmunity: custom.fovImmunity === true
       }
     }
 
@@ -354,6 +369,8 @@ class Stat extends BaseCommand {
         stats['health'] = custom.health
         stats['minZoom'] = custom.minZoom != null ? custom.minZoom : (entity.minZoom || 0.5)
         stats['maxZoom'] = custom.maxZoom != null ? custom.maxZoom : (entity.maxZoom || 3)
+        stats['fovRange'] = custom.fovRange != null ? custom.fovRange : entity.getMaxViewDistance()
+        stats['fovImmunity'] = custom.fovImmunity === true
       } else if (entity.isMob()) {
         stats['health'] = this.sector.entityCustomStats[entity.id].health
         stats['damage'] = this.sector.entityCustomStats[entity.id].damage
@@ -390,6 +407,8 @@ class Stat extends BaseCommand {
         stats['health'] = entity.getMaxHealth()
         stats['minZoom'] = entity.minZoom || 0.5
         stats['maxZoom'] = entity.maxZoom || 3
+        stats['fovRange'] = entity.getMaxViewDistance()
+        stats['fovImmunity'] = false
       } else if (entity.isWeapon()) {
         stats['damage'] = entity.getDamage()
         stats['range'] = entity.getAttackRange()
