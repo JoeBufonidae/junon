@@ -9475,7 +9475,6 @@ body.moderator .team_entry_row .ban_world_btn {
 }
 
 
-/* Mirror the homepage language icon */
 .home_action_row #language_selector .language_icon {
     transform: scaleX(-1);
 }
@@ -9504,7 +9503,6 @@ body.moderator .team_entry_row .ban_world_btn {
     padding-bottom: 10px !important;
 }
 
-/* Balance vertical spacing across the entire homepage action row */
 .home_action_row {
     padding-top: 10px !important;
     padding-bottom: 10px !important;
@@ -9525,42 +9523,36 @@ body.moderator .team_entry_row .ban_world_btn {
     padding-bottom: 2px !important;
 }
 
-/* Reduce actual vertical spacing around the homepage controls */
 .home_user_action_container {
     padding-top: 2px !important;
     padding-bottom: 2px !important;
 }
 
-/* Keep the homepage controls vertically centered in their container */
 .home_user_action_container .home_action_row {
     margin-bottom: 0 !important;
 }
 
-/* Adjust homepage controls container spacing */
 .home_user_action_container {
     padding-top: 5px !important;
     padding-bottom: 5px !important;
 }
 
-/* Increase homepage controls container spacing */
 .home_user_action_container {
     padding-top: 10px !important;
     padding-bottom: 10px !important;
 }
 
-/* Move the Junon title down an additional 20px */
 #game_caption {
     translate: 0 20px !important;
 }
 
-/* Enlarge the homepage Junon title */
 #game_caption {
     font-size: 64px !important;
 }
 
 /* ===== TRANSLUCENT IN-GAME MENUS ===== */
 .modal_menu:not(.loading_modal):not(#username_form_container) {
-    background-color: rgba(17, 17, 17, 0.65);
+    background-color: rgba(17, 17, 17, 0.75);
 }
 
 #entity_menu,
@@ -9568,7 +9560,7 @@ body.moderator .team_entry_row .ban_world_btn {
 #command_block_tooltip,
 #building_menu_tooltip,
 #events_menu {
-    background-color: rgba(17, 17, 17, 0.65);
+    background-color: rgba(17, 17, 17, 0.75);
 }
 
 #tutorial_menu {
@@ -9588,12 +9580,10 @@ body.moderator .team_entry_row .ban_world_btn {
     background-color: rgba(0, 0, 0, 0.70);
 }
 
-/* V menu: specifically target the in-game browse panel, not the homepage. */
 .browse_games_container.in_game_middle_menu {
     background-color: rgba(34, 34, 34, 0.62) !important;
 }
 
-/* Mini-map */
 #mini_map_menu {
     background-color: rgba(0, 0, 0, 0.40);
 }
@@ -9610,7 +9600,10 @@ body.moderator .team_entry_row .ban_world_btn {
     background-color: rgba(0, 0, 0, 0.60);
 }
 
-/* V-menu tab header: 15% opacity */
 .browse_games_container.in_game_middle_menu .game_list_header {
     background: rgba(34, 34, 34, 0.15) !important;
+}
+
+#command_block_menu.modal_menu:not(.loading_modal):not(#username_form_container) {
+    background-color: rgba(17, 17, 17, 0.95);
 }
