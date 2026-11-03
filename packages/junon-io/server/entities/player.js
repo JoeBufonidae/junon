@@ -3386,7 +3386,8 @@ class Player extends BaseEntity {
     let char = typeof pressedKeyName === 'string' && pressedKeyName.length > 0
       ? pressedKeyName
       : String.fromCharCode(pressedKey).toLowerCase()
-
+    if (char === ' ') char = 'Space'
+    
     this.game.triggerEvent("PlayerKeyboard", {
       playerId: this.id,
       player: this.getName(),

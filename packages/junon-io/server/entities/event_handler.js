@@ -1036,8 +1036,8 @@ class EventHandler {
   }
 
   safeEvalComparison(comparison, params) {
-    let safeValue1 = this.interpolate(comparison.value1, params, { dontQuoteString: true })
-    let safeValue2 = this.interpolate(comparison.value2, params, { dontQuoteString: true })
+    let safeValue1 = this.interpolate(comparison.value1, params, { dontQuoteString: true, preserveWhitespace: true })
+    let safeValue2 = this.interpolate(comparison.value2, params, { dontQuoteString: true, preserveWhitespace: true })
     let operator = comparison.operator
     let result
 
@@ -1729,7 +1729,7 @@ cleanArgument(...args) {
 }
 
   interpolate(value, params, options = {}) {
-    let result = value.trim()
+    let result = options.preserveWhitespace ? value : value.trim()
 
     let parameters = Object.assign({}, params, this.variables)
 
