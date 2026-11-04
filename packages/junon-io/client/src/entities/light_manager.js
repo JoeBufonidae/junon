@@ -741,43 +741,43 @@ class LightManager {
     switch(hour) {
       case 21:
         this.setLightMapContainerAlpha(0.95)
-        this.setSkyBrightness(5)
+        this.setSkyBrightness(0)
         break
       case 20:
         this.setLightMapContainerAlpha(0.8)
-        this.setSkyBrightness(22)
+        this.setSkyBrightness(10)
         break
       case 19:
         this.setLightMapContainerAlpha(0.7)
-        this.setSkyBrightness(38)
+        this.setSkyBrightness(20)
         break
       case 18:
         this.setLightMapContainerAlpha(0.6)
-        this.setSkyBrightness(52)
+        this.setSkyBrightness(32)
         break
       case 6:
         this.setLightMapContainerAlpha(0.8)
-        this.setSkyBrightness(22)
+        this.setSkyBrightness(10)
         break
       case 7:
         this.setLightMapContainerAlpha(0.7)
-        this.setSkyBrightness(38)
+        this.setSkyBrightness(20)
         break
       case 8:
         this.setLightMapContainerAlpha(0.6)
-        this.setSkyBrightness(52)
+        this.setSkyBrightness(32)
         break
       case 9:
         this.setLightMapContainerAlpha(0.5)
-        this.setSkyBrightness(65)
+        this.setSkyBrightness(45)
         break
       default:
         if (hour < 6 || hour > 21) {
           this.setLightMapContainerAlpha(0.95)
-          this.setSkyBrightness(5)
+          this.setSkyBrightness(0)
         } else {
           this.setLightMapContainerAlpha(0.5)
-          this.setSkyBrightness(65)
+          this.setSkyBrightness(45)
         }
     }
 
