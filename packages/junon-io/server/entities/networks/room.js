@@ -492,6 +492,13 @@ class Room extends Network {
   }
 
   checkOxygenLevels() {
+    // tell nearby players when the room becomes airtight or stops being airtight
+    let isAirtightNow = !!this.isAirtight()
+    if (this.lastAnnouncedAirtight !== isAirtightNow) {
+      this.lastAnnouncedAirtight = isAirtightNow
+      this.onStateChanged()
+    }
+
     let isOxygenated = this.checkIsOxygenated()
     if (this.isOxygenated !== isOxygenated) {
       this.isOxygenated = isOxygenated
@@ -1152,7 +1159,7 @@ class Room extends Network {
       oxygenPercentage: this.oxygenPercentage,
       isOxygenated: this.isOxygenated,
       clientMustDelete: this.clientMustDelete,
-      isConnectedToSky: !!this.isConnectedToSky,
+      isAirtight: !!this.isAirtight(),
     }
 
     if (this.x) data.x = this.x

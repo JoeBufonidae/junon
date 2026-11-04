@@ -188,13 +188,13 @@ class LightManager {
     this.isLightMapChanged = true
   }
 
-  // floor tiles inside a room that is not open to space get no sky light
+  // floor tiles inside an airtight (sealed) room get no sky light
   isInSealedRoom(row, col) {
     if (!this.sector || !this.sector.settings.isShadowsEnabled) return false
     let roomTileMap = this.sector.roomTileMap
     if (!roomTileMap) return false
     let roomTile = roomTileMap.get(row, col)
-    return !!(roomTile && roomTile.room && !roomTile.room.isConnectedToSky)
+    return !!(roomTile && roomTile.room && roomTile.room.isAirtight)
   }
 
   computeShadowValue(row, col) {
