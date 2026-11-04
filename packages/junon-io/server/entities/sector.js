@@ -1395,9 +1395,35 @@ initSettings(entities) {
     this.buildingDecays.delete(building.getId())
   }
 
+  dirtyFloorsNearWalls() {
+    if (!this.shouldFloorsAutodirt()) return
+
+    const maxDirtLevel = 2
+    const dirtChance = 0.2
+    const neighbors = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+
+    this.platformMap.forEach((row, col, platform) => {
+      if (!platform || !platform.hasCategory("platform") || !platform.isPlatformDirtiable()) return
+      if (platform.getDirtLevel() >= maxDirtLevel) return
+      if (Math.random() >= dirtChance) return
+
+      let touchesWall = neighbors.some(([dr, dc]) => {
+        let r = row + dr
+        let c = col + dc
+        if (this.groundMap.isOutOfBounds(r, c)) return false
+        let tile = this.groundMap.get(r, c)
+        return tile && tile.isForegroundTile && tile.isForegroundTile()
+      })
+
+      if (touchesWall) platform.addDirt()
+    })
+  }
+
   removeDecayedBuildings() {
     const isTwoMinuteInterval = this.game.timestamp % (Constants.physicsTimeStep * 60 * 2) === 0
     if (!isTwoMinuteInterval) return
+
+    this.dirtyFloorsNearWalls()
 
     this.buildingDecays.forEach((buildingId) => {
       let building = this.game.getEntity(buildingId)
