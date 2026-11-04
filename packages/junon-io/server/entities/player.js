@@ -3067,6 +3067,8 @@ class Player extends BaseEntity {
     switch(activityType) {
       case "walk":
         result = 50
+        // walking on rock, soil or lattice without a space suit tires you out faster
+        if (this.isOnRockLikeTile() && !this.hasSpaceSuitEquipped()) result = 25
         break
       case "attack":
         result = 10
@@ -4140,6 +4142,22 @@ class Player extends BaseEntity {
     // targetEntityToMove.setAngle(targetEntityToMove.angle + angleDelta)
   }
 
+  isOnRockLikeTile() {
+    if (this.sector.hasGravity()) return false
+    const platform = this.getStandingPlatform()
+    if (!platform) return false
+
+    const isRock = platform.isTerrain() && platform.isGroundTile()
+    const isSoil = platform.hasCategory("soil")
+    const isLattice = platform.getType() === Protocol.definition().BuildingType.Lattice
+    return isRock || isSoil || isLattice
+  }
+
+  hasSpaceSuitEquipped() {
+    const armor = this.getArmorEquipment()
+    return !!armor && armor.getType() === Protocol.definition().BuildingType.SpaceSuit
+  }
+
   getSpeedMultiplier() {
     if (this.hasEffect('fear')) return 0.7
     if (this.hasEffect('haste')) return 1.5
@@ -4155,6 +4173,8 @@ class Player extends BaseEntity {
     const platform = this.getStandingPlatform()
 
     let multiplier = platform ? platform.getSpeedMultiplier() : 1
+    // rock, soil and lattice are slower to walk on than dirty floors (0.9)
+    if (this.isOnRockLikeTile()) multiplier = Math.min(multiplier, 0.8)
     let playerSpeedMultiplier = this.getSpeedMultiplier()
     let totalMultiplier = multiplier * playerSpeedMultiplier
 
