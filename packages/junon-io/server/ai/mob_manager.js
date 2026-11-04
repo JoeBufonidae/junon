@@ -89,7 +89,9 @@ class MobManager {
 
   spawnLandMob(player, mobTypeName) {
     this.spawnAreaMob(player, mobTypeName, (hit) => {
-      return hit.entity && hit.entity.isGroundTile()
+      // land mobs never spawn on floors (platforms)
+      let hasFloor = this.sector.platformMap.get(hit.row, hit.col)
+      return hit.entity && hit.entity.isGroundTile() && !hasFloor
     })
   }
 
