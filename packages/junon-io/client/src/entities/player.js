@@ -147,7 +147,7 @@ class Player extends BaseEntity {
     let armorEquipment = this.getArmorEquipment()
     if (!armorEquipment) {
       if (this.isMe()) {
-        return { r: 255,  g: 255, b: 255, a: 0.250 }
+        return { r: 255,  g: 255, b: 255, a: 0.050 }
       } else {
         return { r: 255,  g: 255, b: 255, a: 0.000 } // i cant see other player's normal vision
       }
