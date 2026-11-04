@@ -880,11 +880,8 @@ class Room extends Network {
   onCreateSuccess() {
     this.createdAt = Date.now()
 
-    // the room will already contain tiles/edgeTiles to be sent to player
-    // no need to resend invidivual tiles to chunks
-    this.disableSendTileUpdate = true
+    // the Room message does not carry a tile list, so tiles are sent to nearby players as they get assigned
     this.assignRoomsToEntities()
-    this.disableSendTileUpdate = false
     this.pressurizeRoom()
 
     if (debugMode) {

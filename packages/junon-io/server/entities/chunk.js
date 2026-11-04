@@ -549,11 +549,37 @@ class Chunk {
     // console.log("sent chunk  " + [this.row, this.col].join("-") + " size: " + Helper.roughSizeOfObject(data))
 
     this.getSocketUtil().emit(player.getSocket(), "Chunk", data)
+    this.sendRoomTilesToClient(player)
 
 
     if (this.sector.pathFinder.isDebugSubscriber(player)) {
       this.sendChunkRegions(player)
     }
+  }
+
+  // the Room message has no tile list, so tell the client which tiles of this chunk belong to which room
+  sendRoomTilesToClient(player) {
+    let roomTiles = {}
+
+    this.getRooms().forEach((room) => {
+      let tiles = {}
+      let add = (hit) => {
+        if (hit.row < this.tileStartRow || hit.row > this.tileEndRow) return
+        if (hit.col < this.tileStartCol || hit.col > this.tileEndCol) return
+        tiles[hit.row + "-" + hit.col] = { row: hit.row, col: hit.col }
+      }
+
+      Object.values(room.tiles).forEach(add)
+      Object.values(room.edgeTiles).forEach(add)
+
+      if (Object.keys(tiles).length > 0) {
+        roomTiles[room.id] = { tiles: tiles }
+      }
+    })
+
+    if (Object.keys(roomTiles).length === 0) return
+
+    this.getSocketUtil().emit(player.getSocket(), "EntityUpdated", { roomTiles: roomTiles })
   }
 
   sendChunkRegions(player) {

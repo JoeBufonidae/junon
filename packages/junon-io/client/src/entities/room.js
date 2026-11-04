@@ -212,7 +212,7 @@ class Room {
     let lightManager = this.sector.lightManager
     if (!lightManager) return
     let shadows = tiles.map((tile) => { return { row: tile.row, col: tile.col } })
-    lightManager.shadowQueue = lightManager.shadowQueue.concat(shadows)
+    shadows.forEach((shadow) => { lightManager.shadowQueue.push(shadow) })
   }
 
   syncTiles(tiles) {
