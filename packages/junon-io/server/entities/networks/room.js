@@ -19,6 +19,7 @@ class Room extends Network {
 
     this.isRoom = true
     this.isOxygenated = false
+    this.isSealedRoom = false // plain stored value so it gets sent to clients
     this.shouldUpdateSpatialTree = false
     this.cachedIsAirtight = null
 
@@ -494,8 +495,8 @@ class Room extends Network {
   checkOxygenLevels() {
     // tell nearby players when the room becomes airtight or stops being airtight
     let isAirtightNow = !!this.isAirtight()
-    if (this.lastAnnouncedAirtight !== isAirtightNow) {
-      this.lastAnnouncedAirtight = isAirtightNow
+    if (this.isSealedRoom !== isAirtightNow) {
+      this.isSealedRoom = isAirtightNow
       this.onStateChanged()
     }
 
@@ -1159,7 +1160,7 @@ class Room extends Network {
       oxygenPercentage: this.oxygenPercentage,
       isOxygenated: this.isOxygenated,
       clientMustDelete: this.clientMustDelete,
-      isAirtight: !!this.isAirtight(),
+      isSealedRoom: !!this.isSealedRoom,
     }
 
     if (this.x) data.x = this.x

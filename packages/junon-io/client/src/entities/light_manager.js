@@ -194,7 +194,7 @@ class LightManager {
     let roomTileMap = this.sector.roomTileMap
     if (!roomTileMap) return false
     let roomTile = roomTileMap.get(row, col)
-    return !!(roomTile && roomTile.room && roomTile.room.isAirtight)
+    return !!(roomTile && roomTile.room && roomTile.room.isSealedRoom)
   }
 
   computeShadowValue(row, col) {

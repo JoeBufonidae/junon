@@ -20,7 +20,7 @@ class Room {
     this.data = data
     this.tiles = {}
     this.chunks = {}
-    this.isAirtight = !!data.isAirtight
+    this.isSealedRoom = !!data.isSealedRoom
 
     this.initSprite()
   }
@@ -132,8 +132,8 @@ class Room {
       this.setOxygenPercentage(data.oxygenPercentage)
     }
 
-    if (data.hasOwnProperty("isAirtight")) {
-      this.setAirtight(!!data.isAirtight)
+    if (data.hasOwnProperty("isSealedRoom")) {
+      this.setSealedRoom(!!data.isSealedRoom)
     }
 
     if (data.tiles) {
@@ -201,9 +201,9 @@ class Room {
     return [tile.row, tile.col].join("-")
   }
 
-  setAirtight(value) {
-    if (this.isAirtight === value) return
-    this.isAirtight = value
+  setSealedRoom(value) {
+    if (this.isSealedRoom === value) return
+    this.isSealedRoom = value
     this.queueShadowRedraw(Object.values(this.tiles))
   }
 
