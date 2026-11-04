@@ -20,6 +20,7 @@ class Room {
     this.data = data
     this.tiles = {}
     this.chunks = {}
+    this.isConnectedToSky = !!data.isConnectedToSky
 
     this.initSprite()
   }
@@ -131,6 +132,10 @@ class Room {
       this.setOxygenPercentage(data.oxygenPercentage)
     }
 
+    if (data.hasOwnProperty("isConnectedToSky")) {
+      this.setConnectedToSky(!!data.isConnectedToSky)
+    }
+
     if (data.tiles) {
       this.syncTiles(Object.values(data.tiles))
     }
@@ -196,6 +201,20 @@ class Room {
     return [tile.row, tile.col].join("-")
   }
 
+  setConnectedToSky(value) {
+    if (this.isConnectedToSky === value) return
+    this.isConnectedToSky = value
+    this.queueShadowRedraw(Object.values(this.tiles))
+  }
+
+  // redraw the darkness of these tiles (sealed rooms get no sky light)
+  queueShadowRedraw(tiles) {
+    let lightManager = this.sector.lightManager
+    if (!lightManager) return
+    let shadows = tiles.map((tile) => { return { row: tile.row, col: tile.col } })
+    lightManager.shadowQueue = lightManager.shadowQueue.concat(shadows)
+  }
+
   syncTiles(tiles) {
     if (!tiles) return
 
@@ -220,6 +239,7 @@ class Room {
       }
 
       this.unregisterTile(tile)
+      this.queueShadowRedraw([tile])
     }
 
     delete this.tiles[tileKey]
@@ -230,6 +250,7 @@ class Room {
 
     tile.room = this
     this.registerTile(tile)
+    this.queueShadowRedraw([tile])
 
     if (this.shouldCreateSprites()) {
       tile.sprite = this.createTileSprite(tile.row, tile.col)

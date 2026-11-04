@@ -1089,6 +1089,7 @@ message Room {
   bool clientMustDelete = 6;
   uint32 x = 7;
   uint32 y = 8;
+  bool isConnectedToSky = 9;
 }
 
 message RoomWithTiles {

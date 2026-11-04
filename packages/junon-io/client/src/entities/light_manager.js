@@ -188,11 +188,21 @@ class LightManager {
     this.isLightMapChanged = true
   }
 
+  // floor tiles inside a room that is not open to space get no sky light
+  isInSealedRoom(row, col) {
+    if (!this.sector || !this.sector.settings.isShadowsEnabled) return false
+    let roomTileMap = this.sector.roomTileMap
+    if (!roomTileMap) return false
+    let roomTile = roomTileMap.get(row, col)
+    return !!(roomTile && roomTile.room && !roomTile.room.isConnectedToSky)
+  }
+
   computeShadowValue(row, col) {
     let shadowColor = this.getShadowColor(row, col)
     if (!shadowColor) return { r: 255, g: 255, b: 255, a: 1 }
 
-    let color = this.getColorInRange(shadowColor, "#000000", this.skyBrightness)
+    let brightness = this.isInSealedRoom(row, col) ? 0 : this.skyBrightness
+    let color = this.getColorInRange(shadowColor, "#000000", brightness)
     return tinycolor(color).toRgb()
   }
 

@@ -1152,6 +1152,7 @@ class Room extends Network {
       oxygenPercentage: this.oxygenPercentage,
       isOxygenated: this.isOxygenated,
       clientMustDelete: this.clientMustDelete,
+      isConnectedToSky: !!this.isConnectedToSky,
     }
 
     if (this.x) data.x = this.x
