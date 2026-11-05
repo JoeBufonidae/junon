@@ -4103,10 +4103,12 @@ class Player extends BaseEntity {
     this.setUserOxygen(this.getOxygen() - 1)
 
     if (this.getOxygen() <= 0) {
-      // 10 damage in an oxygen suit with an empty tank, 30 when breathing with no suit at all
+      // 10 damage with an oxygen suit, or with no suit inside an airtight room (pressure damage)
+      // 30 damage with no suit in space (or in a room that is open to space)
       const armor = this.getArmorEquip()
       const hasOxygenSuit = !!armor && armor.hasOxygen()
-      this.setHealth(this.health - (hasOxygenSuit ? 10 : 30))
+      const isInAirtightRoom = !!(platform && platform.room && platform.room.isAirtight())
+      this.setHealth(this.health - ((hasOxygenSuit || isInAirtightRoom) ? 10 : 30))
     }
   }
 
