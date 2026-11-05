@@ -49,6 +49,11 @@ class ArmorEquipment extends BaseEquipment {
     return this.oxygen
   }
 
+  // saved with the item as oxygen + 1, so that 0 can mean "not saved" (old saves get a full tank)
+  get oxygenPlusOne() {
+    return typeof this.oxygen === "number" ? this.oxygen + 1 : 0
+  }
+
   setOxygen(oxygen, player) {
     let prevOxygen = this.oxygen
     if (oxygen > this.getMaxOxygen()) {

@@ -536,6 +536,7 @@ class Player extends BaseEntity {
     this.isAuthenticated = data.isAuthenticated
 
     if (data.hasOwnProperty("health"))  this.health = data.health
+    if (data.hasOwnProperty("maxHealthPenalty")) this.maxHealthPenalty = data.maxHealthPenalty
     if (data.hasOwnProperty("hunger"))  this.hunger = data.hunger
     if (data.hasOwnProperty("stamina")) this.stamina = data.stamina
     if (data.hasOwnProperty("oxygen"))  this.oxygen = data.oxygen

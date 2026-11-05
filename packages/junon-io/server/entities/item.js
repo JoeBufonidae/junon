@@ -44,10 +44,12 @@ class Item extends BaseTransientEntity {
 
     let usage
     let content
+    let oxygenPlusOne
 
     if (options.instance && options.instance.constructor.name === "ItemInstance") {
       usage = options.instance.usage
       content = options.instance.content
+      oxygenPlusOne = options.instance.oxygenPlusOne
       delete options["instance"]
     }
 
@@ -60,6 +62,11 @@ class Item extends BaseTransientEntity {
 
     if (this.instance && usage) {
       this.instance.usage = usage
+    }
+
+    // suits remember how much oxygen they had (0 means not saved: keep the full tank)
+    if (this.instance && oxygenPlusOne && typeof this.instance.oxygen === "number" && typeof this.instance.getMaxOxygen === "function") {
+      this.instance.oxygen = Math.min(oxygenPlusOne - 1, this.instance.getMaxOxygen())
     }
   }
 
