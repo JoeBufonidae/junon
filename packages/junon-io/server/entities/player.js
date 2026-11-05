@@ -3545,6 +3545,7 @@ class Player extends BaseEntity {
       this.dragger.unsetDragTarget()
     }
 
+    this.maxHealthPenalty = 0
     this.setHealth(this.getMaxHealth())
     this.setUserOxygen(this.getMaxOxygen())
     this.setStamina(this.getMaxStamina())
@@ -3735,6 +3736,7 @@ class Player extends BaseEntity {
     this.consumePoison()
     this.consumeOxygen()
     this.consumeHunger()
+    this.recoverMaxHealth()
     this.consumeFear()
     this.consumeMiasma()
     this.consumeSpin()
@@ -4108,8 +4110,44 @@ class Player extends BaseEntity {
       const armor = this.getArmorEquip()
       const hasOxygenSuit = !!armor && armor.hasOxygen()
       const isInAirtightRoom = !!(platform && platform.room && platform.room.isAirtight())
-      this.setHealth(this.health - ((hasOxygenSuit || isInAirtightRoom) ? 10 : 30))
+      this.takeNeedsDamage((hasOxygenSuit || isInAirtightRoom) ? 10 : 30)
     }
+  }
+
+  // ---- Tuning: oxygen / hunger damage ----
+  getNeedsDamageSettings() {
+    return {
+      maxHealthRecoverySeconds: 10, // how often lost max health comes back
+      maxHealthRecoveryAmount: 1    // how much max health comes back each time
+    }
+  }
+
+  // Oxygen and hunger damage lowers health, max health and current stamina by the same amount
+  takeNeedsDamage(amount) {
+    if (this.isGod() || this.isBot()) {
+      this.setHealth(this.health - amount)
+      return
+    }
+
+    this.maxHealthPenalty = Math.min(this.getBaseMaxHealth(), (this.maxHealthPenalty || 0) + amount)
+    this.lastNeedsDamageTimestamp = this.game.timestamp
+    this.setHealth(this.health - amount)
+    this.setStamina(this.stamina - amount)
+  }
+
+  // Lost max health slowly comes back while no oxygen or hunger damage is being taken
+  recoverMaxHealth() {
+    if (!this.maxHealthPenalty) return
+
+    const settings = this.getNeedsDamageSettings()
+    const interval = Constants.physicsTimeStep * settings.maxHealthRecoverySeconds
+    if (this.game.timestamp % interval !== 0) return
+
+    const lastDamage = this.lastNeedsDamageTimestamp
+    if (lastDamage !== undefined && this.game.timestamp - lastDamage < interval) return
+
+    this.maxHealthPenalty = Math.max(0, this.maxHealthPenalty - settings.maxHealthRecoveryAmount)
+    this.onStateChanged("health")
   }
 
   setUserOxygen(oxygen) {
@@ -6371,6 +6409,9 @@ Object.assign(Player.prototype, Destroyable.prototype, {
     this.onStateChanged("health")
   },
   getMaxHealth() {
+    return Math.max(0, this.getBaseMaxHealth() - (this.maxHealthPenalty || 0))
+  },
+  getBaseMaxHealth() {
     if (this.sector) {
       if (this.sector.entityCustomStats[this.id]) {
         return this.sector.entityCustomStats[this.id].health
@@ -6437,7 +6478,7 @@ Object.assign(Player.prototype, Needs.prototype, {
     }
   },
   onHungerZero() {
-    this.setHealth(this.health - 2)
+    this.takeNeedsDamage(2)
   }
 })
 
