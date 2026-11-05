@@ -3548,7 +3548,7 @@ class Player extends BaseEntity {
     this.maxHealthPenalty = 0
     this.setHealth(this.getMaxHealth())
     this.setUserOxygen(this.getMaxOxygen())
-    this.setStamina(this.getMaxStamina())
+    // stamina is intentionally NOT refilled on respawn
 
     this.initClientState()
 
