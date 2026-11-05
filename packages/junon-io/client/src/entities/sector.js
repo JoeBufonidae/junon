@@ -1505,11 +1505,11 @@ class Sector {
       if (room) {
         let roomTileBatches = Helper.batch(roomTileList, 20)
         this.processRoomTileUpdate(room, roomTileBatches)
-      } else if (attempt < 20) {
+      } else if (attempt < 100) {
         // the room itself may not have arrived yet, try again shortly
         let retryData = { roomTiles: {} }
         retryData.roomTiles[roomId] = roomTileMap
-        setTimeout(() => { this.syncRoomTiles(retryData, attempt + 1) }, 250)
+        setTimeout(() => { this.syncRoomTiles(retryData, attempt + 1) }, 50)
       }
     }
   }

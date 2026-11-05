@@ -399,6 +399,17 @@ class Room extends Network {
       this.removeDoor(entity)
     }
 
+    // removing a structure (like a lamp) tells clients its tile left the room,
+    // but the floor underneath is still part of the room, so tell the clients again
+    if (!entity.hasCategory("platform")) {
+      hits.forEach((hit) => {
+        const platform = this.container.getStandingPlatform(hit.row, hit.col)
+        if (platform && platform.room === this) {
+          this.sendTileChunkUpdate({ row: hit.row, col: hit.col })
+        }
+      })
+    }
+
     this.onOxygenComponentChanged()
   }
 
@@ -882,6 +893,7 @@ class Room extends Network {
 
     // the Room message does not carry a tile list, so tiles are sent to nearby players as they get assigned
     this.assignRoomsToEntities()
+    this.isSealedRoom = !!this.isAirtight() // correct from the start, so new rooms do not flash as unsealed
     this.pressurizeRoom()
 
     if (debugMode) {

@@ -106,9 +106,19 @@ class Room {
   }
 
   remove() {
-    Object.values(this.tiles).forEach((tile) => {
-      this.unregisterTile(tile)
-    })
+    // keep the tile -> room links for a moment: when a room is rebuilt (a wall is placed or removed)
+    // the new room's tiles arrive a little later, and clearing right away makes the light flash
+    const removedTiles = Object.values(this.tiles)
+    setTimeout(() => {
+      try {
+        removedTiles.forEach((tile) => {
+          if (this.container.roomTileMap.get(tile.row, tile.col) === tile) {
+            this.unregisterTile(tile)
+            this.queueShadowRedraw([tile])
+          }
+        })
+      } catch (e) {}
+    }, 2000)
 
     this.getContainer().unregisterEntity("rooms", this)
     this.unregisterFromChunks()
