@@ -4103,7 +4103,10 @@ class Player extends BaseEntity {
     this.setUserOxygen(this.getOxygen() - 1)
 
     if (this.getOxygen() <= 0) {
-      this.setHealth(this.health - 10)
+      // 10 damage in an oxygen suit with an empty tank, 30 when breathing with no suit at all
+      const armor = this.getArmorEquip()
+      const hasOxygenSuit = !!armor && armor.hasOxygen()
+      this.setHealth(this.health - (hasOxygenSuit ? 10 : 30))
     }
   }
 
