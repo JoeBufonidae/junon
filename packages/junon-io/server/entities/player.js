@@ -3552,6 +3552,7 @@ class Player extends BaseEntity {
     this.setHealth(this.getMaxHealth())
     this.setUserOxygen(this.getMaxOxygen())
     // stamina is intentionally NOT refilled on respawn
+    this.wasOxygenProtected = undefined
 
     this.initClientState()
 
@@ -3737,6 +3738,7 @@ class Player extends BaseEntity {
     this.consumeFood()
     this.consumeFire()
     this.consumePoison()
+    this.checkOxygenExposure()
     this.consumeOxygen()
     this.raiseBodyOxygenToSuit()
     this.consumeHunger()
@@ -4129,7 +4131,38 @@ class Player extends BaseEntity {
     }
   }
 
-  // Taking an oxygen suit off: instant 0 oxygen in space, -10 oxygen inside an airtight room
+  // True while something keeps air around you: an oxygen suit, or standing in an airtight room (or in a doorway to one)
+  isOxygenProtected() {
+    const armor = this.getArmorEquip()
+    if (armor && armor.hasOxygen()) return true
+    if (!this.getContainer().isSector()) return true // other containers (like ships) are not covered by this rule
+
+    const platform = this.getStandingPlatform()
+    if (platform && platform.room && platform.room.isAirtight()) return true
+
+    const structureHits = this.getContainer().structureMap.hitTestTile(this.getBox())
+    const structureHit = structureHits.find((hit) => { return hit.entity })
+    const isDoor = structureHit && structureHit.entity && structureHit.entity.hasCategory("door")
+    if (isDoor) {
+      const rooms = structureHit.entity.getConnectedRooms()
+      return rooms.some((room) => { return room && room.isAirtight() })
+    }
+
+    return false
+  }
+
+  // Going outside with no suit (or the room you are in losing its seal) drops your oxygen to 0 at once
+  checkOxygenExposure() {
+    if (!this.sector.settings["isOxygenEnabled"]) return
+
+    const isProtected = this.isOxygenProtected()
+    if (this.wasOxygenProtected && !isProtected) {
+      this.setOxygen(0)
+    }
+    this.wasOxygenProtected = isProtected
+  }
+
+  // Taking an oxygen suit off: nothing changes inside an airtight room, oxygen goes to 0 anywhere else
   onOxygenSuitChanged(previousItem, currentItem) {
     if (this.isRemoved) return
 
@@ -4151,14 +4184,11 @@ class Player extends BaseEntity {
       this.setOxygen(Math.max(this.oxygen, Math.min(suitOxygen, Constants.Player.oxygen)))
     }
 
-    // then the pressure change hits
-    const platform = this.getContainer().isSector() ? this.getStandingPlatform() : null
-    const room = platform && platform.room
-    if (room && room.isAirtight()) {
-      this.setOxygen(this.oxygen - 10)
-    } else {
+    // inside an airtight room nothing special happens; anywhere else the air is gone at once
+    if (!this.isOxygenProtected()) {
       this.setOxygen(0)
     }
+    this.wasOxygenProtected = this.isOxygenProtected()
   }
 
   // ---- Tuning: oxygen / hunger damage ----
