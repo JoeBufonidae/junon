@@ -18,6 +18,7 @@ class LightManager {
     this.lightMap          = new Grid("light",  container, container.getRowCount(), container.getColCount())
     this.fovMap            = new Grid("fov",  container, container.getRowCount(), container.getColCount())
     this.MAX_LIGHT_DISTANCE = 3
+    this.FIXED_LIGHT_ALPHA = 0.95 // the light layer is always drawn at this opacity
 
     this.shadowQueue = []
     this.lightSourceQueue = []
@@ -197,13 +198,34 @@ class LightManager {
     return !!(roomTile && roomTile.room && roomTile.room.isSealedRoom)
   }
 
+  // The light layer blends as: 1 - alpha + alpha * color. It now always uses the fixed alpha,
+  // so tile colors are adjusted to give the same result the old per-hour alpha gave.
+  adjustForFixedLightAlpha(rgb) {
+    const FIXED = this.FIXED_LIGHT_ALPHA
+    const legacy = (this.legacyLightAlpha === undefined) ? FIXED : this.legacyLightAlpha
+    if (legacy === FIXED) return rgb
+    if (!this.sector || !this.sector.settings || !this.sector.settings.isShadowsEnabled) return rgb
+    if (!this.container.lightMapContainer || this.game.isCanvasMode()) return rgb
+
+    const adjust = (channel) => {
+      const oldColor = channel / 255
+      const multiplier = (1 - legacy) + legacy * oldColor
+      const newColor = (multiplier - (1 - FIXED)) / FIXED
+      return Math.round(Math.max(0, Math.min(1, newColor)) * 255)
+    }
+
+    return { r: adjust(rgb.r), g: adjust(rgb.g), b: adjust(rgb.b), a: rgb.a }
+  }
+
   computeShadowValue(row, col) {
     let shadowColor = this.getShadowColor(row, col)
     if (!shadowColor) return { r: 255, g: 255, b: 255, a: 1 }
 
-    let brightness = this.isInSealedRoom(row, col) ? 0 : this.skyBrightness
-    let color = this.getColorInRange(shadowColor, "#000000", brightness)
-    return tinycolor(color).toRgb()
+    // sealed rooms always get full (night level) darkness, whatever the time of day
+    if (this.isInSealedRoom(row, col)) return { r: 0, g: 0, b: 0, a: 1 }
+
+    let color = this.getColorInRange(shadowColor, "#000000", this.skyBrightness)
+    return this.adjustForFixedLightAlpha(tinycolor(color).toRgb())
   }
 
   computeLightValue(row, col) {
@@ -709,7 +731,8 @@ class LightManager {
     let color = this.colorWithBrightness(this.skyColor, this.skyBrightness)
 
     let ctx = this.skyMapCanvas.getContext("2d")
-    ctx.fillStyle = color.toString()
+    let skyRgb = this.adjustForFixedLightAlpha(color.toRgb())
+    ctx.fillStyle = "rgb(" + skyRgb.r + "," + skyRgb.g + "," + skyRgb.b + ")"
     ctx.fillRect(0, 0, this.skyMapCanvas.width, this.skyMapCanvas.height)
 
 
@@ -726,11 +749,12 @@ class LightManager {
   }
 
   setLightMapContainerAlpha(alpha) {
+    this.legacyLightAlpha = alpha // what the per-hour table asks for; used to adjust tile colors
     if (this.game.isCanvasMode()) return
     if (!this.container.lightMapContainer) return
 
     if (this.sector.settings.isShadowsEnabled) {
-      this.container.lightMapContainer.alpha = alpha  
+      this.container.lightMapContainer.alpha = this.FIXED_LIGHT_ALPHA  
     } else {
       this.container.lightMapContainer.alpha = 0.3
     }
