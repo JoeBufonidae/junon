@@ -3120,6 +3120,8 @@ class Player extends BaseEntity {
       let previousArmor = previousItem ? previousItem.getTypeName() : ""
       let currentArmor = equipmentItem ? equipmentItem.getTypeName() : ""
 
+      this.onOxygenSuitChanged(previousItem, equipmentItem)
+
       this.game.triggerEvent("ArmorEquipChanged", {
           playerId: this.getId(),
           player: this.getName(),
@@ -3736,6 +3738,7 @@ class Player extends BaseEntity {
     this.consumeFire()
     this.consumePoison()
     this.consumeOxygen()
+    this.raiseBodyOxygenToSuit()
     this.consumeHunger()
     this.recoverMaxHealth()
     this.consumeFear()
@@ -4112,6 +4115,49 @@ class Player extends BaseEntity {
       const hasOxygenSuit = !!armor && armor.hasOxygen()
       const isInAirtightRoom = !!(platform && platform.room && platform.room.isAirtight())
       this.takeNeedsDamage((hasOxygenSuit || isInAirtightRoom) ? 10 : 30)
+    }
+  }
+
+  // Wearing a suit that holds more air than your body: your own oxygen rises to match (up to what a body holds)
+  raiseBodyOxygenToSuit() {
+    const armor = this.getArmorEquip()
+    if (!armor || !armor.hasOxygen()) return
+
+    const target = Math.min(armor.getOxygen(), Constants.Player.oxygen)
+    if (this.oxygen < target) {
+      this.setOxygen(target)
+    }
+  }
+
+  // Taking an oxygen suit off: instant 0 oxygen in space, -10 oxygen inside an airtight room
+  onOxygenSuitChanged(previousItem, currentItem) {
+    if (this.isRemoved) return
+
+    const hasOxygenSuit = (item) => {
+      return !!(item && item.instance && typeof item.instance.hasOxygen === "function" && item.instance.hasOxygen())
+    }
+
+    if (hasOxygenSuit(currentItem)) {
+      this.raiseBodyOxygenToSuit()
+      return
+    }
+
+    if (!hasOxygenSuit(previousItem)) return
+    if (!this.sector.settings["isOxygenEnabled"]) return
+
+    // you keep the air your body can hold from the suit
+    const suitOxygen = previousItem.instance.oxygen
+    if (typeof suitOxygen === "number") {
+      this.setOxygen(Math.max(this.oxygen, Math.min(suitOxygen, Constants.Player.oxygen)))
+    }
+
+    // then the pressure change hits
+    const platform = this.getContainer().isSector() ? this.getStandingPlatform() : null
+    const room = platform && platform.room
+    if (room && room.isAirtight()) {
+      this.setOxygen(this.oxygen - 10)
+    } else {
+      this.setOxygen(0)
     }
   }
 
