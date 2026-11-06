@@ -4196,7 +4196,9 @@ class Player extends BaseEntity {
   getNeedsDamageSettings() {
     return {
       maxHealthRecoverySeconds: 5, // how often lost max health comes back
-      maxHealthRecoveryAmount: 3    // how much max health comes back each time
+      maxHealthRecoveryAmount: 3,    // how much max health comes back each time
+      minOxygenForRecovery: 1,      // no recovery while oxygen is at or below this
+      minHungerForRecovery: 1       // no recovery while hunger is at or below this
     }
   }
 
@@ -4221,6 +4223,10 @@ class Player extends BaseEntity {
     const settings = this.getNeedsDamageSettings()
     const interval = Constants.physicsTimeStep * settings.maxHealthRecoverySeconds
     if (this.game.timestamp % interval !== 0) return
+
+    // no recovery while you are out of oxygen or starving
+    if (this.getOxygen() <= settings.minOxygenForRecovery) return
+    if (this.getHunger() <= settings.minHungerForRecovery) return
 
     const lastDamage = this.lastNeedsDamageTimestamp
     if (lastDamage !== undefined && this.game.timestamp - lastDamage < interval) return
