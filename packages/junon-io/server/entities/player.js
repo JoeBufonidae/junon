@@ -4115,7 +4115,7 @@ class Player extends BaseEntity {
       // 30 damage with no suit in space (or in a room that is open to space)
       const armor = this.getArmorEquip()
       const hasOxygenSuit = !!armor && armor.hasOxygen()
-      const isInAirtightRoom = !!(platform && platform.room && platform.room.isAirtight())
+      const isInAirtightRoom = !!(platform && platform.room && platform.room.isAirtightAndSealed())
       this.takeNeedsDamage((hasOxygenSuit || isInAirtightRoom) ? 10 : 30)
     }
   }
@@ -4138,14 +4138,14 @@ class Player extends BaseEntity {
     if (!this.getContainer().isSector()) return true // other containers (like ships) are not covered by this rule
 
     const platform = this.getStandingPlatform()
-    if (platform && platform.room && platform.room.isAirtight()) return true
+    if (platform && platform.room && platform.room.isAirtightAndSealed()) return true
 
     const structureHits = this.getContainer().structureMap.hitTestTile(this.getBox())
     const structureHit = structureHits.find((hit) => { return hit.entity })
     const isDoor = structureHit && structureHit.entity && structureHit.entity.hasCategory("door")
     if (isDoor) {
       const rooms = structureHit.entity.getConnectedRooms()
-      return rooms.some((room) => { return room && room.isAirtight() })
+      return rooms.some((room) => { return room && room.isAirtightAndSealed() })
     }
 
     return false
