@@ -25,7 +25,7 @@ class Airlock extends BaseBuilding {
 
   recalculateNearbyFov() {
     if (!this.sector.isFovMode()) return
-    let hits = this.getDoorSidePlatformTiles()    
+    let hits = this.getDoorSidePlatformTiles()
     this.game.forEachPlayer((player) => {
       player.recalculateFovIfHitPresent(hits)
     })
@@ -89,7 +89,7 @@ class Airlock extends BaseBuilding {
                              !this.isOnHangar(container, x, y, w, h) &&
                              !this.hasRailNeighbor(container, x, y, w, h) &&
                              !container.railMap.isOccupied(x, y, w, h) &&
-                             !container.structureMap.isOccupied(x, y, w, h, false, false) // false is for ignoring walls, like we used to when they weren't classified as structures. 
+                             !container.structureMap.isOccupied(x, y, w, h, false, false) // false is for ignoring walls, like we used to when they weren't classified as structures.
   }
 
   interact(user) {
@@ -223,19 +223,66 @@ class Airlock extends BaseBuilding {
   }
 
   getVacuumTiles(roomToCheck) {
-    let hits = this.getDoorSidePlatformTiles()
-
-    return hits.filter((hit) => {
-      let noPlatform = hit.entity === 0
-      if (noPlatform) return this.isOpen
-
-      let room  = hit.entity.room
-      if (room === roomToCheck && !room.isAirtight()) return true
-
-      return false
+    let sideHits = [-1, 1].map((side) => {
+      return this.getPlatformTiles(this.getDoorSideRelativeBox(side))
     })
-  }
 
+    // Without a room argument, callers are looking for an actual space tile.
+    if (!roomToCheck) {
+      return sideHits.reduce((hits, side) => hits.concat(side), []).filter((hit) => {
+        return hit.entity === 0 && this.isOpen
+      })
+    }
+
+    let roomSideIndex = sideHits.findIndex((hits) => {
+      return hits.some((hit) => hit.entity && hit.entity.room === roomToCheck)
+    })
+
+    if (roomSideIndex === -1) return []
+
+    let roomSideHits = sideHits[roomSideIndex]
+
+    // A non-airtight room is already exposed to vacuum.
+    if (!roomToCheck.isAirtight()) {
+      return roomSideHits.filter((hit) => hit.entity && hit.entity.room === roomToCheck)
+    }
+
+    // A closed door prevents this room from reaching anything on its other side.
+    if (!this.isOpen) return []
+
+    // Search every room reachable through open doors. Track visited rooms so
+    // loops between rooms cannot cause infinite traversal.
+    let pendingRooms = [roomToCheck]
+    let visitedRooms = new Set()
+
+    while (pendingRooms.length > 0) {
+      let room = pendingRooms.shift()
+      if (!room || visitedRooms.has(room)) continue
+
+      visitedRooms.add(room)
+
+      // Any non-airtight room in the connected open-door network is exposed.
+      if (!room.isAirtight()) return roomSideHits
+
+      for (let hit of room.getDoors()) {
+        let door = hit.entity
+        if (!door || !door.isOpen) continue
+
+        // A door with an actual empty-space tile is a vacuum boundary.
+        if (door.getVacuumTiles().length > 0) return roomSideHits
+
+        // Continue through every room connected by this open door.
+        for (let roomId in door.rooms) {
+          let neighborRoom = door.rooms[roomId]
+          if (neighborRoom && !visitedRooms.has(neighborRoom)) {
+            pendingRooms.push(neighborRoom)
+          }
+        }
+      }
+    }
+
+    return []
+  }
 
   getDockingBoundingBox(w, h) {
     let box = this.getRelativeBox()
