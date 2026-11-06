@@ -100,6 +100,7 @@ class Airlock extends BaseBuilding {
     }
 
     if (this.isOpen) {
+      clearTimeout(this.closeTimeout)
       this.close()
     } else {
       if (user.isMob()) {
@@ -107,6 +108,14 @@ class Airlock extends BaseBuilding {
         return
       } else {
         this.open()
+        if (this.isAutomatic()) {
+          clearTimeout(this.closeTimeout)
+          this.closeTimeout = setTimeout(() => {
+            this.close()
+            this.onOpenStateChanged(user)
+            this.closeTimeout = null
+          }, 3000)
+        }
       }
     }
 
@@ -117,6 +126,7 @@ class Airlock extends BaseBuilding {
   }
 
   unregister() {
+    clearTimeout(this.closeTimeout)
     super.unregister()
   }
 
