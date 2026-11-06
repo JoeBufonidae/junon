@@ -4195,8 +4195,8 @@ class Player extends BaseEntity {
   // ---- Tuning: oxygen / hunger damage ----
   getNeedsDamageSettings() {
     return {
-      maxHealthRecoverySeconds: 10, // how often lost max health comes back
-      maxHealthRecoveryAmount: 1    // how much max health comes back each time
+      maxHealthRecoverySeconds: 5, // how often lost max health comes back
+      maxHealthRecoveryAmount: 3    // how much max health comes back each time
     }
   }
 
