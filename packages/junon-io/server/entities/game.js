@@ -2405,6 +2405,7 @@ async setGameMode(gameMode) {
       oxygen: player.getOxygen(),
       stamina: player.getStamina(),
       hunger: player.getHunger(),
+      maxHealthPenalty: player.maxHealthPenalty || 0,
       creatorUid: this.getCreatorUid(),
       host: this.server.getHost(),
       playerUid: player.getUid(),

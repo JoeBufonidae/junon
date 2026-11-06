@@ -1277,6 +1277,7 @@ message JoinGame {
   map<uint32, EntityDialogues> dialogueMap = 29;
   FullMap fullMap = 30;
   uint32 isLightingCustom = 31;
+  uint32 maxHealthPenalty = 32;
 }
 
 message Objective {

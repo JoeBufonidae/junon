@@ -4454,6 +4454,7 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.player.setOxygen(data.oxygen)
     this.player.setHunger(data.hunger)
     this.player.setStamina(data.stamina)
+    this.player.setMaxHealthPenalty(data.maxHealthPenalty)
     this.player.setGold(data.gold)
 
     this.renderInventory(data)
