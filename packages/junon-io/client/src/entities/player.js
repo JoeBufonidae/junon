@@ -68,7 +68,7 @@ class Player extends BaseEntity {
     this.interpolator.setOnNoPositionAvailableListener(this.onNoPositionAvailable.bind(this))
 
     if (this.isMe()) {
-      this.game.updateHealthBar(this.health, this.getMaxHealth())
+      this.game.updateHealthBar(this.health, this.getMaxHealth(), this.maxHealthPenalty)
       this.game.updateOxygenBar(this.oxygen, this.getMaxOxygen())
       this.game.updateStaminaBar(this.stamina, this.getMaxStamina())
       this.game.updateHungerBar(this.hunger, this.getMaxHunger())
@@ -1952,7 +1952,7 @@ Object.assign(Player.prototype, Destroyable.prototype, {
   },
   onPostSetHealth() {
     if (this.isMe()) {
-      this.game.updateHealthBar(this.health, this.getMaxHealth())
+      this.game.updateHealthBar(this.health, this.getMaxHealth(), this.maxHealthPenalty)
     }
 
     if (this.sector.originalPlayers[this.getId()]) {
@@ -1969,7 +1969,16 @@ Object.assign(Player.prototype, Destroyable.prototype, {
       this.game.entityMenu.update(this)
     }
   },
+  setMaxHealthPenalty(value) {
+    this.maxHealthPenalty = value || 0
+    if (this.isMe()) {
+      this.game.updateHealthBar(this.health, this.getMaxHealth(), this.maxHealthPenalty)
+    }
+  },
   getMaxHealth() {
+    return Math.max(0, this.getBaseMaxHealth() - (this.maxHealthPenalty || 0))
+  },
+  getBaseMaxHealth() {
     if (this.game.sector.entityCustomStats[this.id]) {
       return this.game.sector.entityCustomStats[this.id].health
     }

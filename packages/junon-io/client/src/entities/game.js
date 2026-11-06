@@ -3533,7 +3533,7 @@ arrow.style.setProperty('--arrow-color',realColor)
   onUpdateStats(data) {
     if (!this.player) return
 
-    let stats = ["gold", "oxygen", "stamina", "hunger", "thirst"]
+    let stats = ["gold", "oxygen", "stamina", "hunger", "thirst", "maxHealthPenalty"]
 
     stats.forEach((stat) => {
       if (data.hasOwnProperty(stat)) {
@@ -5140,9 +5140,14 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.hungerBar.querySelector(".bar_fill").style.width = max ? (curr / max * 100) + "%" : "0%"
   }
 
-  updateHealthBar(curr, max) {
+  updateHealthBar(curr, max, locked) {
+    // locked is max health lost to oxygen and hunger damage, drawn as a gray block at the end of the bar
+    locked = locked || 0
+    const full = max + locked
     this.healthBar.querySelector(".bar_label").innerText = curr
-    this.healthBar.querySelector(".bar_fill").style.width = max ? (curr / max * 100) + "%" : "0%"
+    this.healthBar.querySelector(".bar_fill").style.width = full ? (curr / full * 100) + "%" : "0%"
+    const lockedBar = this.healthBar.querySelector(".bar_locked")
+    if (lockedBar) lockedBar.style.width = full ? (locked / full * 100) + "%" : "0%"
   }
 
   updateTotalTasksBar(curr, max) {

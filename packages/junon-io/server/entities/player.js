@@ -3307,7 +3307,7 @@ class Player extends BaseEntity {
 
     this.teamRequests = {}
 
-    this.PLAYER_STAT_ATTRIBUTES = ["oxygen", "hunger", "stamina", "gold"]
+    this.PLAYER_STAT_ATTRIBUTES = ["oxygen", "hunger", "stamina", "gold", "maxHealthPenalty"]
 
     this.chunkSubscriptions = {} // chunks ive explored/subscribed to
 
@@ -3549,6 +3549,7 @@ class Player extends BaseEntity {
     }
 
     this.maxHealthPenalty = 0
+    this.onStateChanged("maxHealthPenalty")
     this.setHealth(this.getMaxHealth())
     this.setUserOxygen(this.getMaxOxygen())
     // stamina is intentionally NOT refilled on respawn
@@ -4208,6 +4209,7 @@ class Player extends BaseEntity {
 
     this.maxHealthPenalty = Math.min(this.getBaseMaxHealth(), (this.maxHealthPenalty || 0) + amount)
     this.lastNeedsDamageTimestamp = this.game.timestamp
+    this.onStateChanged("maxHealthPenalty")
     this.setHealth(this.health - amount)
     this.setStamina(this.stamina - amount)
   }
@@ -4224,6 +4226,7 @@ class Player extends BaseEntity {
     if (lastDamage !== undefined && this.game.timestamp - lastDamage < interval) return
 
     this.maxHealthPenalty = Math.max(0, this.maxHealthPenalty - settings.maxHealthRecoveryAmount)
+    this.onStateChanged("maxHealthPenalty")
     this.onStateChanged("health")
   }
 

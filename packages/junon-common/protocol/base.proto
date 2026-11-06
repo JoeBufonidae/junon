@@ -770,6 +770,7 @@ message UpdateStats {
   uint32 textureIndex = 8;
   uint32 taskCompleted = 9;
   uint32 totalTasks = 10;
+  uint32 maxHealthPenalty = 11;
 }
 
 message CircleCollision {

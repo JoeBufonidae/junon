@@ -163,7 +163,7 @@ class Sector {
     this.entityCustomStats[id] = stats
 
     if (id === this.game.playerId) {
-      this.game.updateHealthBar(this.game.player.health, this.game.player.getMaxHealth())
+      this.game.updateHealthBar(this.game.player.health, this.game.player.getMaxHealth(), this.game.player.maxHealthPenalty)
     }
   }
 
