@@ -20,6 +20,28 @@ class SuitStation extends BaseBuilding {
       return
     }
 
+    // putting a suit on or taking one off takes time (a fraction of it at a suit station, see getEquipDelaySettings)
+    if (user.isPlayer() && !user.isSwappingAtSuitStation) {
+      const wornArmor = user.getArmorItem()
+      const storedArmor = this.get(0)
+      if (wornArmor || storedArmor) {
+        const seconds = user.getArmorSwapSeconds(storedArmor, wornArmor, user.getEquipDelaySettings().suitStationMultiplier)
+        const started = user.startEquipDelay(
+          seconds,
+          () => {
+            user.isSwappingAtSuitStation = true
+            try {
+              this.interact(user)
+            } finally {
+              user.isSwappingAtSuitStation = false
+            }
+          },
+          () => { return user.getArmorItem() === wornArmor && this.get(0) === storedArmor }
+        )
+        if (started) return
+      }
+    }
+
     let playerArmorItem = user.retrieveArmorItem()
     let storedArmorItem = this.retrieve(0)
 

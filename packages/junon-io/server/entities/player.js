@@ -1937,14 +1937,17 @@ class Player extends BaseEntity {
     const isThrowOperation = destinationStorage.isSector()
     const isStoreOperation = !data.hasOwnProperty("destinationIndex")
 
-    // putting armor on takes time: the move waits, and only happens if you stay put (see getEquipDelaySettings)
-    if (!skipEquipDelay && !isThrowOperation && this.sector.shouldAllowSuitChanged()) {
-      const incomingArmor = this.findIncomingArmor(data)
-      if (incomingArmor) {
+    // putting armor on or taking it off takes time: the move waits, and only happens if you stay put (see getEquipDelaySettings)
+    if (!skipEquipDelay && this.sector.shouldAllowSuitChanged()) {
+      const move = this.describeArmorMove(data)
+      if (move.incoming || move.outgoing) {
         const started = this.startEquipDelay(
-          incomingArmor,
+          this.getArmorSwapSeconds(move.incoming, move.outgoing),
           () => { this.swapInventory(data, { skipEquipDelay: true }) },
-          () => { return this.findIncomingArmor(data) === incomingArmor }
+          () => {
+            const now = this.describeArmorMove(data)
+            return now.incoming === move.incoming && now.outgoing === move.outgoing
+          }
         )
         if (started) return
       }
@@ -4232,11 +4235,12 @@ class Player extends BaseEntity {
     this.wasOxygenProtected = this.isOxygenProtected()
   }
 
-  // ---- Tuning: putting armor on ----
+  // ---- Tuning: putting armor on and taking it off ----
   getEquipDelaySettings() {
     return {
-      defaultSeconds: 5,  // time to put armor on; one armor can override it with "equipDelaySeconds" in constants.json (0 = instant)
-      cancelOnMove: true  // moving while putting armor on cancels it
+      defaultSeconds: 5,          // time to put armor on or take it off; one armor can override it with "equipDelaySeconds" in constants.json (0 = instant)
+      cancelOnMove: true,         // moving while putting armor on or taking it off cancels it
+      suitStationMultiplier: 0.5  // using a suit station takes this fraction of that time
     }
   }
 
@@ -4248,33 +4252,67 @@ class Player extends BaseEntity {
     return typeof override === "number" ? override : settings.defaultSeconds
   }
 
-  // the armor item that this inventory move would put into the armor slot (or null)
-  findIncomingArmor(data) {
-    const armorSlot = Protocol.definition().EquipmentRole.Armor
-    const sourceStorage = this.getStorage(data.sourceStorageId)
-    const destinationStorage = this.getStorage(data.destinationStorageId)
-    if (!sourceStorage || !destinationStorage) return null
-
-    let item = null
-    if (!data.hasOwnProperty("destinationIndex")) {
-      // store operation: no slot chosen
-      if (destinationStorage.isEquipmentStorage() && !sourceStorage.isEquipmentStorage()) {
-        item = sourceStorage.get(data.sourceIndex)
-      }
-    } else if (destinationStorage.isEquipmentStorage() && data.destinationIndex === armorSlot && !sourceStorage.isEquipmentStorage()) {
-      item = sourceStorage.get(data.sourceIndex)
-    } else if (sourceStorage.isEquipmentStorage() && data.sourceIndex === armorSlot && !destinationStorage.isEquipmentStorage()) {
-      item = destinationStorage.get(data.destinationIndex)
-    }
-
-    return item && item.isArmor() ? item : null
+  // seconds for one armor change: the slower of the armor going on and the armor coming off
+  getArmorSwapSeconds(incoming, outgoing, multiplier) {
+    const seconds = Math.max(
+      incoming ? this.getEquipDelaySeconds(incoming) : 0,
+      outgoing ? this.getEquipDelaySeconds(outgoing) : 0
+    )
+    return seconds * (typeof multiplier === "number" ? multiplier : 1)
   }
 
-  startEquipDelay(item, action, matches) {
-    const seconds = this.getEquipDelaySeconds(item)
+  // which armor this inventory move would put on and/or take off: { incoming, outgoing }
+  describeArmorMove(data) {
+    const armorSlot = Protocol.definition().EquipmentRole.Armor
+    const result = { incoming: null, outgoing: null }
+
+    const sourceStorage = this.getStorage(data.sourceStorageId)
+    const destinationStorage = this.getStorage(data.destinationStorageId)
+    if (!sourceStorage || !destinationStorage) return result
+
+    const isEquipment = (storage) => { return typeof storage.isEquipmentStorage === "function" && storage.isEquipmentStorage() }
+    const asArmor = (item) => { return item && item.isArmor() ? item : null }
+
+    if (destinationStorage.isSector()) {
+      // thrown on the ground
+      if (isEquipment(sourceStorage) && data.sourceIndex === armorSlot) {
+        result.outgoing = asArmor(sourceStorage.get(data.sourceIndex))
+      }
+      return result
+    }
+
+    if (!data.hasOwnProperty("destinationIndex")) {
+      // store operation: no slot chosen
+      if (isEquipment(destinationStorage) && !isEquipment(sourceStorage)) {
+        result.incoming = asArmor(sourceStorage.get(data.sourceIndex))
+      } else if (isEquipment(sourceStorage) && !isEquipment(destinationStorage) && data.sourceIndex === armorSlot) {
+        result.outgoing = asArmor(sourceStorage.get(data.sourceIndex))
+      }
+      return result
+    }
+
+    if (isEquipment(destinationStorage) && !isEquipment(sourceStorage) && data.destinationIndex === armorSlot) {
+      const incoming = asArmor(sourceStorage.get(data.sourceIndex))
+      if (incoming) {
+        result.incoming = incoming
+        result.outgoing = asArmor(destinationStorage.get(data.destinationIndex))
+      }
+    } else if (isEquipment(sourceStorage) && !isEquipment(destinationStorage) && data.sourceIndex === armorSlot) {
+      const destinationItem = destinationStorage.get(data.destinationIndex)
+      if (!destinationItem || destinationItem.isArmor()) {
+        result.outgoing = asArmor(sourceStorage.get(data.sourceIndex))
+        result.incoming = asArmor(destinationItem)
+      }
+    }
+
+    return result
+  }
+
+  startEquipDelay(seconds, action, matches) {
     if (!(seconds > 0)) return false
 
-    const readyTimestamp = this.game.timestamp + Constants.physicsTimeStep * seconds
+    const ticks = Math.max(1, Math.round(Constants.physicsTimeStep * seconds))
+    const readyTimestamp = this.game.timestamp + ticks
     this.pendingEquip = { readyTimestamp: readyTimestamp, action: action, matches: matches }
     this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { completeTimestamp: readyTimestamp })
     return true
