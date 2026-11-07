@@ -64,6 +64,8 @@ class ChatMenu extends BaseMenu {
       let chat = chatHistory[i]
       this.createChatEntry("global", chat)
     }
+
+    this.chatHistory["global"].scrollTop = this.chatHistory["global"].scrollHeight
   }
 
   getTotalMessageCount() {
@@ -248,6 +250,8 @@ class ChatMenu extends BaseMenu {
   }
 
   createChatEntry(chatGroup, messageObj,prefixList) {
+    const chatHistory = this.chatHistory[chatGroup]
+    const wasAtBottom = chatHistory.scrollTop + chatHistory.clientHeight >= chatHistory.scrollHeight - 1
     let chatMessage = document.createElement("div")
     chatMessage.className = "chat_message"
     chatMessage.dataset.username = messageObj.username
@@ -284,8 +288,10 @@ class ChatMenu extends BaseMenu {
     chatMessage.appendChild(chatUsername)
     chatMessage.appendChild(chatContent)
 
-    this.chatHistory[chatGroup].appendChild(chatMessage)
-    this.chatHistory[chatGroup].scrollTop = this.chatHistory[chatGroup].scrollHeight
+    chatHistory.appendChild(chatMessage)
+    if (wasAtBottom) {
+      chatHistory.scrollTop = chatHistory.scrollHeight
+    }
 
     if (this.chatGroup !== chatGroup) {
       this.increaseUnreadCount(chatGroup)
