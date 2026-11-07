@@ -86,6 +86,8 @@
   "StoveSlaveNotice": "Slaves would cook this food only",
   "MobTarget": "Mob",
   "PlayerTarget": "Player",
+  "Safe": "Safe",
+  "Safe.Description": "A keypad-protected storage crate",
   "AssignedRole": "Your role is now %{roleName}",
   "RoleName": "Name",
   "PeacefulModeDescription": "Full Admin Commands. No Raids. No taxes. Good for roleplay and minigames.",

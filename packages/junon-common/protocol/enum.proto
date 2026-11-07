@@ -284,6 +284,7 @@ enum BuildingType {
   ArmoredWindow = 290;
   Revitalizer = 291;
   Dispenser = 292;
+  Safe = 293;
 }
 
 enum TerrainType {

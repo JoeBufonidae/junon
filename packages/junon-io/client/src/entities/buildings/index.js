@@ -40,6 +40,7 @@ Buildings.Structures.Fence = require("./fence")
 Buildings.Structures.Lamp = require("./lamp")
 Buildings.Structures.WallLamp = require("./wall_lamp")
 Buildings.Structures.SteelCrate = require("./steel_crate")
+Buildings.Structures.Safe = require("./safe")
 Buildings.Structures.FarmController = require("./farm_controller")
 Buildings.Structures.FoodVendingMachine = require("./food_vending_machine")
 Buildings.Structures.DrinksVendingMachine = require("./drinks_vending_machine")
@@ -201,10 +202,24 @@ for (let name in Constants.Crops) {
 
 
 Buildings.forType = (type) => {
-  let klass
   const klassName = Helper.getTypeNameById(type)
+  let klass = Buildings.forTypeByName(klassName)
+  if (klass && klass.prototype.getType() === type) return klass
 
-  return Buildings.forTypeByName(klassName)
+  for (let group in Buildings) {
+    const namespace = Buildings[group]
+    if (!namespace || typeof namespace !== "object") continue
+
+    for (let name in namespace) {
+      klass = namespace[name]
+      if (typeof klass === "function" &&
+          klass.prototype &&
+          typeof klass.prototype.getType === "function" &&
+          klass.prototype.getType() === type) {
+        return klass
+      }
+    }
+  }
 }
 
 Buildings.forTypeByName = (klassName) => {

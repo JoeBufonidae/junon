@@ -1692,6 +1692,7 @@ class Game {
   }
 
   onKeypadUnsuccessful() {
+    this.keypadMenu.pendingAction = null
     document.querySelector("#keypad_err_msg").style.visibility = 'visible'
     document.querySelector("#keypad_code_value").innerHTML = ''
 
@@ -1701,7 +1702,18 @@ class Game {
   }
 
   onKeypadSuccessful() {
-    game.keypadMenu.close()
+    const keypadMenu = this.keypadMenu
+    const entity = this.sector.getEntity(keypadMenu.doorId)
+    const shouldOpenSafe = keypadMenu.pendingAction === "checkCode" &&
+      entity &&
+      entity.getType() === Protocol.definition().BuildingType.Safe
+
+    keypadMenu.close()
+    keypadMenu.pendingAction = null
+
+    if (shouldOpenSafe) {
+      this.storageMenu.open("Safe", entity)
+    }
   }
 
   onDoorStatus(status) {
