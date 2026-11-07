@@ -7,7 +7,7 @@ class SetEquipment extends BaseCommand {
   getUsage() {
     return [
       "Sets the hand or armor equipment of a player to a certain suit or item",
-      "/setequipment [armor|hand] [player] [suit_type|item_type]",
+      "/setequipment [armor|hand] [player] [suit_type|item_type|none]",
       "ex: /setequipment armor kuroro Combat_Armor"
     ]
   }
@@ -33,6 +33,7 @@ class SetEquipment extends BaseCommand {
 
     let type = args[2] || ""
     type = this.sector.klassifySnakeCase(type)
+    const shouldClear = !type || type === "None" || type === "Nothing"
 
     // Try to find players first, then mobs (by name or ID)
     let targetEntities = this.getPlayersBySelector(username)
@@ -60,38 +61,32 @@ class SetEquipment extends BaseCommand {
       return
     }
 
-    let typeId = Protocol.definition().BuildingType[type]
-    if (!typeId) {
-      player.showChatError("No such item: " + type)
-      return
-    }
+    if (!shouldClear) {
+      let typeId = Protocol.definition().BuildingType[type]
+      if (!typeId) {
+        player.showChatError("No such item: " + type)
+        return
+      }
 
-    // validate proper armor/equipment
-    let klass = Item.getKlass(typeId)
-    if (!klass) {
-      player.showChatError("No such item: " + type)
-      return
-    }
+      // validate proper armor/equipment
+      let klass = Item.getKlass(typeId)
+      if (!klass) {
+        player.showChatError("No such item: " + type)
+        return
+      }
 
-    if (typeof klass.prototype.isArmor !== 'function') {
-      player.showChatError("invalid")
-      return
-    }
-
-    if (slot === 'armor' && !klass.prototype.isArmor()) {
-      player.showChatError("invalid")
-      return
-    }
-
-    if (slot === 'hand' && klass.prototype.isArmor()) {
-      player.showChatError("invalid")
-      return
+      if (slot === 'armor' &&
+          (typeof klass.prototype.isArmor !== 'function' || !klass.prototype.isArmor())) {
+        player.showChatError("invalid")
+        return
+      }
     }
 
     targetEntities.forEach((targetEntity) => {
-      if (!targetEntity.equipments.isFullyStored()) {
+      if (shouldClear) {
+        targetEntity.equipments.removeAt(index)
+      } else {
         let options = {}
-
         const item = targetEntity.createItem(type, options)
         targetEntity.equipments.storeAt(index, item)
       }
