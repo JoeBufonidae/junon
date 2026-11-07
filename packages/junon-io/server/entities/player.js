@@ -4083,12 +4083,16 @@ class Player extends BaseEntity {
       if (!isThreeSecondInterval) return
     }
 
+    // a worn oxygen suit does not refill from the room's air: it drains as usual (take the suit off to breathe)
+    const wornArmor = this.getArmorEquip()
+    const isWearingOxygenSuit = !!wornArmor && wornArmor.hasOxygen()
+
     // check platform
     let platform = this.getStandingPlatform()
     if (platform && this.getContainer().isSector()) {
       let isOnOxygenatedPlatform = platform.room && platform.room.isOxygenated
 
-      if (isOnOxygenatedPlatform) {
+      if (isOnOxygenatedPlatform && !isWearingOxygenSuit) {
         platform.room.consumeOxygen(this)
         this.setUserOxygen(this.getOxygen() + 1)
         return
@@ -4101,7 +4105,7 @@ class Player extends BaseEntity {
       const room = isDoor && structureHit.entity.getConnectedRooms()[0]
       const isOnOxygenatedDoor = isDoor && room && room.isOxygenated
 
-      if (isOnOxygenatedDoor) {
+      if (isOnOxygenatedDoor && !isWearingOxygenSuit) {
         room.consumeOxygen(this)
         this.setUserOxygen(this.getOxygen() + 1)
         return
