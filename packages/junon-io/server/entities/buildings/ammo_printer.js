@@ -1,7 +1,16 @@
 const Constants = require('../../../common/constants.json')
 const Protocol = require('../../../common/util/protocol')
+const Helper = require('../../../common/helper')
 const BaseBuilding = require("./base_building")
 const Ammos = require("./../ammos/index")
+
+const ExplosiveTypes = new Set([
+  "Dynamite",
+  "Grenade",
+  "PoisonGrenade",
+  "ShockGrenade",
+  "TimerBomb"
+])
 
 class AmmoPrinter extends BaseBuilding {
 
@@ -16,7 +25,7 @@ class AmmoPrinter extends BaseBuilding {
   canCraft(type) {
     if (this.isFull()) return false
 
-    return Ammos.forType(type)
+    return !!Ammos.forType(type) || ExplosiveTypes.has(Helper.getTypeNameById(type))
   }
 
   craft(item, inventoryInput) {
@@ -33,4 +42,3 @@ class AmmoPrinter extends BaseBuilding {
 }
 
 module.exports = AmmoPrinter
-
