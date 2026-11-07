@@ -13,12 +13,14 @@ class KeypadMenu extends BaseMenu {
             switch (el.innerText) {
                 case 'set code':
                     if(valueEl.value != '') {
+                        this.pendingAction = "setCode"
                         this.game.getSocketUtil().emit("KeypadAction", {id: this.doorId, action: "setCode", keyCode: valueEl.value})
                     }
                     break
                     
                 case 'check code':
                     if(valueEl.value != '') {
+                        this.pendingAction = "checkCode"
                         this.game.getSocketUtil().emit("KeypadAction", {id: this.doorId, action: "checkCode", keyCode: valueEl.value})
                     }
                     break;
@@ -52,6 +54,7 @@ class KeypadMenu extends BaseMenu {
         document.querySelector("#keypad_err_msg").style.visibility = 'hidden'
 
         this.doorId = doorId
+        this.pendingAction = null
 
         if(doorId == 0) return
         this.game.getSocketUtil().emit("GetDoorStatus", {id: doorId})

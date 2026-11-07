@@ -5975,6 +5975,32 @@
       },
       "description": "Only opens if you have the code"
     },
+    "Safe": {
+      "hasMenu": true,
+      "width": 32,
+      "height": 32,
+      "cost": {
+        "gold": 250
+      },
+      "requirements": {
+        "IronBar": 15,
+        "CircuitBoard": 5,
+        "Wire": 5
+      },
+      "categories": {"storage":true},
+      "isInteractable": true,
+      "showInteractTooltip": true,
+      "storageCount": 8,
+      "stats": {
+        "health": 200,
+        "count": 125
+      },
+      "upgrade": {
+        "health": "+25",
+        "count": "+25"
+      },
+      "description": "A keypad-protected storage crate"
+    },
     "SolarPanel": {
       "width": 64,
       "height": 32,

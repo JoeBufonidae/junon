@@ -575,8 +575,7 @@ class RemoteEventHandler {
   onGetDoorStatus(player, data, socket) {
     let entity = player.game.getEntity(data.id)
 
-    if(!entity) return
-    if(!entity.type === 269) return
+    if (!entity || typeof entity.getStatus !== "function") return
 
     this.getSocketUtil().emit(socket, "DoorStatus", {status: entity.getStatus(player)})
     
@@ -584,14 +583,15 @@ class RemoteEventHandler {
   onKeypadAction(player, data, socket) {
     let entity = player.game.getEntity(data.id)
 
-    if(!entity) return
-    if(!entity.type == 269) return
+    if (!entity) return
 
     switch(data.action) {
       case "setCode":
+        if (typeof entity.setKeypadCode !== "function") return
         entity.setKeypadCode(player, data)
         break
       case "checkCode":
+        if (typeof entity.checkKeypadCode !== "function") return
         entity.checkKeypadCode(player, data)
         break
       default:

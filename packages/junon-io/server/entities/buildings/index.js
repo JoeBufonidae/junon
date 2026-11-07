@@ -27,6 +27,7 @@ Buildings.WebTrap = require("./web_trap")
 
 Buildings.SealedDoor = require("./sealed_door")
 Buildings.KeypadDoor = require("./keypad_door")
+Buildings.Safe = require("./safe")
 Buildings.Airlock = require("./airlock")
 Buildings.ManualAirlock = require("./manual_airlock")
 Buildings.SmallAirlock = require("./small_airlock")

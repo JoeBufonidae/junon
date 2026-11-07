@@ -1925,6 +1925,12 @@ class Player extends BaseEntity {
                               !destinationStorage.canStoreAt(destinationIndex)
     if (isInvalidOperation) return
 
+    for (const storage of [sourceStorage, destinationStorage]) {
+      if (typeof storage.isKeypadProtectedStorage === "function" &&
+          storage.isKeypadProtectedStorage() &&
+          !storage.hasKeypadStorageAccess(this)) return
+    }
+
     const nonInventoryStorage = this.getNonInventoryStorage(sourceStorage, destinationStorage)
 
     const isThrowOperation = destinationStorage.isSector()
@@ -1975,33 +1981,47 @@ class Player extends BaseEntity {
     // TODO: validate that its within view of user
     const storage = this.game.getEntity(data.id)
     if (storage) {
+      const isKeypadProtectedStorage =
+        typeof storage.isKeypadProtectedStorage === "function" &&
+        storage.isKeypadProtectedStorage()
+
       if (!storage.isReachableFromRoom(this.getOccupiedRoom())) {
         this.showError("Unreachable")
         return
       }
 
-      if (storage.hasOwner() && !this.hasOwnership(storage)) {
-        this.showError("That doesnt belong to you")
-        return
-      }
+      const hasKeypadAuthorization = isKeypadProtectedStorage &&
+        storage.authorizeStorageView(this)
 
-      if (!storage.hasCategory("vending_machine")) {
-        if (storage.owner &&
-            storage.owner.isTeam() &&
-            !this.canAccessStorage(storage)) {
-          this.showError("Permission Denied")
+      if (!hasKeypadAuthorization) {
+        if (storage.hasOwner() && !this.hasOwnership(storage)) {
+          this.showError("That doesnt belong to you")
           return
+        }
+
+        if (!storage.hasCategory("vending_machine")) {
+          if (storage.owner &&
+              storage.owner.isTeam() &&
+              !this.canAccessStorage(storage)) {
+            this.showError("Permission Denied")
+            return
+          }
         }
       }
 
-    storage.addViewSubscriber(this)
-    this.getSocketUtil().emit(this.socket, "RenderStorage", {
-      id: storage.id,
-      inventory: storage,
-      progress: typeof storage.getProgressPercentage === "function"
-        ? storage.getProgressPercentage()
-        : 0
-    })
+      if (isKeypadProtectedStorage && !hasKeypadAuthorization) {
+        this.showError("Enter the keypad code to access this safe", { isWarning: true })
+        return
+      }
+
+      storage.addViewSubscriber(this)
+      this.getSocketUtil().emit(this.socket, "RenderStorage", {
+        id: storage.id,
+        inventory: storage,
+        progress: typeof storage.getProgressPercentage === "function"
+          ? storage.getProgressPercentage()
+          : 0
+      })
     }
   }
 
