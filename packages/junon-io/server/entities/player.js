@@ -4196,6 +4196,30 @@ class Player extends BaseEntity {
     this.wasOxygenProtected = this.isOxygenProtected()
   }
 
+  // ---- Tuning: what you cannot use while wearing an oxygen suit ----
+  getSuitRestrictionSettings() {
+    return {
+      blockedItemKinds: ["food", "drink", "drug"], // kinds of items that cannot be used in a suit
+      allowedItemNames: ["FirstAidKit"],           // exceptions that still work in a suit
+      message: "Take your suit off first"
+    }
+  }
+
+  isItemBlockedBySuit(item) {
+    if (!this.isWearingOxygenArmor()) return false
+
+    const settings = this.getSuitRestrictionSettings()
+    if (settings.allowedItemNames.indexOf(item.getTypeName()) !== -1) return false
+
+    const kinds = {
+      food: () => item.isFood(),
+      drink: () => item.isDrink(),
+      drug: () => item.isDrug()
+    }
+
+    return settings.blockedItemKinds.some((kind) => { return kinds[kind] && kinds[kind]() })
+  }
+
   // ---- Tuning: oxygen / hunger damage ----
   getNeedsDamageSettings() {
     return {
@@ -5591,6 +5615,11 @@ class Player extends BaseEntity {
 
       if (this.isGuest() && item.isFlamethrower()) {
         this.showError("You are not allowed to use flamethrower")
+        return
+      }
+
+      if (this.isItemBlockedBySuit(item)) {
+        this.showError(this.getSuitRestrictionSettings().message)
         return
       }
 
