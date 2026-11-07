@@ -1913,7 +1913,8 @@ class Player extends BaseEntity {
 
   }
 
-  swapInventory(data) {
+  swapInventory(data, options) {
+    const skipEquipDelay = !!(options && options.skipEquipDelay === true)
     const sourceStorage      = this.getStorage(data.sourceStorageId)
     const destinationStorage = this.getStorage(data.destinationStorageId)
     const sourceIndex        = data.sourceIndex
@@ -1935,6 +1936,19 @@ class Player extends BaseEntity {
 
     const isThrowOperation = destinationStorage.isSector()
     const isStoreOperation = !data.hasOwnProperty("destinationIndex")
+
+    // putting armor on takes time: the move waits, and only happens if you stay put (see getEquipDelaySettings)
+    if (!skipEquipDelay && !isThrowOperation && this.sector.shouldAllowSuitChanged()) {
+      const incomingArmor = this.findIncomingArmor(data)
+      if (incomingArmor) {
+        const started = this.startEquipDelay(
+          incomingArmor,
+          () => { this.swapInventory(data, { skipEquipDelay: true }) },
+          () => { return this.findIncomingArmor(data) === incomingArmor }
+        )
+        if (started) return
+      }
+    }
 
     if (isThrowOperation) {
       this.performItemThrow(sourceStorage, sourceIndex)
@@ -2483,6 +2497,7 @@ class Player extends BaseEntity {
   }
 
   onPositionChanged(options = {}) {
+    this.cancelPendingEquipIfMoved()
     this.repositionOnPlayerTree()
 
     if (this.getHandEquip()) {
@@ -3756,6 +3771,7 @@ class Player extends BaseEntity {
 
     this.consumeDrug()
     this.consumeItem()
+    this.processPendingEquip()
     this.consumeFood()
     this.consumeFire()
     this.consumePoison()
@@ -4214,6 +4230,82 @@ class Player extends BaseEntity {
       this.setOxygen(0)
     }
     this.wasOxygenProtected = this.isOxygenProtected()
+  }
+
+  // ---- Tuning: putting armor on ----
+  getEquipDelaySettings() {
+    return {
+      defaultSeconds: 5,  // time to put armor on; one armor can override it with "equipDelaySeconds" in constants.json (0 = instant)
+      cancelOnMove: true  // moving while putting armor on cancels it
+    }
+  }
+
+  getEquipDelaySeconds(item) {
+    const settings = this.getEquipDelaySettings()
+    const instance = item && item.instance
+    const constants = instance && typeof instance.getConstants === "function" ? instance.getConstants() : null
+    const override = constants ? constants.equipDelaySeconds : undefined
+    return typeof override === "number" ? override : settings.defaultSeconds
+  }
+
+  // the armor item that this inventory move would put into the armor slot (or null)
+  findIncomingArmor(data) {
+    const armorSlot = Protocol.definition().EquipmentRole.Armor
+    const sourceStorage = this.getStorage(data.sourceStorageId)
+    const destinationStorage = this.getStorage(data.destinationStorageId)
+    if (!sourceStorage || !destinationStorage) return null
+
+    let item = null
+    if (!data.hasOwnProperty("destinationIndex")) {
+      // store operation: no slot chosen
+      if (destinationStorage.isEquipmentStorage() && !sourceStorage.isEquipmentStorage()) {
+        item = sourceStorage.get(data.sourceIndex)
+      }
+    } else if (destinationStorage.isEquipmentStorage() && data.destinationIndex === armorSlot && !sourceStorage.isEquipmentStorage()) {
+      item = sourceStorage.get(data.sourceIndex)
+    } else if (sourceStorage.isEquipmentStorage() && data.sourceIndex === armorSlot && !destinationStorage.isEquipmentStorage()) {
+      item = destinationStorage.get(data.destinationIndex)
+    }
+
+    return item && item.isArmor() ? item : null
+  }
+
+  startEquipDelay(item, action, matches) {
+    const seconds = this.getEquipDelaySeconds(item)
+    if (!(seconds > 0)) return false
+
+    const readyTimestamp = this.game.timestamp + Constants.physicsTimeStep * seconds
+    this.pendingEquip = { readyTimestamp: readyTimestamp, action: action, matches: matches }
+    this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { completeTimestamp: readyTimestamp })
+    return true
+  }
+
+  processPendingEquip() {
+    const pending = this.pendingEquip
+    if (!pending) return
+
+    if (this.isDestroyed() || this.isRemoved) {
+      this.cancelPendingEquip()
+      return
+    }
+
+    if (this.game.timestamp < pending.readyTimestamp) return
+
+    this.cancelPendingEquip() // clears the waiting state and the progress circle
+    if (pending.matches()) pending.action()
+  }
+
+  cancelPendingEquip() {
+    if (!this.pendingEquip) return
+    this.pendingEquip = null
+    if (!this.isRemoved) {
+      this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { clientMustDelete: true })
+    }
+  }
+
+  cancelPendingEquipIfMoved() {
+    if (!this.pendingEquip) return
+    if (this.getEquipDelaySettings().cancelOnMove) this.cancelPendingEquip()
   }
 
   // ---- Tuning: what you cannot use while wearing an oxygen suit ----
