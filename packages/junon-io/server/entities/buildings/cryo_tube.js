@@ -65,8 +65,8 @@ class CryoTube extends BaseBuilding {
     if (entity) {
       if (entity.isCorpse()) {
         let mob
-        if (this.sector.getSetting("isMutantEnabled") && Math.random() < 0.25) {
-          mob = entity.resurrect("Mutant")
+        if (this.sector.getSetting("isMutantEnabled") && Math.random() < 0.10) {
+          mob = entity.resurrect("Mutant", null, null)
           mob.setHealth(mob.getMaxHealth())
           this.removeAt(0) // remove storage content
           this.store(mob)
@@ -139,4 +139,3 @@ class CryoTube extends BaseBuilding {
 }
 
 module.exports = CryoTube
-

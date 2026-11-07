@@ -88,9 +88,9 @@ class Corpse extends BaseEntity {
     return mobKlass.prototype.getMaxHealth()
   }
 
-  resurrect(mobName) {
+  resurrect(mobName, owner = this.owner, name = this.name) {
     let mobType = mobName || Helper.getMobNameById(this.type)
-    let data = { x: this.x, y: this.y, type: mobType, health: 1, name: this.name, owner: this.owner, isRevived: true, resurrectCount: this.resurrectCount + 1 }
+    let data = { x: this.x, y: this.y, type: mobType, health: 1, name, owner, isRevived: true, resurrectCount: this.resurrectCount + 1 }
     let mobs = this.sector.spawnMob(data)
     this.remove()
 
