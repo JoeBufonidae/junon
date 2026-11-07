@@ -6574,10 +6574,10 @@
       "categories": {"door":true,"melee_resistant":true},
       "minimapColor": "#3bceaa",
       "requirements": {
-        "IronBar": 5
+        "IronBar": 10
       },
       "cost": {
-        "gold": 50
+        "gold": 100
       },
       "stats": {
         "health": 200,
@@ -7257,7 +7257,7 @@
         "health": "+25",
         "count": "+1"
       },
-      "description": "Restores player stamina. Also a respawn point"
+      "description": "Restores player stamina. Faster with no suit"
     },
     "FlamethrowerTurret": {
       "width": 64,
