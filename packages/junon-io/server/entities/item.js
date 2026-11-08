@@ -67,6 +67,7 @@ class Item extends BaseTransientEntity {
     // suits remember how much oxygen they had (0 means not saved: keep the full tank)
     if (this.instance && oxygenPlusOne && typeof this.instance.oxygen === "number" && typeof this.instance.getMaxOxygen === "function") {
       this.instance.oxygen = Math.min(oxygenPlusOne - 1, this.instance.getMaxOxygen())
+      if (typeof this.instance.syncOxygenForSave === "function") this.instance.syncOxygenForSave()
     }
   }
 

@@ -50,8 +50,9 @@ class ArmorEquipment extends BaseEquipment {
   }
 
   // saved with the item as oxygen + 1, so that 0 can mean "not saved" (old saves get a full tank)
-  get oxygenPlusOne() {
-    return typeof this.oxygen === "number" ? this.oxygen + 1 : 0
+  // kept as a real property (not a computed one) because the save writer only writes properties the object itself holds
+  syncOxygenForSave() {
+    this.oxygenPlusOne = typeof this.oxygen === "number" ? this.oxygen + 1 : 0
   }
 
   setOxygen(oxygen, player) {
@@ -63,6 +64,8 @@ class ArmorEquipment extends BaseEquipment {
     } else {
       this.oxygen = oxygen
     }
+
+    this.syncOxygenForSave()
 
     if (prevOxygen !== this.oxygen) {
       this.onOxygenChanged(oxygen, player)
@@ -94,6 +97,7 @@ class ArmorEquipment extends BaseEquipment {
 
   onEquipmentConstructed() {
     this.oxygen = this.getMaxOxygen()
+    this.syncOxygenForSave()
   }
 
   onStorageChanged(storage) {
