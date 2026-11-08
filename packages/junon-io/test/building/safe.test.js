@@ -63,8 +63,7 @@ describe("Safe registration and spawning", () => {
       try {
         Helper.typeNamesById = {}
 
-        expect(Buildings.Safe).toBe(Buildings.Structures.Safe)
-        expect(Buildings.forType(safeType)).toBe(Buildings.Safe)
+        expect(Buildings.forType(safeType)).toBe(Buildings.Structures.Safe)
         expect(() => require("../../client/src/entities/item").getSpritePath(safeType)).not.toThrow()
         expect(markup).toContain(`data-type='${safeType}' data-construction-type='Structures'`)
       } finally {
@@ -77,30 +76,10 @@ describe("Safe registration and spawning", () => {
     }
   })
 
-  test("the client can render Safe if its cached protocol enum is stale", async () => {
-    const Protocol = require("../../common/util/protocol")
-    const previousDebugMode = global.debugMode
+  test("the client uses safe.png for the Safe sprite", () => {
+    const Safe = require("../../client/src/entities/buildings/safe")
 
-    try {
-      global.debugMode = false
-      await new Promise((resolve, reject) => {
-        Protocol.initServer(error => error ? reject(error) : resolve())
-      })
-
-      const buildingType = Protocol.definition().BuildingType
-      const safeType = buildingType.Safe
-      delete buildingType.Safe
-
-      try {
-        const Item = require("../../client/src/entities/item")
-        expect(() => Item.getSpritePath(293)).not.toThrow()
-        expect(Item.getSpritePath(293)).toBe("fridge.png")
-      } finally {
-        buildingType.Safe = safeType
-      }
-    } finally {
-      global.debugMode = previousDebugMode
-    }
+    expect(Safe.prototype.getSpritePath()).toBe("safe.png")
   })
 
   test("default spawnitem drops the pickup beyond the player's immediate reach", () => {

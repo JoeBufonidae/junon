@@ -11,8 +11,8 @@ class Safe extends BaseBuilding {
     }
 
     getSpritePath() {
-      return "fridge.png"
-    } //replace with safe.png when we have one
+      return "safe.png"
+    }
 
     getConstantsTable() {
       return "Buildings.Safe"
