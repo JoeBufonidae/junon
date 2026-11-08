@@ -3428,13 +3428,13 @@
       },
       "stats": {
         "food": 0,
-        "health": 50
+        "health": 100
       },
       "requirements": {
         "BloodBottle": 1
       },
       "upgrade": {},
-      "description": "Heals 50 health points"
+      "description": "Heals 100 health points"
     },
     "Stimpack": {
       "width": 24,
@@ -3460,7 +3460,7 @@
         "PlantFiber": 5
       },
       "upgrade": {},
-      "description": "Doubles Attack Speed for 15 seconds. Reduces health by 25"
+      "description": "Doubles Attack Speed for 15 seconds"
     },
     "FirstAidKit": {
       "width": 24,
@@ -3472,13 +3472,13 @@
       "categories": {"drug": true},
       "stats": {
         "food": 0,
-        "health": 50
+        "health": 25
       },
       "requirements": {
         "PlantFiber": 5
       },
       "upgrade": {},
-      "description": "Heals 50 health points instantly"
+      "description": "Heals 25 health points instantly"
     }
   },
   "Equipments": {

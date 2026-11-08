@@ -4350,7 +4350,7 @@ class Player extends BaseEntity {
   getSuitRestrictionSettings() {
     return {
       blockedItemKinds: ["food", "drink", "drug"], // kinds of items that cannot be used in a suit
-      allowedItemNames: ["FirstAidKit"],           // exceptions that still work in a suit
+      allowedItemNames: ["FirstAidKit", "BloodPack", "Stimpack"],           // exceptions that still work in a suit
       message: "Take your suit off first"
     }
   }

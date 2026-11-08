@@ -15,7 +15,7 @@ class Stimpack extends BaseFood {
 
   use(player, entity) {
     player.addRage()
-    player.setHealth(player.getHealth() - 25)
+    //player.setHealth(player.getHealth() - 25)
     player.setActiveDrug("Stimpack")
     return true
   }
