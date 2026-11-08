@@ -100,22 +100,90 @@ class SuitStation extends BaseBuilding {
     return super.canBeSalvagedBy(player)
   }
 
+  // ---- Tuning: refilling the suit stored in the station ----
+  getRefillSettings() {
+    return {
+      oxygenPerInterval: 6, // oxygen added to the stored suit every 3 second oxygen tick
+      ratio: 1              // oxygen taken from the connected network for each oxygen the suit gains
+    }
+  }
+
   executeTurn() {
     const isThreeSecondInterval = this.game.timestamp % (Constants.physicsTimeStep * Constants.oxygenProductionConsumptionRate) === 0
     if (!isThreeSecondInterval) return
 
     let item = this.get(0)
-    if (!item) return
+    if (!this.isOxygenItem(item)) return
 
-    let platform = this.getStandingPlatform()
+    const equipment = item.instance
+    const settings = this.getRefillSettings()
+    const ratio = settings.ratio > 0 ? settings.ratio : 1
 
-    let isOxygenatedPlatform = platform && platform.room && platform.room.isOxygenated
+    // a full suit takes nothing
+    const wanted = Math.min(settings.oxygenPerInterval, equipment.getUnfilledOxygen())
+    if (!(wanted > 0)) return
 
-    if (this.isOxygenItem(item) && isOxygenatedPlatform) {
-      let equipment = item.instance
-      equipment.increaseOxygen(6)
-      platform.room.consumeOxygen(this)
+    // no touching oxygen pipe, tank or generator: no refill, and the room's air is never used
+    const networks = this.getConnectedOxygenNetworks()
+    if (networks.length === 0) return
+
+    const taken = this.drainOxygenFromNetworks(networks, Math.ceil(wanted * ratio))
+    const gained = Math.min(wanted, Math.floor(taken / ratio))
+    if (gained > 0) {
+      equipment.increaseOxygen(gained)
     }
+  }
+
+  // the oxygen networks of the pipes, tanks and generators touching this station
+  getConnectedOxygenNetworks() {
+    const grids = [this.container.structureMap, this.container.gasDistributionMap].filter((grid) => { return !!grid })
+    const networks = {}
+
+    const top = this.getTopLeftRow()
+    const left = this.getTopLeftCol()
+    const bottom = top + this.getRowCount()
+    const right = left + this.getColCount()
+
+    const touchingTiles = []
+    for (let col = left; col < right; col++) {
+      touchingTiles.push([top - 1, col])
+      touchingTiles.push([bottom, col])
+    }
+    for (let row = top; row < bottom; row++) {
+      touchingTiles.push([row, left - 1])
+      touchingTiles.push([row, right])
+    }
+
+    touchingTiles.forEach((tile) => {
+      grids.forEach((grid) => {
+        const entity = grid.get(tile[0], tile[1])
+        if (entity && entity !== this && entity.oxygenNetwork) {
+          networks[entity.oxygenNetwork.id] = entity.oxygenNetwork
+        }
+      })
+    })
+
+    return Object.values(networks)
+  }
+
+  // takes oxygen out of the tanks on these networks; returns how much was taken
+  drainOxygenFromNetworks(networks, amount) {
+    let remaining = amount
+
+    networks.forEach((network) => {
+      Object.values(network.storages || {}).forEach((hit) => {
+        if (remaining <= 0) return
+
+        const storage = hit.entity
+        const take = Math.min(storage.getResourceStored("oxygen"), remaining)
+        if (take > 0) {
+          const drained = storage.consumeResource("oxygen", take)
+          remaining -= (typeof drained === "number" ? drained : 0)
+        }
+      })
+    })
+
+    return amount - remaining
   }
 
   isOxygenItem(item) {
