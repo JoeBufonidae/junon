@@ -17,6 +17,7 @@ jest.mock('../../server/entities/team', () => ({
 }))
 
 const BaseBuilding = require('../../server/entities/buildings/base_building')
+const VendingMachine = require('../../server/entities/buildings/vending_machine')
 
 function createBuilding(overrides = {}) {
   const building = Object.create(BaseBuilding.prototype)
@@ -198,5 +199,34 @@ describe('isRepairable', () => {
     building.getMaxHealth = () => 10
 
     expect(building.isRepairable()).toEqual(false)
+  })
+})
+
+describe('vending machine salvage permissions', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  test('does not allow a non-placing non-admin player to salvage', () => {
+    const player = { isAdmin: () => false }
+    const machine = Object.create(VendingMachine.prototype)
+    machine.getPlacer = () => ({})
+    const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy')
+
+    expect(machine.canBeSalvagedBy(player)).toEqual(false)
+    expect(baseCheck).not.toHaveBeenCalled()
+  })
+
+  test.each([
+    ['the placer', false],
+    ['an admin', true],
+  ])('uses the existing salvage rules for %s', (role, isAdmin) => {
+    const player = { isAdmin: () => isAdmin }
+    const machine = Object.create(VendingMachine.prototype)
+    machine.getPlacer = () => role === 'the placer' ? player : {}
+    const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy').mockReturnValue(true)
+
+    expect(machine.canBeSalvagedBy(player)).toEqual(true)
+    expect(baseCheck).toHaveBeenCalledWith(player)
   })
 })

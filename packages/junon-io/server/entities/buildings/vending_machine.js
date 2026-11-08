@@ -19,6 +19,12 @@ class VendingMachine extends BaseBuilding {
     super.remove()
   }
 
+  canBeSalvagedBy(player) {
+    if (!player.isAdmin() && this.getPlacer() !== player) return false
+
+    return super.canBeSalvagedBy(player)
+  }
+
   withdraw(player) {
     let canWithdraw = player === this.getOwner()
     if (!canWithdraw) {
