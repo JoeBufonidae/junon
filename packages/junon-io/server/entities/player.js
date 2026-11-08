@@ -2501,6 +2501,7 @@ class Player extends BaseEntity {
 
   onPositionChanged(options = {}) {
     this.cancelPendingEquipIfMoved()
+    this.cancelSuitRefillIfMoved()
     this.repositionOnPlayerTree()
 
     if (this.getHandEquip()) {
@@ -3775,6 +3776,7 @@ class Player extends BaseEntity {
     this.consumeDrug()
     this.consumeItem()
     this.processPendingEquip()
+    this.processSuitRefill()
     this.consumeFood()
     this.consumeFire()
     this.consumePoison()
@@ -4311,6 +4313,8 @@ class Player extends BaseEntity {
   startEquipDelay(seconds, action, matches) {
     if (!(seconds > 0)) return false
 
+    this.cancelSuitRefill()
+
     const ticks = Math.max(1, Math.round(Constants.physicsTimeStep * seconds))
     const readyTimestamp = this.game.timestamp + ticks
     this.pendingEquip = { readyTimestamp: readyTimestamp, action: action, matches: matches }
@@ -4344,6 +4348,91 @@ class Player extends BaseEntity {
   cancelPendingEquipIfMoved() {
     if (!this.pendingEquip) return
     if (this.getEquipDelaySettings().cancelOnMove) this.cancelPendingEquip()
+  }
+
+  // ---- Tuning: refilling a suit at an oxygen tank or generator ----
+  getSuitRefillSettings() {
+    return {
+      secondsForFullSuit: 5, // an empty suit takes this long to fill; a partly full suit takes proportionally less
+      cancelOnMove: true     // moving stops the refill (the oxygen already added stays in the suit)
+    }
+  }
+
+  // oxygen moves from the source (a tank or generator) into the suit a little each tick
+  startSuitRefill(source, onFirstTransfer) {
+    if (this.pendingEquip) return
+
+    const armor = this.getArmorEquip()
+    if (!armor || !armor.hasOxygen()) return
+
+    const missing = armor.getUnfilledOxygen()
+    if (!(missing > 0)) return
+
+    const settings = this.getSuitRefillSettings()
+    const perTick = (armor.getMaxOxygen() / settings.secondsForFullSuit) / Constants.physicsTimeStep
+    const ticksNeeded = Math.max(1, Math.ceil(missing / perTick))
+    const endTimestamp = this.game.timestamp + ticksNeeded
+
+    this.cancelSuitRefill()
+    this.suitRefill = {
+      source: source,
+      perTick: perTick,
+      carry: 0,
+      endTimestamp: endTimestamp,
+      onFirstTransfer: onFirstTransfer,
+      hasTransferred: false
+    }
+    this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { completeTimestamp: endTimestamp })
+  }
+
+  processSuitRefill() {
+    const refill = this.suitRefill
+    if (!refill) return
+
+    const armor = this.getArmorEquip()
+    if (this.isDestroyed() || this.isRemoved || !armor || !armor.hasOxygen()) {
+      this.cancelSuitRefill()
+      return
+    }
+
+    // oxygen is stored in whole numbers, so keep the fraction and move whole units when there are enough
+    refill.carry += refill.perTick
+    const wanted = Math.min(Math.floor(refill.carry), armor.getUnfilledOxygen())
+
+    if (wanted >= 1) {
+      const drained = refill.source.consumeResource("oxygen", wanted)
+      if (drained > 0) {
+        armor.setOxygen(armor.oxygen + drained, this)
+        refill.carry -= drained
+        if (!refill.hasTransferred) {
+          refill.hasTransferred = true
+          if (refill.onFirstTransfer) refill.onFirstTransfer()
+        }
+      }
+
+      // the tank or generator ran dry: stop with a partly filled suit
+      if (!(drained >= wanted)) {
+        this.cancelSuitRefill()
+        return
+      }
+    }
+
+    if (armor.getUnfilledOxygen() <= 0 || this.game.timestamp >= refill.endTimestamp) {
+      this.cancelSuitRefill()
+    }
+  }
+
+  cancelSuitRefill() {
+    if (!this.suitRefill) return
+    this.suitRefill = null
+    if (!this.isRemoved) {
+      this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { clientMustDelete: true })
+    }
+  }
+
+  cancelSuitRefillIfMoved() {
+    if (!this.suitRefill) return
+    if (this.getSuitRefillSettings().cancelOnMove) this.cancelSuitRefill()
   }
 
   // ---- Tuning: what you cannot use while wearing an oxygen suit ----

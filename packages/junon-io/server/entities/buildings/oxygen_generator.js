@@ -42,6 +42,15 @@ class OxygenGenerator extends BaseBuilding {
       }
     }
 
+    // players refill gradually (see getSuitRefillSettings); anything else keeps the instant refill
+    if (user.isPlayer() && typeof user.startSuitRefill === "function") {
+      user.startSuitRefill(this, () => {
+        this.getPlacer() && this.getPlacer().progressTutorial("main", 7)
+        user.walkthroughManager.handle("refill_space_suit")
+      })
+      return
+    }
+
     let armorEquipment = user.getArmorEquipment()
     if (armorEquipment && armorEquipment.hasOxygen()) {
       let amount = armorEquipment.getUnfilledOxygen()

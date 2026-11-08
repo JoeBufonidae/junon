@@ -13,6 +13,12 @@ class OxygenTank extends BaseBuilding {
   }
 
   interact(user) {
+    // players refill gradually (see getSuitRefillSettings); anything else keeps the instant refill
+    if (user.isPlayer() && typeof user.startSuitRefill === "function") {
+      user.startSuitRefill(this)
+      return
+    }
+
     let armorEquipment = user.getArmorEquipment()
     if (armorEquipment && armorEquipment.hasOxygen()) {
       let amount = armorEquipment.getUnfilledOxygen()
