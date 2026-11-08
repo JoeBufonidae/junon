@@ -6373,6 +6373,11 @@ class Player extends BaseEntity {
         this.throwInventory(item)
       }
     })
+
+    const armorItem = this.retrieveArmorItem()
+    if (armorItem) {
+      this.throwInventory(armorItem)
+    }
   }
 
   throwAllInventoryExceptSurvivalTool() {
