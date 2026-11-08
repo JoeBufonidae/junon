@@ -928,17 +928,6 @@ class Sector {
     this.progressCircleAngle = 0
 
     this.progressCircleContainer.addChild(this.progressCircle)
-
-    // a copy of the progress circle drawn on the page, so it can sit in front of the menus (the game canvas is behind them)
-    this.progressRingEl = document.getElementById("progress_ring")
-    if (!this.progressRingEl) {
-      const ring = document.createElement("div")
-      ring.id = "progress_ring"
-      ring.style.cssText = "position:fixed;display:none;z-index:2000;pointer-events:none;border-radius:50%;background:rgba(0,0,0,0.5)"
-      ring.innerHTML = "<svg viewBox='0 0 96 96' width='100%' height='100%'><circle id='progress_ring_arc' cx='48' cy='48' r='30' fill='none' stroke='#cccccc' stroke-opacity='0.9' stroke-width='6' stroke-dasharray='0 188.5' transform='rotate(-90 48 48)'></circle></svg>"
-      document.body.appendChild(ring)
-      this.progressRingEl = ring
-    }
   }
 
   startProgressCircle(completeTimestamp) {
@@ -950,71 +939,13 @@ class Sector {
 
     this.progressCircleStartTimestamp = this.game.timestamp
     this.progressCircleCompleteTimestamp = completeTimestamp
-    this.showProgressRing()
   }
 
   hideProgressCircle() {
-    this.hideProgressRing()
     this.progressCircleContainer.parent.removeChild(this.progressCircleContainer)
     this.progressCircleContainer.visible = false
 
     this.progressCircleCompleteTimestamp = null
-  }
-
-  showProgressRing() {
-    if (!this.progressRingEl) return
-
-    // the in-game circle stays attached to the player (it tells us where to draw) but is not drawn
-    this.progressCircleContainer.alpha = 0
-    this.progressRingEl.style.display = "block"
-
-    cancelAnimationFrame(this.progressRingFrame)
-    const loop = () => {
-      if (!this.progressCircleCompleteTimestamp) return
-      this.updateProgressRing()
-      this.progressRingFrame = requestAnimationFrame(loop)
-    }
-    loop()
-  }
-
-  hideProgressRing() {
-    cancelAnimationFrame(this.progressRingFrame)
-    if (this.progressRingEl) this.progressRingEl.style.display = "none"
-  }
-
-  // if anything is off, fall back to the in-game circle so a circle is always shown
-  fallBackToGameProgressCircle() {
-    cancelAnimationFrame(this.progressRingFrame)
-    if (this.progressRingEl) this.progressRingEl.style.display = "none"
-    this.progressCircleContainer.alpha = 1
-  }
-
-  updateProgressRing() {
-    try {
-      const view = (typeof app !== "undefined" && app.view) ? app.view : null
-      if (!view) return this.fallBackToGameProgressCircle()
-
-      const rect = view.getBoundingClientRect()
-      const screenWidth = (app.screen && app.screen.width) ? app.screen.width : rect.width
-      const ratio = rect.width / screenWidth
-
-      const transform = this.progressCircleContainer.worldTransform
-      const size = 96 * (transform.a || 1) * ratio
-
-      const total = this.progressCircleCompleteTimestamp - this.progressCircleStartTimestamp
-      const elapsed = this.game.timestamp - this.progressCircleStartTimestamp
-      const done = total > 0 ? Math.min(1, Math.max(0, elapsed / total)) : 1
-
-      const style = this.progressRingEl.style
-      style.width = size + "px"
-      style.height = size + "px"
-      style.left = (rect.left + transform.tx * ratio - size / 2) + "px"
-      style.top = (rect.top + transform.ty * ratio - size / 2) + "px"
-
-      document.getElementById("progress_ring_arc").setAttribute("stroke-dasharray", (done * 188.5) + " 188.5")
-    } catch (e) {
-      this.fallBackToGameProgressCircle()
-    }
   }
 
   renderProgressCircle() {
