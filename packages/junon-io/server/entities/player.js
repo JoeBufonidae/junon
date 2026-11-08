@@ -2011,7 +2011,9 @@ class Player extends BaseEntity {
         storage.authorizeStorageView(this)
 
       if (!hasKeypadAuthorization) {
-        if (storage.hasOwner() && !this.hasOwnership(storage)) {
+        if (storage.hasOwner() &&
+            !this.hasOwnership(storage) &&
+            !storage.hasCategory("vending_machine")) {
           this.showError("That doesnt belong to you")
           return
         }
