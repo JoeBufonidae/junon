@@ -349,6 +349,7 @@ message StartRound {
 message ProgressCircle {
   uint32 completeTimestamp = 1;
   bool clientMustDelete = 2;
+  bool closeInventory = 3;
 }
 
 message TeamLogs {

@@ -3588,6 +3588,11 @@ arrow.style.setProperty('--arrow-color',realColor)
   }
 
   onProgressCircle(data) {
+    // an armor change started: close the inventory so the progress circle is not hidden behind it
+    if (data.closeInventory && this.inventoryMenu && this.inventoryMenu.isOpen()) {
+      this.inventoryMenu.close()
+    }
+
     if (data.completeTimestamp) {
       this.sector.startProgressCircle(data.completeTimestamp)
     } else if (data.clientMustDelete) {

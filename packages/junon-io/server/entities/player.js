@@ -4314,7 +4314,7 @@ class Player extends BaseEntity {
     const ticks = Math.max(1, Math.round(Constants.physicsTimeStep * seconds))
     const readyTimestamp = this.game.timestamp + ticks
     this.pendingEquip = { readyTimestamp: readyTimestamp, action: action, matches: matches }
-    this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { completeTimestamp: readyTimestamp })
+    this.getSocketUtil().emit(this.getSocket(), "ProgressCircle", { completeTimestamp: readyTimestamp, closeInventory: true })
     return true
   }
 
