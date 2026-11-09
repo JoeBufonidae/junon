@@ -52,6 +52,11 @@ class SurvivalTool extends MeleeEquipment {
       return false
     }
 
+    // things that are on fire cannot be deconstructed
+    if (typeof targetEntity.isOnFire === "function" && targetEntity.isOnFire()) {
+      return false
+    }
+
     return targetEntity.canBeSalvagedBy(player)
   }
 
