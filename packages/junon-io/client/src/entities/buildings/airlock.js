@@ -10,6 +10,22 @@ class Airlock extends BaseBuilding {
     super.onBuildingConstructed()
 
     this.isFirstLoad = true
+    this.redrawNeighborWalls()
+  }
+
+  redrawNeighborWalls() {
+    const neighborTiles = this.constructor.getNeighborTiles(this.container.armorMap, this.getRelativeBox())
+
+    neighborTiles.forEach((hit) => {
+      if (hit.entity && hit.entity.hasCategory("wall")) {
+        hit.entity.redrawSprite()
+      }
+    })
+  }
+
+  remove() {
+    super.remove()
+    this.redrawNeighborWalls()
   }
 
   isLightBlocker() {
