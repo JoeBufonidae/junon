@@ -1568,9 +1568,9 @@
       "parent": "Mobs.BaseMob",
       "stats": {
         "speed": 5,
-        "reload": 2000,
-        "health": 150,
-        "damage": 15,
+        "reload": 1000,
+        "health": 250,
+        "damage": 40,
         "range": 64,
         "los": 256
       },

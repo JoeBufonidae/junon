@@ -9,7 +9,8 @@
       "Structures that are on fire can no longer be deconstructed",
       "Airlocks now close automatically after being opened manually",
       "Increased manual airlock craft cost",
-      "Make /setequipment hand work with any item and clear it with none"
+      "Make /setequipment hand work with any item and clear it with none",
+      "Buffed mutants"
     ],
     "bugs": [
       "Fixed ammo printer not allowing crafting of explosives",
