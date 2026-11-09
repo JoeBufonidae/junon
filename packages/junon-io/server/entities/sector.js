@@ -399,7 +399,7 @@ initSettings(entities) {
     isCraftingEnabled: true,
     isBloodEnabled: true,
     isSuitChangeEnabled: true,
-    isDropInventoryOnDeath: false,
+    isDropInventoryOnDeath: true,
     isMutantEnabled: true,
     isGravityEnabled: false,
     isFireSpreadEnabled: true,
@@ -411,6 +411,7 @@ initSettings(entities) {
   if (this.isPeaceful()) {
     this.settings.isFireSpreadEnabled = false;
     this.settings.isItemBreakingEnabled = true;
+    this.settings.isDropInventoryOnDeath = false;
   }
   
   if (entities && entities.settings) {
