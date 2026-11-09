@@ -55,4 +55,3 @@ class LiquidPipe extends Conduit {
 }
 
 module.exports = LiquidPipe
-

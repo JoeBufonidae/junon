@@ -112,7 +112,10 @@ class Grid {
 
       let mapdata = this.mapData[position.row][position.col]
       if(!includeWalls && mapdata) {
-        if (mapdata && mapdata.hasCategory && mapdata.hasCategory("wall")) {
+        if (mapdata.hasCategory &&
+            (mapdata.hasCategory("wall") ||
+             mapdata.hasCategory("door") ||
+             mapdata.hasCategory("vent"))) {
           isTileFilled = false;
         }
       }

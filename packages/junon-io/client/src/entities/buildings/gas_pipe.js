@@ -55,4 +55,3 @@ class GasPipe extends Conduit {
 }
 
 module.exports = GasPipe
-

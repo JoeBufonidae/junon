@@ -55,4 +55,3 @@ class FuelPipe extends Conduit {
 }
 
 module.exports = FuelPipe
-

@@ -190,6 +190,24 @@ describe('isTileEmptyRowCol / isOccupied', () => {
     expect(grid.isOccupied(0 * TILE + 5, 0 * TILE + 5, TILE, TILE)).toEqual(false)
   })
 
+  test('isOccupied can ignore doors and vents along with walls when requested', () => {
+    const grid = new Grid('structure', {}, 4, 4)
+    const wall = makeEntity('wall', { hasCategory: (category) => category === 'wall' })
+    const door = makeEntity('door', { hasCategory: (category) => category === 'door' })
+    const vent = makeEntity('vent', { hasCategory: (category) => category === 'vent' })
+    const structure = makeEntity('structure', { hasCategory: () => false })
+    grid.set({ row: 0, col: 0, value: wall })
+    grid.set({ row: 0, col: 1, value: door })
+    grid.set({ row: 0, col: 2, value: vent })
+    grid.set({ row: 0, col: 3, value: structure })
+
+    expect(grid.isOccupied(5, 5, TILE, TILE, false, false)).toEqual(false)
+    expect(grid.isOccupied(TILE + 5, 5, TILE, TILE, false, false)).toEqual(false)
+    expect(grid.isOccupied(2 * TILE + 5, 5, TILE, TILE, false, false)).toEqual(false)
+    expect(grid.isOccupied(3 * TILE + 5, 5, TILE, TILE, false, false)).toEqual(true)
+    expect(grid.isOccupied(TILE + 5, 5, TILE, TILE)).toEqual(true)
+  })
+
   test('isOccupied for a multi-tile box delegates to isBoxOccupied (any tile filled)', () => {
     const grid = new Grid('structure', {}, 3, 3)
     grid.set({ row: 0, col: 1, value: 'x' })
