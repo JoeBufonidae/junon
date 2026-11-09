@@ -44,4 +44,3 @@ class Wall3d extends BaseWall {
 }
 
 module.exports = Wall3d
-

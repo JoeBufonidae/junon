@@ -75,6 +75,20 @@ class BaseWall extends BaseFloor {
     return [this.container.armorMap]
   }
 
+  convertNeighborsToSideHits(neighbors) {
+    const tiles = super.convertNeighborsToSideHits(neighbors)
+    const directions = ["left", "up", "right", "down", "topleft", "topright", "bottomleft", "bottomright"]
+    const structureNeighbors = this.container.structureMap.getNeighborsAllowEmpty(this.getRow(), this.getCol(), true)
+
+    structureNeighbors.forEach((neighbor, index) => {
+      if (neighbor.entity && neighbor.entity.hasCategory("door")) {
+        tiles[directions[index]] = true
+      }
+    })
+
+    return tiles
+  }
+
   getMap() {
     return this.container.armorMap
   }
