@@ -1,0 +1,24 @@
+{
+  "version": "v0.8.3.alpha",
+  "date": "November 9, 2026",
+  "title": "More bugs squashed, and a tad bit more - by BigTforLife",
+  "content": {
+    "features": [
+      "Added a safe, which can be set with a passcode",
+      "Made it so players can place wires and pipes under more structures",
+      "Structures that are on fire can no longer be deconstructed",
+      "Airlocks now close automatically after being opened manually",
+      "Increased manual airlock craft cost",
+      "Make /setequipment hand work with any item and clear it with none"
+    ],
+    "bugs": [
+      "Fixed ammo printer not allowing crafting of explosives",
+      "Fix mutants retaining team affiliation. reduced chance to 10%",
+      "Fix vending machines and dispensers being able to be deconstructed by anyone",
+      "Fix non-placers not being able to open buy menu on vending machines and dispensers",
+      "Fixed bed description",
+      "Fixed new messages always forcing the player to the bottom of the chat history",
+      "Fixed walls not connecting to doors"
+    ]
+  }
+}
