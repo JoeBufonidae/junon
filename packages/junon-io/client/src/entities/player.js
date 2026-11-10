@@ -1559,6 +1559,12 @@ class Player extends BaseEntity {
       colorPicker.colorIndex = colorPicker.floorColorIndex
     } else if (buildingType === Protocol.definition().BuildingType.Wall) {
       colorPicker.colorIndex = colorPicker.wallColorIndex
+    } else if (buildingType === Protocol.definition().BuildingType.LowWall) {
+      colorPicker.colorIndex = colorPicker.wallColorIndex
+    } else if (buildingType === Protocol.definition().BuildingType.Window) {
+      colorPicker.colorIndex = colorPicker.wallColorIndex
+    } else if (buildingType === Protocol.definition().BuildingType.ArmoredWindow) {
+      colorPicker.colorIndex = colorPicker.wallColorIndex
     }
 
     this.building.onBuildStart()

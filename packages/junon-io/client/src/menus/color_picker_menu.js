@@ -66,14 +66,19 @@ class ColorPickerMenu extends BaseMenu {
   }
 
   applyBuildingTint(building) {
-    let floorWallTypes = [Protocol.definition().BuildingType.Floor, Protocol.definition().BuildingType.Wall]
-    let isFloorOrWall = floorWallTypes.indexOf(building.getType()) !== -1
-    if (isFloorOrWall) {
+    const buildingType = building.getType()
+    const isFloor = buildingType === Protocol.definition().BuildingType.Floor
+    const wallTypes = [
+      Protocol.definition().BuildingType.Wall,
+      Protocol.definition().BuildingType.LowWall,
+      Protocol.definition().BuildingType.Window,
+      Protocol.definition().BuildingType.ArmoredWindow
+    ]
+    if (isFloor || wallTypes.indexOf(buildingType) !== -1) {
       if (this.colorIndex) {
-        const buildingType = building.getType()
-        if (buildingType === Protocol.definition().BuildingType.Floor) {
+        if (isFloor) {
           this.floorColorIndex = Number(this.colorIndex)
-        } else if (buildingType === Protocol.definition().BuildingType.Wall) {
+        } else {
           this.wallColorIndex = Number(this.colorIndex)
         }
 
