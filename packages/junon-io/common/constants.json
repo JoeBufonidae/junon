@@ -5983,7 +5983,8 @@
         "gold": 250
       },
       "requirements": {
-        "IronBar": 15,
+        "IronBar": 30,
+        "Meteorite": 5,
         "CircuitBoard": 5,
         "Wire": 5
       },
@@ -5992,7 +5993,7 @@
       "showInteractTooltip": true,
       "storageCount": 8,
       "stats": {
-        "health": 200,
+        "health": 1000,
         "count": 125
       },
       "upgrade": {
