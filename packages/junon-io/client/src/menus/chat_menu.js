@@ -251,7 +251,7 @@ class ChatMenu extends BaseMenu {
 
   createChatEntry(chatGroup, messageObj,prefixList) {
     const chatHistory = this.chatHistory[chatGroup]
-    const wasAtBottom = chatHistory.scrollTop + chatHistory.clientHeight >= chatHistory.scrollHeight - 1
+    const wasAtBottom = chatHistory.scrollTop + chatHistory.clientHeight >= chatHistory.scrollHeight - 100
     let chatMessage = document.createElement("div")
     chatMessage.className = "chat_message"
     chatMessage.dataset.username = messageObj.username
