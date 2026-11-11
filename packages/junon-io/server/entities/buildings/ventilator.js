@@ -6,17 +6,20 @@ class Ventilator extends BaseBuilding {
 
   static isPositionValid(container, x, y, w, h, angle, player) {
     let armorHits = container.armorMap.hitTestTile(this.prototype.getBox(x, y, w, h))
+    const isOnWall = armorHits.find((hit) => { return hit.entity && hit.entity.hasCategory("wall") })
+    if (isOnWall) return false
+
     const isEnemyArmor = armorHits.find((hit) => { return hit.entity && !hit.entity.isOwnedBy(player) })
     if (isEnemyArmor) return false
 
     return  this.isOnValidPlatform(container, x, y, w, h, angle, player) &&
                              !this.isOnHangar(container, x, y, w, h) &&
-                             !container.structureMap.isOccupied(x, y, w, h, false, false)
+                             !container.structureMap.isOccupied(x, y, w, h, false, true)
   }
 
 
   onBuildingPlaced() {
-    this.replaceWallsIfPresent()
+    // this.replaceWallsIfPresent()
     super.onBuildingPlaced()
   }
 
@@ -35,4 +38,3 @@ class Ventilator extends BaseBuilding {
 }
 
 module.exports = Ventilator
-

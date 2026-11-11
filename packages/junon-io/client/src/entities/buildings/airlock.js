@@ -41,6 +41,9 @@ class Airlock extends BaseBuilding {
     // let noAirtightStructureBeside = structureSides.every((hit) => { return !hit.entity || (hit.entity && !hit.entity.isAirtight()) })
 
     let armorHits = container.armorMap.hitTestTile(relativeBox)
+    const isOnWall = armorHits.find((hit) => { return hit.entity && hit.entity.hasCategory("wall") })
+    if (isOnWall) return false
+
     const isEnemyArmor = armorHits.find((hit) => { return hit.entity && !hit.entity.isOwnedBy(player) })
     if (isEnemyArmor) return false
 
@@ -51,7 +54,7 @@ class Airlock extends BaseBuilding {
                          !this.hasRailNeighbor(container, x, y, w, h) &&
                          !container.unitMap.isOccupied(x, y, w, h) &&
                          !container.railMap.isOccupied(x, y, w, h) &&
-                         !container.structureMap.isOccupied(x, y, w, h, false, false)
+                         !container.structureMap.isOccupied(x, y, w, h, false, true)
   }
 
 

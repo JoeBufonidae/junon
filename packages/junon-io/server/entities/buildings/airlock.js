@@ -10,7 +10,7 @@ class Airlock extends BaseBuilding {
 
     // ordering is important . replace walls would assign pressurables which need to be initialized
     this.initPressureSealer()
-    this.replaceWallsIfPresent()
+    // this.replaceWallsIfPresent()
   }
 
   getMaxHealth() {
@@ -79,6 +79,9 @@ class Airlock extends BaseBuilding {
 
   static isPositionValid(container, x, y, w, h, angle, player) {
     let armorHits = container.armorMap.hitTestTile(this.prototype.getBox(x, y, w, h))
+    const isOnWall = armorHits.find((hit) => { return hit.entity && hit.entity.hasCategory("wall") })
+    if (isOnWall) return false
+
     const isEnemyArmor = armorHits.find((hit) => { return hit.entity && !hit.entity.isOwnedBy(player) })
     if (isEnemyArmor) return false
 
@@ -89,7 +92,7 @@ class Airlock extends BaseBuilding {
                              !this.isOnHangar(container, x, y, w, h) &&
                              !this.hasRailNeighbor(container, x, y, w, h) &&
                              !container.railMap.isOccupied(x, y, w, h) &&
-                             !container.structureMap.isOccupied(x, y, w, h, false, false) // false is for ignoring walls, like we used to when they weren't classified as structures. 
+                             !container.structureMap.isOccupied(x, y, w, h, false, true)
   }
 
   interact(user) {
