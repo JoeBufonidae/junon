@@ -1922,7 +1922,9 @@ class Player extends BaseEntity {
         sourceIndex >= sourceStorage.getStorageLength()) return
 
     if (!data.hasOwnProperty("destinationIndex") &&
-        sourceStorage.isInventory() && destinationStorage.isBuildingStorage()) {
+        sourceStorage.isInventory() &&
+        typeof destinationStorage.isBuildingStorage === "function" &&
+        destinationStorage.isBuildingStorage()) {
       const sourceItem = sourceStorage.get(sourceIndex)
       if (!sourceItem) return
 

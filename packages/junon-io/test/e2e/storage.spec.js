@@ -91,4 +91,50 @@ test.describe('escape pod storage', () => {
 
     expect((await readInventory(page)).items.find((item) => item.type === 'Potato')).toBeUndefined()
   })
+
+  test('drags items between storage and player inventory', async ({ page }) => {
+    await createNewColonyAndJoin(page)
+
+    const pod = await readInitialEscapePod(page)
+    await openEscapePod(page, pod)
+
+    const emptyPlayerSlot = page.locator(
+      '#storage_menu .storage_player_inventory .inventory_slot:not([data-type]), ' +
+      '#storage_menu .storage_player_inventory .inventory_slot[data-type=""]'
+    ).first()
+    const playerIndex = Number(await emptyPlayerSlot.getAttribute('data-index'))
+
+    await page.locator(POD_SLOT(0)).dragTo(emptyPlayerSlot, { steps: 5 })
+
+    await expect
+      .poll(async () => (await readInventory(page)).items.find((item) => item.type === 'Potato'), { timeout: 10_000 })
+      .toMatchObject({ index: playerIndex, count: 5 })
+
+    await page.locator(PLAYER_SLOT(playerIndex)).dragTo(page.locator(POD_SLOT(0)), { steps: 5 })
+
+    await expect
+      .poll(async () => (await readStorage(page, pod.id)).items, { timeout: 10_000 })
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ index: 0, type: 'Potato', count: 5 })
+      ]))
+
+    await page.locator(POD_SLOT(0)).dragTo(page.locator(PLAYER_SLOT(playerIndex)), { steps: 5 })
+
+    const dropPoint = await page.evaluate(() => ({
+      x: window.innerWidth - 30,
+      y: Math.floor(window.innerHeight / 2)
+    }))
+    const dropTargetId = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y).id, dropPoint)
+    expect(dropTargetId).toBe('game_canvas')
+
+    const playerSlot = await page.locator(PLAYER_SLOT(playerIndex)).boundingBox()
+    await page.mouse.move(playerSlot.x + playerSlot.width / 2, playerSlot.y + playerSlot.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(dropPoint.x, dropPoint.y, { steps: 5 })
+    await page.mouse.up()
+
+    await expect
+      .poll(async () => (await readInventory(page)).items.find((item) => item.type === 'Potato'), { timeout: 10_000 })
+      .toBeUndefined()
+  })
 })

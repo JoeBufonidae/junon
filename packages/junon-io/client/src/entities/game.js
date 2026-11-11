@@ -386,20 +386,22 @@ class Game {
   initDraggables() {
     const containers = Array.from(document.querySelectorAll(".storage, #game_canvas"))
 
-    const dragDelay = 150
-
     const draggable = new Draggable(containers, {
       draggable: '.inventory_slot',
-      delay: dragDelay,
+      delay: { mouse: 0, touch: 150 },
+      distance: 5,
       placedTimeout: 100
-    })
-
-    const canvasContainer = new Draggable(document.querySelector("#game_canvas"), {
-      draggable: '.player_inventory_slot',
     })
 
     draggable.on('drag:start', (event) => {
       this.isDragging = true
+      this.destinationIndex = null
+      this.destinationStorageId = null
+
+      const buildingTooltip = document.querySelector("#building_menu_tooltip")
+      if (buildingTooltip) {
+        buildingTooltip.style.display = "none"
+      }
     })
 
     draggable.on('drag:over:container', (event) => {
@@ -421,10 +423,27 @@ class Game {
     draggable.on('drag:stop', (event) => {
       this.isDragging = false
 
+      const dropTarget = event.data.sensorEvent && event.data.sensorEvent.target
+      if (dropTarget) {
+        const destinationSlot = dropTarget.closest(".inventory_slot")
+        const destinationStorage = destinationSlot && destinationSlot.closest(".storage")
+
+        if (destinationStorage && destinationStorage.dataset.storageId) {
+          this.destinationIndex = destinationSlot.dataset.index
+          this.destinationStorageId = destinationStorage.dataset.storageId
+        } else if (dropTarget.closest("#game_canvas")) {
+          this.destinationIndex = null
+          this.destinationStorageId = Constants.worldStorageId
+        } else if (this.destinationStorageId !== Constants.worldStorageId) {
+          this.destinationIndex = null
+          this.destinationStorageId = null
+        }
+      }
+
       const sourceIndex = event.data.source.dataset.index
       const sourceStorageId = event.data.source.closest(".storage").dataset.storageId
 
-      let isPositionChanged = this.destinationIndex && this.destinationIndex !== sourceIndex
+      let isPositionChanged = this.destinationIndex !== null && this.destinationIndex !== sourceIndex
       if (isPositionChanged) {
         event.data.originalSource.classList.add("hidden")
       } else {
@@ -439,12 +458,15 @@ class Game {
           destinationStorageId: this.destinationStorageId
         }
 
-        if (this.destinationIndex) {
+        if (this.destinationIndex !== null) {
           data['destinationIndex'] = this.destinationIndex
         }
 
         SocketUtil.emit("SwapInventory", data)
       }
+
+      this.destinationIndex = null
+      this.destinationStorageId = null
     })
   }
 

@@ -1420,6 +1420,7 @@ body {
 
 #building_menu_tooltip {
     z-index: 12;
+    pointer-events: none;
 }
 
 .stats_type,
