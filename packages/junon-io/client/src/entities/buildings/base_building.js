@@ -118,6 +118,10 @@ class BaseBuilding extends BaseEntity {
     return false
   }
 
+  onPostEquip() {
+
+  }
+
   getStorageCount() {
     return this.getConstants().storageCount
   }

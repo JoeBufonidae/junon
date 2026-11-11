@@ -149,6 +149,7 @@ ClientContainer.prototype = {
 
   syncTerrain(entityData) {
     entityData.id = this.getTerrainId(entityData)
+    entityData.container = this
 
     try {
       if (entityData.clientMustDelete) {

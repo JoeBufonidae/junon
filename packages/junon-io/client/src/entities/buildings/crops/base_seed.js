@@ -62,6 +62,14 @@ class BaseSeed extends BaseBuilding {
     return "distributions"
   }
 
+  isEquipment() {
+    return this.data.user
+  }
+
+  onPostEquip() {
+    this.sprite.visible = false
+  }
+
 
   setIsHarvestable(isHarvestable) {
     this.isHarvestable = isHarvestable
