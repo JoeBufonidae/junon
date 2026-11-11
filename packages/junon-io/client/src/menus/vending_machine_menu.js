@@ -16,6 +16,7 @@ class VendingMachineMenu extends StorageMenu {
 
     this.el.querySelector(".vending_machine_tab_container").addEventListener("click", this.onVendingMachineTabClick.bind(this), true)
     this.el.querySelector(".purchasable_items_list").addEventListener("click", this.onPurchasableItemsClick.bind(this), true)
+    this.el.querySelector(".purchasable_items_list").addEventListener("keydown", this.onRepriceInputKeydown.bind(this), true)
     this.el.querySelector(".buy_btn").addEventListener("click", this.onBuyBtnClick.bind(this), true)
     this.el.querySelector(".collect_money_btn").addEventListener("click", this.onWithdrawBtnClick.bind(this), true)
   }
@@ -205,6 +206,23 @@ class VendingMachineMenu extends StorageMenu {
       }
     }
 
+  }
+
+  onRepriceInputKeydown(event) {
+    let input = event.target.closest(".trade_item_reprice")
+    if (!input) return
+    console.log(event.key, event.keyCode, event.code)
+    if (event.key === "Enter" || event.keyCode === 13 || event.code === "Enter") {
+      event.preventDefault()
+      event.stopPropagation()
+
+      let row = input.closest(".trade_item_row")
+      if (!row) return
+
+      this.selectedRow = row
+      row.dataset.selected = true
+      this.onRepriceBtnClick()
+    }
   }
 
   onRepriceBtnClick() {
