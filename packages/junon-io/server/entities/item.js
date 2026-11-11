@@ -17,7 +17,7 @@ class InvalidBuildingTypeError extends Error {}
 
 class Item extends BaseTransientEntity {
   constructor(owner, typeIdOrName, options = {}) {
-    super(owner.game)
+    super(owner.game, options.id)
 
     this.options = options
 
