@@ -314,21 +314,15 @@ class BaseMob extends BaseEntity {
   
   setNameColor(color) {
     this.nameColor = color || 16777215 
-    // Upd:
-    let SavedName = this.name
-    this.setName(" ")
-    this.setName(SavedName)
-    // Upd
-    this.onNameChanged();
+    if (this.usernameText && this.usernameText.sprite) {
+      this.usernameText.sprite.tint = this.nameColor
+    }
   }
   setNameSize(size) {
     this.nameSize = size || 23
-    // Upd:
-    let SavedName = this.name
-    this.setName(" ")
-    this.setName(SavedName)
-    // Upd
-    this.onNameChanged();
+    if (this.usernameText && this.usernameText.sprite) {
+      this.usernameText.sprite._font.size = this.nameSize
+    }
   }
   setName(name) {
     if (this.name !== name) {
