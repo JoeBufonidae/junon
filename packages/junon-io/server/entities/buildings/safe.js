@@ -17,6 +17,15 @@ class Safe extends SteelCrate {
     return false
   }
 
+  canBeSalvagedBy(player) {
+      if (player.isSectorOwner()) {
+          return super.canBeSalvagedBy(player)
+      } else {
+          player.showError("Wait for the map owner to break this safe",  {isWarning: true})
+          return false
+      }
+  }
+
   setKeypadCode(player, data) {
     KeypadAccess.setKeypadCode.call(this, player, data)
   }
