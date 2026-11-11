@@ -65,9 +65,9 @@ class VendingMachine extends BaseBuilding {
 
     let purchaseHistory = this.getPurchaseHistory(customer, itemSold.type)
     if (purchaseHistory) {
-      if (purchaseHistory.count >= 3) {
-        return { error: i18n.t(customer.locale,"BoughtTooMuch") }
-      }
+      // if (purchaseHistory.count >= 3) {
+      //   return { error: i18n.t(customer.locale,"BoughtTooMuch") }
+      // }
     }
 
     return {}
