@@ -156,7 +156,22 @@ class BaseMenu {
     for (let i = 0; i < elements.length; i++) {
       let el = elements[i]
       this.initInventorySlotListener(el)
+      el.addEventListener("dblclick", this.onPlayerInventoryDblClick.bind(this), true)
     }
+  }
+
+  onPlayerInventoryDblClick(e) {
+    if (this.game.main.isMobile || this.game.isDragging || !this.storageId) return
+
+    const inventorySlot = e.target.closest(".inventory_slot")
+    if (!inventorySlot || !inventorySlot.dataset.type) return
+
+    e.preventDefault()
+    SocketUtil.emit("SwapInventory", {
+      sourceStorageId: Constants.inventoryStorageId,
+      sourceIndex: inventorySlot.dataset.index,
+      destinationStorageId: this.storageId
+    })
   }
 
   initPlayerInventoryStorage() {

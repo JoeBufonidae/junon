@@ -1916,7 +1916,51 @@ class Player extends BaseEntity {
     const sourceStorage      = this.getStorage(data.sourceStorageId)
     const destinationStorage = this.getStorage(data.destinationStorageId)
     const sourceIndex        = data.sourceIndex
-    const destinationIndex   = data.destinationIndex
+    let destinationIndex     = data.destinationIndex
+
+    if (!sourceStorage || !destinationStorage || sourceIndex < 0 ||
+        sourceIndex >= sourceStorage.getStorageLength()) return
+
+    if (!data.hasOwnProperty("destinationIndex") &&
+        sourceStorage.isInventory() && destinationStorage.isBuildingStorage()) {
+      const sourceItem = sourceStorage.get(sourceIndex)
+      if (!sourceItem) return
+
+      let hasValidSlot = false
+      destinationIndex = -1
+
+      for (let index = 0; index < destinationStorage.getStorageLength(); index++) {
+        const storedItem = destinationStorage.get(index)
+        const canStore = destinationStorage.canStoreAt(index) &&
+          destinationStorage.canStore(index, sourceItem)
+        if (!canStore) continue
+
+        hasValidSlot = true
+        if (storedItem && storedItem.type === sourceItem.type &&
+            storedItem.isStackableType() && !storedItem.isFullyStacked()) {
+          destinationIndex = index
+          break
+        }
+      }
+
+      if (destinationIndex === -1) {
+        for (let index = 0; index < destinationStorage.getStorageLength(); index++) {
+          if (destinationStorage.get(index)) continue
+          if (!destinationStorage.canStoreAt(index) ||
+              !destinationStorage.canStore(index, sourceItem)) continue
+
+          destinationIndex = index
+          break
+        }
+      }
+
+      if (destinationIndex === -1) {
+        this.showError(hasValidSlot ? "Inventory Full" : "Invalid Item")
+        return
+      }
+
+      data = Object.assign({}, data, { destinationIndex })
+    }
 
     const isInvalidOperation = !sourceStorage || !destinationStorage || sourceIndex < 0 || destinationIndex < 0 ||
                               sourceIndex >= sourceStorage.getStorageLength() ||

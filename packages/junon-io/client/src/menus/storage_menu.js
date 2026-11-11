@@ -28,7 +28,7 @@ class StorageMenu extends BaseMenu {
 
   onInventoryMouseUp(e) {
     if (this.game.holdItemInventorySlot) return
-    
+
     let isPlayerInventorySlot = parseInt(e.target.closest(".storage").dataset.storageId) === Constants.inventoryStorageId
     if (isPlayerInventorySlot) {
       this.storeInventorySlot(e)
