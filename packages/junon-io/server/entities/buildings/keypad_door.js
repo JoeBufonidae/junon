@@ -34,6 +34,10 @@ class KeypadDoor extends Airlock {
         //wait for keypad usage instead
     }
 
+    isPassableByPathFinder() {
+        return false
+    }
+
     canBeSalvagedBy(player) {
         if (player.isSectorOwner()) {
             return super.canBeSalvagedBy(player)

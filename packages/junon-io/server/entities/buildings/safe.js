@@ -13,6 +13,10 @@ class Safe extends SteelCrate {
     return Protocol.definition().BuildingType.Safe
   }
 
+  isSlaveAllowedToAccess() {
+    return false
+  }
+
   setKeypadCode(player, data) {
     KeypadAccess.setKeypadCode.call(this, player, data)
   }
