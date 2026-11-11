@@ -3906,6 +3906,7 @@ arrow.style.setProperty('--arrow-color',realColor)
 
     inventorySlot.dataset.content = data.count === 1 ? "" : data.count
     inventorySlot.dataset.special = data.instance ? data.instance.content : ""
+    inventorySlot.dataset.lastUsedTimestamp = data.lastUsedTimestamp || ""
 
     // show item count in primary action btn
     if (this.isMobile() && inventorySlot.dataset.id === this.mobilePrimaryActionBtn.dataset.id) {
@@ -3930,6 +3931,8 @@ arrow.style.setProperty('--arrow-color',realColor)
     inventorySlot.dataset.id = ""
     inventorySlot.dataset.type = ""
     inventorySlot.dataset.content = ""
+    inventorySlot.dataset.special = ""
+    inventorySlot.dataset.lastUsedTimestamp = ""
 
     this.removeInventorySlotUsage(inventorySlot)
   }

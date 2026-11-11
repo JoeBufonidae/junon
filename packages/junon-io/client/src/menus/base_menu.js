@@ -583,22 +583,37 @@ class BaseMenu {
     let storageEl = this.el.querySelector(".storage[data-storage-id='" + data.id + "']")
     if (!storageEl) return
 
-    Array.from(storageEl.querySelectorAll(".inventory_slot")).forEach((inventorySlot) => {
-      let isNotDraggableMirror = inventorySlot.className.indexOf("draggable-mirror") === -1
-      if (isNotDraggableMirror) {
-        this.game.resetInventorySlot(inventorySlot)
-      }
-    })
-
+    const inventoryByIndex = new Map()
     for (let index in data.inventory.storage) {
       let inventory = data.inventory.storage[index]
       if (inventory) {
-        let inventorySlot = storageEl.querySelector(".inventory_slot[data-index='" + inventory.index + "']")
-        if (inventorySlot) {
-          this.game.renderInventorySlot(inventorySlot, inventory)
-        }
+        inventoryByIndex.set(String(inventory.index), inventory)
       }
     }
+
+    Array.from(storageEl.querySelectorAll(".inventory_slot")).forEach((inventorySlot) => {
+      if (inventorySlot.className.indexOf("draggable-mirror") !== -1) return
+
+      const inventory = inventoryByIndex.get(inventorySlot.dataset.index)
+      if (!inventory) {
+        if (inventorySlot.dataset.id || inventorySlot.dataset.type) {
+          this.game.resetInventorySlot(inventorySlot)
+        }
+        return
+      }
+
+      const isUnchanged =
+        inventorySlot.dataset.id === String(inventory.id || "") &&
+        inventorySlot.dataset.type === String(inventory.type) &&
+        inventorySlot.dataset.content === String(inventory.count === 1 ? "" : inventory.count) &&
+        inventorySlot.dataset.special === String(inventory.instance ? inventory.instance.content : "") &&
+        inventorySlot.dataset.usage === String(inventory.instance ? inventory.instance.usage : "") &&
+        inventorySlot.dataset.lastUsedTimestamp === String(inventory.lastUsedTimestamp || "")
+
+      if (!isUnchanged) {
+        this.game.renderInventorySlot(inventorySlot, inventory)
+      }
+    })
 
     if (this.entity && this.entity.getId() === data.id) {
       this.storage = data.inventory.storage
