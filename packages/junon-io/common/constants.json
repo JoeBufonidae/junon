@@ -5688,7 +5688,7 @@
         "gold": 200
       },
       "isPassable": true,
-      "categories": {"sign": true},
+      "categories": {"sign": true, "editable_permissions":true},
       "hasMenu": true,
       "hasEditableContent": true,
       "isInteractable": true,
@@ -5712,7 +5712,7 @@
         "gold": 200
       },
       "isPassable": true,
-      "categories": {"sign": true, "switch":true,"lamp":true},
+      "categories": {"sign": true, "switch":true,"lamp":true, "editable_permissions":true},
       "hasMenu": true,
       "hasEditableContent": true,
       "isInteractable": true,

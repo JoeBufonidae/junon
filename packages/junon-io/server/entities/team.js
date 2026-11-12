@@ -149,7 +149,20 @@ class Team extends BaseTransientEntity {
       Ban: false,
       UseCommands: false,
       EditCommandBlocks: false,
-      EditTeamName: false
+      EditTeamName: false,
+      DeconstructOwnedStructures: false,
+      ChangeRoles: false
+    })
+  }
+
+  createAdminRole() {
+    let role = new Role({ id: 2, name: "Admin", team: this })
+    role.allowAll()
+    role.setPermissions({
+      Kick: false,
+      Ban: false,
+      UseCommands: false,
+      EditCommandBlocks: false,
     })
   }
 
@@ -167,17 +180,6 @@ class Team extends BaseTransientEntity {
 
     let role = new Role(options)
     role.onRoleChanged()
-  }
-
-  createAdminRole() {
-    let role = new Role({ id: 2, name: "Admin", team: this })
-    role.allowAll()
-    role.setPermissions({
-      Kick: false,
-      Ban: false,
-      UseCommands: false,
-      EditCommandBlocks: false,
-    })
   }
 
   applyData(data) {

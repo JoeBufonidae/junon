@@ -555,7 +555,7 @@ class BaseBuilding extends BaseEntity {
 
     if (this.hasCategory("editable_permissions")) {
       let canManagePermissions = this.belongToOwner(this.game.player) &&
-                                 this.game.player.isAdmin()
+                                this.game.player.getRole().permissions["ChangeRole"]
 
       if (!canManagePermissions) {
         el += this.getPermissionStat()
@@ -563,7 +563,7 @@ class BaseBuilding extends BaseEntity {
     }
 
     if (this.hasCategory("spawnpoint") && this.content) {
-      let canManageSpawn = this.belongToOwner(this.game.player) && this.game.player.isAdmin()
+      let canManageSpawn = this.belongToOwner(this.game.player) && this.game.player.getRole().permissions["ChangeRole"]
       if (!canManageSpawn) {
         el += this.getSpawnPointStat()
       }

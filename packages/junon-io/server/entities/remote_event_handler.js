@@ -346,7 +346,10 @@ class RemoteEventHandler {
     if (data.hasOwnProperty("content") &&
         building.hasEditableContent()) {
       if (building.hasCategory("sign")) {
-        if (player.getRole().isAllowedTo("EditSign")) {
+        let canEdit = building.isCustomAccess
+          ? building.isRolePermitted(player.roleType)
+          : player.getRole().isAllowedTo("EditSign")
+        if (canEdit) {
           let maxLength = building.getMaxContentLength()
           let content = data.content.slice(0, maxLength)
           content = player.replaceBadWords(content)
@@ -383,7 +386,7 @@ class RemoteEventHandler {
     }
     if (data.hasOwnProperty("roleType") &&
         building.hasCategory("editable_permissions") &&
-        player.isAdmin()) {
+        player.getRole().permissions["ChangeRole"]) {
       building.editPermission(data.roleType, data.isRoleEnabled)
       player.setLastCustomAccess(building)
     }
