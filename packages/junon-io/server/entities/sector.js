@@ -2986,7 +2986,8 @@ initSettings(entities) {
   }
 
   insertEntityToTreeByName(entity, groupName) {
-    if(entity.isRemoved && entity.isRemoved()) return
+    // isRemoved is a plain true/false property on entities, not a method: calling it threw an error for every removed entity
+    if (entity.isRemoved === true || (typeof entity.isRemoved === "function" && entity.isRemoved())) return
     let tree = this.getTreeFromEntityType(groupName, entity.getContainer())
     entity.updateRbushCoords()
     entity.onWorldPostStep()
