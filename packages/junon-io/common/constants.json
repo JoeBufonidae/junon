@@ -6350,7 +6350,7 @@
       "sprite": {
         "rotation": 90
       },
-      "categories": {"seller":true,"vending_machine":true,"editable_permissions":true},
+      "categories": {"seller":true,"vending_machine":true,"editable_permissions":false},
       "hasMenu": true,
       "menuDescription": "",
       "isInteractable": true,
@@ -6380,7 +6380,7 @@
       "sprite": {
         "rotation": 90
       },
-      "categories": {"seller":true,"vending_machine":true,"editable_permissions":true},
+      "categories": {"seller":true,"vending_machine":true,"editable_permissions":false},
       "hasMenu": true,
       "menuDescription": "",
       "isInteractable": true,
@@ -6407,7 +6407,7 @@
       "cost": {
         "gold": 500
       },
-      "categories": {"seller":true,"vending_machine":true,"editable_permissions":true},
+      "categories": {"seller":true,"vending_machine":true,"editable_permissions":false},
       "hasMenu": true,
       "menuDescription": "",
       "isInteractable": true,
