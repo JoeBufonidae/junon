@@ -151,7 +151,7 @@ class RailStopMenu extends BaseMenu {
   }
 
   renderRenameBtn(stop, team) {
-    if (this.game.isLeaderAndOwner(stop, team, this.game.player)) {
+    if (this.game.player.getRole().permissions["ChangeRole"] && team === stop.getOwner() || this.game.player.isSectorOwner()) {
       this.el.querySelector(".rename_btn").style.display = 'inline-block'
     } else {
       this.el.querySelector(".rename_btn").style.display = 'none'
