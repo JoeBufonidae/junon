@@ -39,10 +39,11 @@ class KeypadDoor extends Airlock {
     }
 
     canBeSalvagedBy(player) {
-        if (player.isSectorOwner()) {
+        const role = player.getRole()
+        if (role && role.isAllowedTo("DeconstructOwnedStructures") || player.isSectorOwner()) {
             return super.canBeSalvagedBy(player)
         } else {
-            player.showError("Wait for the map owner to break this door",  {isWarning: true})
+            player.showError("You dont have permission to deconstruct this door", {isWarning: true})
             return false
         }
     }

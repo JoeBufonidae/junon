@@ -48,7 +48,8 @@ class SealedDoor extends Airlock {
   }
 
   canBeSalvagedBy(player) {
-    if (player.isAdmin() || player.isSectorOwner()) {
+    const role = player.getRole()
+    if (role && role.isAllowedTo("DeconstructOwnedStructures") || player.isSectorOwner()) {
       return super.canBeSalvagedBy(player)
     } else {
       return false

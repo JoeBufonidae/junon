@@ -7,23 +7,26 @@ class Role {
       "Kick":              false,
       "Ban":               false,
       "Build":             false,
+      "BuildKeypadStructures":             false,
       "Deconstruct":       false,
+      "DeconstructOwnedStructures": false,
       "MineAsteroids":     false,
       "PlantSeeds":        false,
       "HarvestCrops":      false,
       "ButcherCorpse":     false,
       "Cook":              false,
       "SellToTrader":      false,
+      "SellToPlayers":     false,
       "EditSign":          false,
       "AccessStorage":     false,
       "AccessMiningDrill": false,
       "DamagePvpPlayers":  true,
+      "ChangeRoles":       false,
       "UseVents":          false,
       "EditTeamName":      false,
       "UseCommands":       false,
       "EditCommandBlocks": false,
     }
-
     this.applyData(options)
 
     this.registerRole()

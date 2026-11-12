@@ -4486,6 +4486,20 @@ class Player extends BaseEntity {
 
     if (this.getRole()) {
       let canBuild = this.getRole().isAllowedTo("Build") || byPassRoleBuildPermission
+      let buildingTypeName = buildingKlass.prototype.getTypeName()
+
+      if (["Safe", "KeypadDoor"].indexOf(buildingTypeName) !== -1 &&
+          !this.getRole().isAllowedTo("BuildKeypadStructures")) {
+        this.showError("You dont have permission to build keypad structures")
+        return null
+      }
+
+      if (buildingKlass.prototype.hasCategory("vending_machine") &&
+          !this.getRole().isAllowedTo("SellToPlayers")) {
+        this.showError("You dont have permission to build vending machines")
+        return null
+      }
+
       let ownerOnly = ["UnbreakableWall"]
       if(ownerOnly.indexOf(buildingKlass.prototype.getTypeName()) != -1) {
         if(!this.isSectorOwner()) {

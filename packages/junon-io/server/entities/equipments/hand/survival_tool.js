@@ -48,7 +48,8 @@ class SurvivalTool extends MeleeEquipment {
     }
 
 
-    if (!byPassRoleBuildPermission && player.getRole() && !player.getRole().isAllowedTo("Deconstruct")) {
+    if (!byPassRoleBuildPermission &&
+        (!player.getRole() || !player.getRole().isAllowedTo("Deconstruct"))) {
       return false
     }
 

@@ -294,9 +294,15 @@ class RemoteEventHandler {
     } else if (data.action === 'unban') {
       player.getTeam().unban(data.banId, player)
     } else if (data.action === 'role') {
-      if (!player.isAdmin()) {
-        if (!player.isSectorOwner()) return
-      }
+      const canManageAnyTeam = player.isAdmin() || player.isSectorOwner()
+      const canChangeRoles = player.getRole() &&
+        player.getRole().isAllowedTo("ChangeRoles")
+      if (!canManageAnyTeam && !canChangeRoles) return
+
+      if (targetPlayer && !canManageAnyTeam && targetPlayer.getTeam() !== player.getTeam()) return
+      if (targetPlayer && !canManageAnyTeam &&
+          String(targetPlayer.getId()) === String(player.getId())) return
+
       if (team) {
         team.setRole(data.memberId, data.roleType, player)
       } else {

@@ -3,6 +3,19 @@ const Constants = require("../../common/constants")
 const Protocol = require('../../common/util/protocol')
 
 class Role extends BaseCommand {
+  canExecute(caller) {
+    if (!caller.isPlayer()) return super.canExecute(caller)
+    if (!this.isEnabled()) return caller.isAdminMode
+    if (caller.isAdminMode || caller.isAdmin()) return true
+    if (this.game.isMiniGame()) return false
+    if (this.isNonSandboxCommand()) return true
+    if (!this.game.isPeaceful()) return false
+    if (caller.isSectorOwner()) return true
+
+    let role = caller.getRole()
+    return !!(role && role.isAllowedTo("ChangeRoles"))
+  }
+
   getUsage() {
     return [
       "Assigns a role to a player",
@@ -31,16 +44,32 @@ class Role extends BaseCommand {
     }
 
     targetPlayers.forEach((targetPlayer) => {
-      let role = targetPlayer.getTeam().getRoleByName(roleName)
+      let targetTeam = targetPlayer.getTeam()
+      if (!targetTeam) return
+
+      const canManageAnyTeam = player.isAdmin() || player.isSectorOwner()
+      const canChangeRoles = player.getRole() &&
+        player.getRole().isAllowedTo("ChangeRoles")
+      if (!canManageAnyTeam && canChangeRoles &&
+          String(targetPlayer.getId()) === String(player.getId())) {
+        player.showChatError("Permission Denied")
+        return
+      }
+
+      if (!canManageAnyTeam && canChangeRoles && targetTeam !== player.getTeam()) {
+        player.showChatError("Permission Denied")
+        return
+      }
+
+      let role = targetTeam.getRoleByName(roleName)
       if (!role) {
         player.showChatError("No such role " + roleName)
         return
       }
 
-      targetPlayer.setRoleType(role.id)
+      targetTeam.setRole(targetPlayer.getId(), role.id, player)
     })
   }
 }
 
 module.exports = Role
-

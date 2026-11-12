@@ -18,11 +18,26 @@ jest.mock('../../server/entities/team', () => ({
 
 const BaseBuilding = require('../../server/entities/buildings/base_building')
 const VendingMachine = require('../../server/entities/buildings/vending_machine')
+const KeypadDoor = require('../../server/entities/buildings/keypad_door')
+const Safe = require('../../server/entities/buildings/safe')
+const SealedDoor = require('../../server/entities/buildings/sealed_door')
+const SuitStation = require('../../server/entities/buildings/suit_station')
+const SurvivalTool = require('../../server/entities/equipments/hand/survival_tool')
 
 function createBuilding(overrides = {}) {
   const building = Object.create(BaseBuilding.prototype)
   Object.assign(building, { w: 32, h: 32, origAngle: 0 }, overrides)
   return building
+}
+
+function createRolePlayer(canDeconstructOwnedStructures) {
+  return {
+    getRole: () => ({
+      isAllowedTo: (permission) => permission === 'DeconstructOwnedStructures' &&
+        canDeconstructOwnedStructures
+    }),
+    showError: jest.fn()
+  }
 }
 
 describe('normalizeAngle', () => {
@@ -207,8 +222,8 @@ describe('vending machine salvage permissions', () => {
     jest.restoreAllMocks()
   })
 
-  test('does not allow a non-placing non-admin player to salvage', () => {
-    const player = { isAdmin: () => false }
+  test('requires DeconstructOwnedStructures before applying normal ownership rules', () => {
+    const player = createRolePlayer(false)
     const machine = Object.create(VendingMachine.prototype)
     machine.getPlacer = () => ({})
     const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy')
@@ -217,16 +232,130 @@ describe('vending machine salvage permissions', () => {
     expect(baseCheck).not.toHaveBeenCalled()
   })
 
-  test.each([
-    ['the placer', false],
-    ['an admin', true],
-  ])('uses the existing salvage rules for %s', (role, isAdmin) => {
-    const player = { isAdmin: () => isAdmin }
+  test('delegates to the normal ownership rules when the role has permission', () => {
+    const player = createRolePlayer(true)
     const machine = Object.create(VendingMachine.prototype)
-    machine.getPlacer = () => role === 'the placer' ? player : {}
+    machine.getPlacer = () => ({})
     const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy').mockReturnValue(true)
 
     expect(machine.canBeSalvagedBy(player)).toEqual(true)
     expect(baseCheck).toHaveBeenCalledWith(player)
+  })
+})
+
+describe('restricted structure salvage permissions', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  test.each([
+    ['a keypad door', KeypadDoor],
+    ['a safe', Safe],
+    ['a sealed door', SealedDoor],
+  ])('requires DeconstructOwnedStructures for %s', (name, Building) => {
+    const player = createRolePlayer(false)
+    const building = Object.create(Building.prototype)
+    const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy')
+
+    expect(building.canBeSalvagedBy(player)).toEqual(false)
+    expect(baseCheck).not.toHaveBeenCalled()
+  })
+
+  test.each([
+    ['a keypad door', KeypadDoor],
+    ['a safe', Safe],
+    ['a sealed door', SealedDoor],
+  ])('applies normal ownership rules to %s after permission is granted', (name, Building) => {
+    const player = createRolePlayer(true)
+    const building = Object.create(Building.prototype)
+    const baseCheck = jest.spyOn(BaseBuilding.prototype, 'canBeSalvagedBy').mockReturnValue(true)
+
+    expect(building.canBeSalvagedBy(player)).toEqual(true)
+    expect(baseCheck).toHaveBeenCalledWith(player)
+  })
+
+  test('allows a role to salvage a suit station owned by another member of its team', () => {
+    const team = {}
+    const player = Object.assign(createRolePlayer(true), {
+      getTeam: () => team,
+      getOccupiedRoom: () => ({})
+    })
+    const station = Object.create(SuitStation.prototype)
+    station.owner = {
+      isPlayer: () => true,
+      getTeam: () => team
+    }
+    station.isReachableFromRoom = () => true
+    station.isOwnedBy = () => false
+
+    expect(station.canBeSalvagedBy(player)).toEqual(true)
+  })
+
+  test('does not allow a role to salvage another team member\'s suit station', () => {
+    const player = Object.assign(createRolePlayer(true), {
+      getTeam: () => ({}),
+      getOccupiedRoom: () => ({})
+    })
+    const station = Object.create(SuitStation.prototype)
+    station.owner = {
+      isPlayer: () => true,
+      getTeam: () => ({})
+    }
+    station.isReachableFromRoom = () => true
+    station.isOwnedBy = () => false
+
+    expect(station.canBeSalvagedBy(player)).toEqual(false)
+  })
+})
+
+describe('general deconstruction permission', () => {
+  function createSurvivalTool() {
+    return Object.create(SurvivalTool.prototype)
+  }
+
+  function createSalvageTarget() {
+    return {
+      isBuilding: () => true,
+      owner: {},
+      hasCategory: () => false,
+      getX: () => 0,
+      getY: () => 0,
+      getRotatedWidth: () => 32,
+      getRotatedHeight: () => 32,
+      isOnFire: () => false,
+      canBeSalvagedBy: jest.fn(() => true)
+    }
+  }
+
+  function createSalvagePlayer(deconstruct, deconstructOwnedStructures) {
+    return {
+      getRegionBuildPermission: () => null,
+      getRole: () => ({
+        isAllowedTo: (permission) => ({
+          Deconstruct: deconstruct,
+          DeconstructOwnedStructures: deconstructOwnedStructures
+        }[permission])
+      })
+    }
+  }
+
+  test('DeconstructOwnedStructures alone does not grant any salvage permission', () => {
+    const target = createSalvageTarget()
+
+    expect(createSurvivalTool().canSalvage(
+      createSalvagePlayer(false, true),
+      target
+    )).toEqual(false)
+    expect(target.canBeSalvagedBy).not.toHaveBeenCalled()
+  })
+
+  test('Deconstruct continues to permit ordinary owned structures without the special permission', () => {
+    const target = createSalvageTarget()
+
+    expect(createSurvivalTool().canSalvage(
+      createSalvagePlayer(true, false),
+      target
+    )).toEqual(true)
+    expect(target.canBeSalvagedBy).toHaveBeenCalled()
   })
 })

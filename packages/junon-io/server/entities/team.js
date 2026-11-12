@@ -834,6 +834,11 @@ class Team extends BaseTransientEntity {
   }
 
   setRole(memberId, roleType, user) {
+    if (!this.getRole(roleType)) {
+      user.showError("Invalid role", { isWarning: true })
+      return
+    }
+
     if (this.game.isPvP()) {
       // disallow guest role
       if (roleType === Team.GuestRoleType) {

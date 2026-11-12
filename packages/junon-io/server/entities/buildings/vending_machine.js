@@ -20,9 +20,16 @@ class VendingMachine extends BaseBuilding {
   }
 
   canBeSalvagedBy(player) {
-    if (!player.isAdmin() && this.getPlacer() !== player) return false
-
-    return super.canBeSalvagedBy(player)
+      const role = player.getRole()
+      if (
+          (role && role.isAllowedTo("DeconstructOwnedStructures")) ||
+          this.getPlacer() === player ||
+          player.isSectorOwner()
+      ) {
+          return super.canBeSalvagedBy(player)
+      }
+      player.showError("You dont have permission to deconstruct this", {isWarning: true})
+      return false
   }
 
   withdraw(player) {

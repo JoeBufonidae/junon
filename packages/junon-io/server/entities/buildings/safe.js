@@ -18,12 +18,16 @@ class Safe extends SteelCrate {
   }
 
   canBeSalvagedBy(player) {
-      if (player.isSectorOwner()) {
+      const role = player.getRole()
+      if (
+          (role && role.isAllowedTo("DeconstructOwnedStructures")) ||
+          this.getPlacer() === player ||
+          player.isSectorOwner()
+      ) {
           return super.canBeSalvagedBy(player)
-      } else {
-          player.showError("Wait for the map owner to break this safe",  {isWarning: true})
-          return false
       }
+      player.showError("You dont have permission to deconstruct this safe", {isWarning: true})
+      return false
   }
 
   setKeypadCode(player, data) {

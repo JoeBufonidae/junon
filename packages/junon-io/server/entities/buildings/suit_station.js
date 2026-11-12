@@ -73,9 +73,17 @@ class SuitStation extends BaseBuilding {
   }
 
   canBeSalvagedBy(player) {
-    if (!this.canBeInteracted(player)) return false
+    const role = player.getRole()
+    if (!role || !role.isAllowedTo("DeconstructOwnedStructures")) return false
+    if (!this.isReachableFromRoom(player.getOccupiedRoom())) return false
 
-    return super.canBeSalvagedBy(player)
+    const isPlayerOwner = this.owner &&
+      (this.owner.isPlayer() ||
+        (typeof this.owner.isPlayerData === "function" && this.owner.isPlayerData()))
+    const isOwnedByTeam = isPlayerOwner &&
+      this.owner.getTeam() === player.getTeam()
+
+    return this.isOwnedBy(player) || isOwnedByTeam
   }
 
   executeTurn() {

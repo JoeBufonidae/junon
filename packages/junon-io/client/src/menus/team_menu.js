@@ -1688,7 +1688,13 @@ class TeamMenu extends BaseMenu {
         message: "Warning! This permission can potentially allow anyone with this role to do anything to your world. Proceed?",
         proceedCallback: this.editRole.bind(this, permission, isEnabled)
       })
-  } else {
+    } else if (permission === "DeconstructOwnedStructures" && isEnabled) {
+      this.game.confirmMenu.open({
+        dontCloseMenus: true,
+        message: "Warning! This permission will allow anyone with this role to deconstruct any safes, keypad doors, sealed doors, vending machines, dispensers, and suit stations in your world, even ones they did not place. Proceed?",
+        proceedCallback: this.editRole.bind(this, permission, isEnabled)
+      })
+    } else {
       this.editRole(permission, isEnabled)
     }
 
@@ -1963,7 +1969,7 @@ class TeamMenu extends BaseMenu {
     this.el.querySelector(".member_list").innerHTML = this.createMemberListHTML(playerList)
     if (!this.activeTeam) return
 
-    if (this.activeTeam.isAdmin(this.game.player)) {
+    if (game.player.getRole().permissions["ChangeRole"]) {
       let offlinePlayerList = Object.values(team.offlineMembers)
       if (offlinePlayerList.length > 0) {
         this.el.querySelector(".offline_member_list").innerHTML = this.createMemberListHTML(offlinePlayerList, { offline: true })
@@ -1971,8 +1977,13 @@ class TeamMenu extends BaseMenu {
       } else {
         this.el.querySelector(".offline_member_list").innerHTML = ""
         this.el.querySelector(".offline_member_list_container").style.display = 'none'
-      }
+      }}
+    else {
+      this.el.querySelector(".offline_member_list").innerHTML = ""
+      this.el.querySelector(".offline_member_list_container").style.display = 'none'
+    }
 
+    if (game.player.getRole().permissions["Ban"]) {
       let sectorBanList = Object.values(this.game.sector.sectorBans)
       if (sectorBanList.length > 0) {
         this.el.querySelector(".ban_member_list").innerHTML = this.createBanListHTML(sectorBanList)
@@ -1981,11 +1992,7 @@ class TeamMenu extends BaseMenu {
         this.el.querySelector(".ban_member_list").innerHTML = ""
         this.el.querySelector(".ban_member_list_container").style.display = 'none'
       }
-
     } else {
-      this.el.querySelector(".offline_member_list").innerHTML = ""
-      this.el.querySelector(".offline_member_list_container").style.display = 'none'
-
       this.el.querySelector(".ban_member_list").innerHTML = ""
       this.el.querySelector(".ban_member_list_container").style.display = 'none'
     }
