@@ -1,0 +1,30 @@
+{
+  "version": "v0.8.4.alpha",
+  "date": "November 13, 2026",
+  "title": "Four New Permissions, Better Vending, and Bug Fixes - by BigTforLife",
+  "content": {
+    "features": [
+      "Added ChangeRoles, SellToPlayers, DeconstructOwnedStructures, and BuildKeypadStructures permissions",
+      "Gave signs editable permissions (now can set signs to only be edited by certain roles)",
+      "Increased safe health to 1000",
+      "Increased craft cost of safe",
+      "Can now submit custom prices in vending structures with enter",
+      "Item IDs now save in between world loads",
+      "Removed placing doors and ventilators over walls",
+      "Added double clicking into more menus",
+      "Removed [bought too much] message from vending structures",
+      "Increased the scrolltobottom threshold, should feel better now"
+    ],
+    "bugs": [
+      "Fixed tamed mobs not being able to open non automatic doors",
+      "Fixed wierd drag issues (finally figured out what it was)
+      "Fixed slaves accessing safes and trying to pathfind through keypad doors",
+      "Fixed nametag item not working",
+      "Fixed vending prices not saving in between world loads",
+      "Fixed processor and other menus flickering",
+      "Fixed safe being deconstructable by anyone",
+      "Fixed 2 random console spamming bugs that didn't affect gameplay",
+      "Fixed a left over from the changelog renumbering"
+    ]
+  }
+}
