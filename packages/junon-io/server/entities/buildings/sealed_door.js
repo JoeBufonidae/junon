@@ -71,6 +71,7 @@ class SealedDoor extends Airlock {
   }
 
   isAllowedToPass(entity) {
+    if (typeof entity.isMob === "function" && entity.isMob()) return true
     if (!this.isOwnedBy(entity)) return false
       
     if (entity.isPlayer()) {
