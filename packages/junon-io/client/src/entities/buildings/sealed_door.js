@@ -17,6 +17,10 @@ class SealedDoor extends Airlock {
     return false
   }
 
+  setIsCustomAccess() {
+    super.setIsCustomAccess(true)
+  }
+
   getSpritePath() {
     return "sealed_door.png"
   }

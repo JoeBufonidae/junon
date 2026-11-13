@@ -4539,7 +4539,8 @@ class Player extends BaseEntity {
         }
       }
 
-      if (building.hasCategory("editable_permissions")) {
+      if (building.hasCategory("editable_permissions") &&
+          building.shouldInheritCustomAccess()) {
         if (this.lastCustomAccess && this.lastCustomAccess.type === building.type) {
           building.setIsCustomAccess(true)
           building.setAccessType(this.lastCustomAccess.accessType)

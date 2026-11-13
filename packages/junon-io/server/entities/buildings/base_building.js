@@ -228,7 +228,7 @@ class BaseBuilding extends BaseEntity {
       this.setOwner(owner)
     }
 
-    if (data.accessType) {
+    if (data.hasOwnProperty("accessType")) {
       this.accessType = data.accessType
     } else {
       this.accessType = this.getDefaultAccessType()
@@ -354,6 +354,10 @@ class BaseBuilding extends BaseEntity {
       result += (1 << Team.SlaveRoleType)
       return result
     }
+  }
+
+  shouldInheritCustomAccess() {
+    return true
   }
 
   editTargetType(targetType, isEnabled) {

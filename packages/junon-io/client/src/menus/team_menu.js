@@ -1969,7 +1969,7 @@ class TeamMenu extends BaseMenu {
     this.el.querySelector(".member_list").innerHTML = this.createMemberListHTML(playerList)
     if (!this.activeTeam) return
 
-    if (game.player.getRole().permissions["ChangeRole"]) {
+    if (game.player.getRole().permissions["ChangeRoles"]) {
       let offlinePlayerList = Object.values(team.offlineMembers)
       if (offlinePlayerList.length > 0) {
         this.el.querySelector(".offline_member_list").innerHTML = this.createMemberListHTML(offlinePlayerList, { offline: true })

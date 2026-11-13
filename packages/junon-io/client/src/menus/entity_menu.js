@@ -213,20 +213,19 @@ class EntityMenu extends BaseMenu {
   initPermissionListeners() {
     this.el.querySelector(".custom_access_select").addEventListener("change", this.onCustomAccessSelectChanged.bind(this))
 
-    this.el.querySelector(".entity_permission_roles").addEventListener("click", (e) => {
+    this.el.querySelector(".entity_permission_roles").addEventListener("change", (e) => {
       let role = e.target.closest(".permission_role")
       if (!role) return
       if (e.target.tagName !== 'INPUT') return // dont process label click event
 
       e.stopPropagation()
-      e.preventDefault()
-
-      if (!this.game.player.isAdmin()) {
-        this.game.displayError("Permission Denied", { warning: true })
-        return
-      }
 
       let roleId = role.dataset.roleId
+      if (!this.game.player.getRole().permissions["ChangeRoles"]) {
+        this.game.displayError("Permission Denied", { warning: true })
+        this.entity.renderPermissionCheckbox(this.el, roleId)
+        return
+      }
 
       SocketUtil.emit("EditBuilding", { 
         id: this.entity.getId(),
@@ -234,7 +233,7 @@ class EntityMenu extends BaseMenu {
         isRoleEnabled: role.querySelector("input").checked
       })
 
-    }, true)
+    })
       
   }
 
@@ -433,8 +432,8 @@ class EntityMenu extends BaseMenu {
     }
 
     if (entity.hasCategory("editable_permissions") &&
-        entity.belongToOwner(this.game.player) &&
-        this.game.player.isAdmin()) {
+        entity.isOwnedBy(this.game.player) &&
+        this.game.player.getRole().permissions["ChangeRoles"]) {
       this.el.querySelector(".entity_permissions_container").style.display = 'block'
     } else {
       this.el.querySelector(".entity_permissions_container").style.display = 'none'
@@ -442,7 +441,7 @@ class EntityMenu extends BaseMenu {
 
     if (entity.hasCategory("spawnpoint") &&
         entity.belongToOwner(this.game.player) &&
-        this.game.player.isAdmin()) {
+        this.game.player.getRole().permissions["ChangeRoles"]) {
       this.el.querySelector(".spawn_select_container").style.display = 'block'
     } else {
       this.el.querySelector(".spawn_select_container").style.display = 'none'

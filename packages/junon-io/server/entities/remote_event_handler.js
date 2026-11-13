@@ -386,7 +386,7 @@ class RemoteEventHandler {
     }
     if (data.hasOwnProperty("roleType") &&
         building.hasCategory("editable_permissions") &&
-        player.getRole().permissions["ChangeRole"]) {
+        player.getRole().isAllowedTo("ChangeRoles")) {
       building.editPermission(data.roleType, data.isRoleEnabled)
       player.setLastCustomAccess(building)
     }

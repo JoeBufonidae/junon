@@ -12,13 +12,27 @@ class SealedDoor extends Airlock {
     this.setIsCustomAccess(true)
   }
 
+  setIsCustomAccess() {
+    super.setIsCustomAccess(true)
+  }
+
+  shouldInheritCustomAccess() {
+    return false
+  }
+
   getDefaultAccessType() {
     let result = 0
 
     result += (1 << Team.SlaveRoleType)
 
-    if (this.owner && this.owner.isTeam()) {
-      for (let id in this.owner.roles) {
+    const isTeam = (entity) => entity && typeof entity.isTeam === "function" && entity.isTeam()
+    let ownerTeam = this.owner
+    if (!isTeam(ownerTeam) && this.owner && typeof this.owner.getTeam === "function") {
+      ownerTeam = this.owner.getTeam()
+    }
+
+    if (isTeam(ownerTeam)) {
+      for (let id in ownerTeam.roles) {
         result += (1 << parseInt(id))
       }
     }
@@ -69,8 +83,6 @@ class SealedDoor extends Airlock {
   }
 
   shouldObstruct(body, hit) {
-    // if (!this.isAllowedToPass(body.entity)) return true
-
     return !this.isOpen
   }
 
