@@ -17,7 +17,7 @@
     ],
     "bugs": [
       "Fixed tamed mobs not being able to open non automatic doors",
-      "Fixed wierd drag issues (finally figured out what it was)
+      "Fixed wierd drag issues (finally figured out what it was)",
       "Fixed slaves accessing safes and trying to pathfind through keypad doors",
       "Fixed nametag item not working",
       "Fixed vending prices not saving in between world loads",
