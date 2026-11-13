@@ -1,10 +1,10 @@
 {
   "version": "v0.7.6.alpha",
   "date": "August 17, 2026",
-  "title": "Bug Fix & Patch of v0.8.3.alpha by BigTforLife",
+  "title": "Bug Fix & Patch of v0.7.6.alpha by BigTforLife",
   "content": {
     "bugs": [
-      "Reverted balancing edits from v0.8.3.alpha",
+      "Reverted balancing edits from previous update",
       "Added a default value (true) for isItemBreakingEnabled setting",
       "Locked isItemBreakingEnabled setting in survival and hardcore",
       "Removed crafting of shock grenade, kurki, and bayonet (now peaceful only)",
