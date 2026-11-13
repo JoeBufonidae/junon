@@ -1,6 +1,6 @@
 const KeypadAccess = {
   setKeypadCode(player, data) {
-    if (player.isAdmin() || player.isSectorOwner()) {
+    if (player.getRole().isAllowedTo("BuildKeypadStructures") || player.isSectorOwner()) {
       if (this.sector.keyCodes[this.id]) return
       if (typeof data.keyCode !== "string") return
       if (data.keyCode.length > 10) return
