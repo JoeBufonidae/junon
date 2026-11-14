@@ -222,9 +222,9 @@ class Server {
 
   isHighMemory() {
     if (this.getSectorCount() >= 7) {
-      return this.data.memory > 700
+      return this.data.memory > 1500
     } else {
-      return this.data.memory > 500
+      return this.data.memory > 1000
     }
   }
 
