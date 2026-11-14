@@ -29,23 +29,33 @@ class Role extends BaseCommand {
   }
 
   perform(player, args) {
+    const isPlayer = player.isPlayer()
+    const fail = (msg) => { if (isPlayer) player.showChatError(msg) }
+
     let selector = args[0]
 
     let targetPlayers = this.getPlayersBySelector(selector)
     if (targetPlayers.length === 0) {
-      player.showChatError("No such player ")
+      fail("No such player ")
       return
     }
 
-    let roleName = args[1] 
+    let roleName = args[1]
     if (!roleName) {
-      player.showChatError("/role [player] [rolename]")
+      fail("/role [player] [rolename]")
       return
     }
 
     targetPlayers.forEach((targetPlayer) => {
       let targetTeam = targetPlayer.getTeam()
       if (!targetTeam) return
+
+      // command blocks are not players: no permission checks, original behavior
+      if (!isPlayer) {
+        let blockRole = targetTeam.getRoleByName(roleName)
+        if (blockRole) targetPlayer.setRoleType(blockRole.id)
+        return
+      }
 
       const canManageAnyTeam = player.isAdmin() || player.isSectorOwner()
       const canChangeRoles = player.getRole() &&
