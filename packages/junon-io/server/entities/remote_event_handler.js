@@ -375,6 +375,13 @@ class RemoteEventHandler {
           player.showError("Permission Denied", { isWarning: true })
         }
 
+      } else if (building.constructor.name === "RailStop") {
+        if (player.hasMemberPrivilege() || player.getRole().isAllowedTo("ChangeRoles")) {
+          let maxLength = building.getMaxContentLength()
+          building.setBuildingContent(data.content.slice(0, maxLength), player)
+        } else {
+          player.showError("Permission Denied", { isWarning: true })
+        }
       } else {
         if (player.hasMemberPrivilege()) {
           let maxLength = building.getMaxContentLength()
@@ -448,7 +455,10 @@ class RemoteEventHandler {
     let team = player.game.teams[data.teamId]
     if (!team) return
     if (!team.hasMember(player)) return
-    if (!player.isAdmin()) return
+    if (!player.isSectorOwner() && !team.isLeader(player)) {
+      player.showError("Only the team leader or server owner can create or edit roles", { isWarning: true })
+      return
+    }
     if (!data.hasOwnProperty("roleId")) {
       if (team.isMaxRoleCountReached()) {
         player.showError("Max Roles Reached")

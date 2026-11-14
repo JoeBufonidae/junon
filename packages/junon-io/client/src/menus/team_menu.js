@@ -1668,7 +1668,7 @@ class TeamMenu extends BaseMenu {
     e.stopPropagation()
     e.preventDefault()
 
-    if (!this.activeTeam.isLeader(this.game.player)) {
+    if (!this.activeTeam.isLeader(this.game.player) && !this.game.player.isSectorOwner()) {
       this.game.displayError("Permission Denied", { warning: true })
       return
     }
@@ -1732,7 +1732,7 @@ class TeamMenu extends BaseMenu {
     this.activeRoleId = roleId
     let result = ""
 
-    if (parseInt(roleId) <= 3 || !this.game.player.isLeader()) {
+    if (parseInt(roleId) <= 3 || !(this.game.player.isLeader() || this.game.player.isSectorOwner())) {
       this.el.querySelector(".role_name_label").style.display = 'block'
       this.el.querySelector(".role_name_edit").style.display = 'none'
       this.el.querySelector(".delete_role_btn").style.display = 'none'
@@ -1809,7 +1809,7 @@ class TeamMenu extends BaseMenu {
     this.renderPrivacy(team)
     this.renderMembers(team)
 
-    if (team.isLeader(this.game.player)) {
+    if (team.isLeader(this.game.player) || this.game.player.isSectorOwner()) {
       this.el.querySelector(".new_role_btn").style.display = 'inline-block'
     } else {
       this.el.querySelector(".new_role_btn").style.display = 'none'
@@ -2059,7 +2059,10 @@ class TeamMenu extends BaseMenu {
     let isTeamCreator = this.activeTeam.isCreator(this.game.player)
     if (isTeamCreator) return true
 
-    return this.activeTeam.isAdmin(this.game.player) &&
+    let canChangeRoles = this.activeTeam.isAdmin(this.game.player) ||
+                         this.game.player.getRole().permissions["ChangeRoles"]
+
+    return canChangeRoles &&
            !this.activeTeam.isLeader(member) &&
            !this.activeTeam.isCreator(member) &&
            !this.isMe(member)

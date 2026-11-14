@@ -851,6 +851,26 @@ class Team extends BaseTransientEntity {
     let offlineMember = this.offlineMembers[memberId]
     let onlineMember = this.members[memberId]
 
+    let targetMember = offlineMember || onlineMember
+    if (targetMember && targetMember.uid === this.game.creatorUid) {
+      user.showError("Cannot change server owner role", { isWarning: true })
+      return
+    }
+
+    if (!user.isSectorOwner() && !this.isLeader(user)) {
+      let targetRole = onlineMember ? onlineMember.getRole() : (offlineMember && this.getRole(offlineMember.roleType))
+      if (targetRole && targetRole.isAllowedTo("ChangeRoles")) {
+        user.showError("Only the server owner can change this player's role", { isWarning: true })
+        return
+      }
+
+      let newRole = this.getRole(roleType)
+      if (newRole && newRole.isAllowedTo("ChangeRoles")) {
+        user.showError("Only the server owner can give roles with Change Roles", { isWarning: true })
+        return
+      }
+    }
+
     if (offlineMember) {
       if (offlineMember.uid === this.creatorUid) return
       if (offlineMember.roleType === Team.AdminRoleType && !user.isSectorOwner()) return

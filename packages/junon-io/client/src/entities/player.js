@@ -289,7 +289,9 @@ class Player extends BaseEntity {
     if (!team) return
 
     let sameTeam = this.getTeam() === team
-    if (team.isAdmin(this.game.player) && sameTeam) {
+    let canChangeRoles = team.isAdmin(this.game.player) ||
+                         (this.game.player.getRole().permissions["ChangeRoles"] && !this.game.teamMenu.isMe(this))
+    if (canChangeRoles && sameTeam) {
       actions += permissionSelect
     }
 
