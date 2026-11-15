@@ -428,12 +428,20 @@ class Planner {
     this.isPlanning = false
     let success
 
-    this.storageWithEmptySlot = this.getStorageWithCondition({
+    // room for an item type counts partial stacks, not just empty slots
+    let carried = [this.entity.getHandItem(), this.entity.getExtraItem()].filter(Boolean)
+    let findStorage = (hasRoom) => this.getStorageWithCondition({
       startChunkRegion: this.entity.getChunkRegion(),
       condition: (storage) => {
-        return !storage.isFull()
+        if (carried.length === 0) return !storage.isFull()
+        return hasRoom(storage)
       }
     })
+    // prefer a crate with a partial stack of something carried (top those off first),
+    // else any crate with room for at least one carried item
+    this.storageWithEmptySlot =
+      findStorage((storage) => carried.some((item) => storage.getStackableSpaceIndex(item.type) >= 0)) ||
+      findStorage((storage) => carried.some((item) => !storage.isFull(item.type)))
 
     // when im harvesting, its efficient to keep doing same until i cant harvest anymore
     if (this.repeatTaskName) {
@@ -572,28 +580,24 @@ class Planner {
     let success
 
     if (!this.storageWithEmptySlot) {
-      let item = this.entity.getHandItem()
-      this.entity.equipments.removeItem(item)
-      this.entity.throwInventory(item)
+      let items = [this.entity.getHandItem(), this.entity.getExtraItem()].filter(Boolean)
+      items.forEach((item) => {
+        this.entity.equipments.removeItem(item)
+        this.entity.throwInventory(item)
+      })
       return true
     }
 
     success = this.perform("ReturnItem", {
       targetEntity: this.storageWithEmptySlot,
       onComplete: (storage) => {
-        if (this.entity.getHandItem()) {
+        let items = [this.entity.getHandItem(), this.entity.getExtraItem()].filter(Boolean)
+        items.forEach((item) => {
           this.perform("StoreItem", {
-            item: this.entity.getHandItem(),
+            item: item,
             storage: storage
           })
-        }
-
-        if (this.entity.getExtraItem()) {
-          this.perform("StoreItem", {
-            item: this.entity.getExtraItem(),
-            storage: storage
-          })
-        }
+        })
       }
     })
 

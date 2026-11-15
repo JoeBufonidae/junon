@@ -101,6 +101,9 @@ class BaseSeed extends BaseBuilding {
   remove() {
     super.remove()
 
+    // a seed held in a mob's hand was never planted: no container, no tile to restore
+    if (this.isEquipment() || !this.getContainer()) return
+
     let platform = this.getStandingPlatform()
     if (!platform) return
 
