@@ -1983,7 +1983,7 @@ class TeamMenu extends BaseMenu {
       this.el.querySelector(".offline_member_list_container").style.display = 'none'
     }
 
-    if (game.player.getRolePermissions()["Ban"]) {
+    if (game.player.isSectorOwner() || game.player.getRolePermissions()["Ban"]) {
       let sectorBanList = Object.values(this.game.sector.sectorBans)
       if (sectorBanList.length > 0) {
         this.el.querySelector(".ban_member_list").innerHTML = this.createBanListHTML(sectorBanList)

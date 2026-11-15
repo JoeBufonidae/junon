@@ -1083,7 +1083,7 @@ class Team extends BaseTransientEntity {
         break
       }
 
-      if (member.isAdmin()) {
+      if (member.getRole() && member.getRole().isAllowedTo("ChangeRoles")) {
         result = true
         break
       }

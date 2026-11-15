@@ -26,8 +26,8 @@ class Messenger extends LandMob {
     if (data.choice === 1) {
       this.onPlayerPayment(data)
     } else if (data.choice === 2) {
-      if (!data.player.isAdmin()) {
-        data.player.showError("Only Admin can choose that action")
+      if (!data.player.isSectorOwner() && !(data.player.getRole() && data.player.getRole().isAllowedTo("ChangeRoles"))) {
+        data.player.showError("Only the server owner or players with the Change Roles permission can choose that action")
         return
       }
       this.onPlayerDeclareWar(data)
