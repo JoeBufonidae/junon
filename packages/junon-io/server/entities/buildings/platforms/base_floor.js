@@ -66,6 +66,10 @@ class BaseFloor extends BaseBuilding {
 
   }
 
+  isBurnablePlatform() {
+    return true
+  }
+
   getMap() {
     return this.container.platformMap
   }

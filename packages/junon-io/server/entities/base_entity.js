@@ -1740,7 +1740,8 @@ if (isFiveSecondInterval) {
     const isTimeToGrow = this.game.timestamp % (Constants.physicsTimeStep * this.FIRE_GROW_RATE) === 0
     if (!isTimeToGrow) return
 
-    this.addFire()
+    // floors, soil, lattice and traps are not normally flamable, but once one is burning it should keep growing
+    this.addFire(undefined, { forceFlamable: this.isBurnablePlatform() })
 
     if (this.canSpreadFire() && this.isBuilding()) {
       if (this.isMaxEffectLevelReached("fire")) {
@@ -1782,11 +1783,24 @@ if (isFiveSecondInterval) {
     return this.sector.settings.isFireSpreadEnabled
   }
 
+  isBurnablePlatform() {
+    return false
+  }
+
   spreadFire() {
     const hits = this.getSideTiles(this.container.structureMap)
     hits.forEach((hit) => {
       if (hit.entity && hit.entity.isFlamable() && !hit.entity.isOnFire()) {
         hit.entity.addFire()
+      }
+    })
+
+    // floors live in their own layer (platformMap), so check it separately
+    const platformHits = this.getSideTiles(this.container.platformMap)
+    platformHits.forEach((hit) => {
+      const platform = hit.entity
+      if (platform && typeof platform.isBurnablePlatform === "function" && platform.isBurnablePlatform() && !platform.isOnFire()) {
+        platform.addFire(undefined, { forceFlamable: true })
       }
     })
   }
