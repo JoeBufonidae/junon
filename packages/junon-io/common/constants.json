@@ -4128,7 +4128,8 @@
       },
       "stats": {
         "range": 64,
-        "damage": 2
+        "damage": 2,
+        "reload": 250
       },
       "requirements": {
         "IronBar": 25
