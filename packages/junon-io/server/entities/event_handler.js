@@ -295,6 +295,20 @@ class EventHandler {
     return equipment.getTypeName()
   }
 
+  getSuitColor(playerId) {
+    let player = this.getPlayer(playerId)
+    if (!player) return undefined
+
+    let equipment = player.getArmorEquipment()
+    if (!equipment) return undefined
+
+    // only the normal space suit can be colored
+    if (equipment.getType() !== Protocol.definition().BuildingType.SpaceSuit) return undefined
+
+    // a suit that was never colored has no content yet, and it looks gray
+    return equipment.content || "gray"
+  }
+
   getPlatformByCoords(row, col) {
     let platform = this.sector.platformMap.get(row, col)
     if(!platform) return ''
@@ -1599,6 +1613,7 @@ class EventHandler {
       "$getEquipCount": true,
       "$getInventoryItemCount": true,
       "$getArmorEquip": true,
+      "$getSuitColor": true,
       "$add": true,
       "$subtract": true,
       "$multiply": true,
