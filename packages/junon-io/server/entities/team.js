@@ -1345,7 +1345,7 @@ class Team extends BaseTransientEntity {
   getRequiredTaxAmount() {
     let paymentAmount = 100 * Math.ceil(this.dayCount / 3)
     paymentAmount = Math.max(0, paymentAmount)
-    paymentAmount = Math.min(5000, paymentAmount)
+    paymentAmount = Math.min(100000, paymentAmount)
     return paymentAmount
   }
 
