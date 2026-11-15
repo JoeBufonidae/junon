@@ -32,6 +32,36 @@ class Sign extends BaseBuilding {
     this.game.signMenu.render(this)  
   }
 
+  setLastEditBy(lastEditBy) {
+    this.lastEditBy = lastEditBy
+  }
+
+  setLastEditAt(lastEditAt) {
+    this.lastEditAt = lastEditAt
+  }
+
+  getEntityMenuStats() {
+    let el = super.getEntityMenuStats()
+
+    if (this.lastEditBy) {
+      let name = this.lastEditBy.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      el += "<div class='entity_stats_entry'>" +
+              "<div class='stats_type'>Last edited by:</div>" +
+              "<div class='stats_value'>" + name + "</div>" +
+            "</div>"
+
+      if (this.lastEditAt) {
+        let date = new Date(this.lastEditAt * 1000).toLocaleString()
+        el += "<div class='entity_stats_entry'>" +
+                "<div class='stats_type'>Last edited:</div>" +
+                "<div class='stats_value'>" + date + "</div>" +
+              "</div>"
+      }
+    }
+
+    return el
+  }
+
   canMenuBeOpened() {
     return this.isConstructionFinished()
   }

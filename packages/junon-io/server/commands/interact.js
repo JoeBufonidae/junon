@@ -60,8 +60,9 @@ class Interact extends BaseCommand {
             if (this.isJson(content)) {
               let json = JSON.parse(content)
               entity.setLocaleContent(json.locale, json.text)
+              if (typeof entity.setLastEdit === "function") entity.setLastEdit(player)
             } else {
-              entity.setBuildingContent(content)
+              entity.setBuildingContent(content, player)
             }
 
           }

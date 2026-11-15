@@ -168,6 +168,8 @@ message Building {
   uint32 nameColor = 28;
   uint32 nameSize = 29;
   map<string,uint32> prices = 30;
+  string lastEditBy = 31;
+  uint32 lastEditAt = 32;
 }
 
 message RaidRef {

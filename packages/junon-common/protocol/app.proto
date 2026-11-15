@@ -43,6 +43,8 @@ message Building {
   uint32 nameColor = 39;
   uint32 nameSize = 40;
   map<string,uint32> prices = 41;
+  string lastEditBy = 42;
+  uint32 lastEditAt = 43;
 }
 
 message Mob {

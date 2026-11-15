@@ -203,6 +203,8 @@ class BaseBuilding extends BaseEntity {
     }
 
     this.content = data.content
+    if (data.lastEditBy) this.lastEditBy = data.lastEditBy
+    if (data.lastEditAt) this.lastEditAt = data.lastEditAt
     this.usage = data.usage
 
     if (data.health) {

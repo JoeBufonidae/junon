@@ -49,6 +49,8 @@ message Building {
   Network soilNetwork = 56;
   uint32 nameColor = 57;
   uint32 nameSize = 58;
+  string lastEditBy = 59;
+  uint32 lastEditAt = 60;
 }
 
 message Mob {
