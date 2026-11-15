@@ -221,7 +221,7 @@ class EntityMenu extends BaseMenu {
       e.stopPropagation()
 
       let roleId = role.dataset.roleId
-      if (!this.game.player.getRole().permissions["ChangeRoles"]) {
+      if (!this.game.player.getRolePermissions()["ChangeRoles"]) {
         this.game.displayError("Permission Denied", { warning: true })
         this.entity.renderPermissionCheckbox(this.el, roleId)
         return
@@ -433,7 +433,7 @@ class EntityMenu extends BaseMenu {
 
     if (entity.hasCategory("editable_permissions") &&
         entity.isOwnedBy(this.game.player) &&
-        this.game.player.getRole().permissions["ChangeRoles"]) {
+        this.game.player.getRolePermissions()["ChangeRoles"]) {
       this.el.querySelector(".entity_permissions_container").style.display = 'block'
     } else {
       this.el.querySelector(".entity_permissions_container").style.display = 'none'
@@ -441,7 +441,7 @@ class EntityMenu extends BaseMenu {
 
     if (entity.hasCategory("spawnpoint") &&
         entity.belongToOwner(this.game.player) &&
-        this.game.player.getRole().permissions["ChangeRoles"]) {
+        this.game.player.getRolePermissions()["ChangeRoles"]) {
       this.el.querySelector(".spawn_select_container").style.display = 'block'
     } else {
       this.el.querySelector(".spawn_select_container").style.display = 'none'

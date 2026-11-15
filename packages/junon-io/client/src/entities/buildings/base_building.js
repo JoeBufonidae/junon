@@ -555,7 +555,7 @@ class BaseBuilding extends BaseEntity {
 
     if (this.hasCategory("editable_permissions")) {
       let canManagePermissions = this.isOwnedBy(this.game.player) &&
-                                this.game.player.getRole().permissions["ChangeRoles"]
+                                this.game.player.getRolePermissions()["ChangeRoles"]
 
       if (!canManagePermissions) {
         el += this.getPermissionStat()
@@ -563,7 +563,7 @@ class BaseBuilding extends BaseEntity {
     }
 
     if (this.hasCategory("spawnpoint") && this.content) {
-      let canManageSpawn = this.belongToOwner(this.game.player) && this.game.player.getRole().permissions["ChangeRoles"]
+      let canManageSpawn = this.belongToOwner(this.game.player) && this.game.player.getRolePermissions()["ChangeRoles"]
       if (!canManageSpawn) {
         el += this.getSpawnPointStat()
       }
@@ -807,11 +807,14 @@ class BaseBuilding extends BaseEntity {
 
   isChunkable() {
     if (this.data.isEquipDisplay) return false
+    if (this.isEquipment()) return false
 
-    if (this.getContainer().isMovable()) return false
+    let container = this.getContainer()
+    if (!container) return false
+    if (container.isMovable()) return false
 
     let chunkableGroups = ["platforms", "distributions", "armors"]
-    return !this.isEquipment() && chunkableGroups.indexOf(this.getGroup()) !== -1
+    return chunkableGroups.indexOf(this.getGroup()) !== -1
   }
 
   updateChunkSprite() {

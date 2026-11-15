@@ -639,7 +639,7 @@ class Game {
     if (isSandboxOwner) return true
 
     return game.player.getRole() &&
-      game.player.getRole().permissions["UseCommands"]
+      game.player.getRolePermissions()["UseCommands"]
   }
 
   hideEntityMenu(entity) {

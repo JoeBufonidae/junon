@@ -1969,7 +1969,7 @@ class TeamMenu extends BaseMenu {
     this.el.querySelector(".member_list").innerHTML = this.createMemberListHTML(playerList)
     if (!this.activeTeam) return
 
-    if (game.player.getRole().permissions["ChangeRoles"]) {
+    if (game.player.getRolePermissions()["ChangeRoles"]) {
       let offlinePlayerList = Object.values(team.offlineMembers)
       if (offlinePlayerList.length > 0) {
         this.el.querySelector(".offline_member_list").innerHTML = this.createMemberListHTML(offlinePlayerList, { offline: true })
@@ -1983,7 +1983,7 @@ class TeamMenu extends BaseMenu {
       this.el.querySelector(".offline_member_list_container").style.display = 'none'
     }
 
-    if (game.player.getRole().permissions["Ban"]) {
+    if (game.player.getRolePermissions()["Ban"]) {
       let sectorBanList = Object.values(this.game.sector.sectorBans)
       if (sectorBanList.length > 0) {
         this.el.querySelector(".ban_member_list").innerHTML = this.createBanListHTML(sectorBanList)
@@ -2060,7 +2060,7 @@ class TeamMenu extends BaseMenu {
     if (isTeamCreator) return true
 
     let canChangeRoles = this.activeTeam.isAdmin(this.game.player) ||
-                         this.game.player.getRole().permissions["ChangeRoles"]
+                         this.game.player.getRolePermissions()["ChangeRoles"]
 
     return canChangeRoles &&
            !this.activeTeam.isLeader(member) &&
