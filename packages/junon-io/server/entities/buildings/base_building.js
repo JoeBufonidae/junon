@@ -1457,7 +1457,7 @@ class BaseBuilding extends BaseEntity {
   }
 
   addGroundToNetwork(room, wasEdgeTile) {
-    if (!this.hasCategory('platform')) return false
+    if (!(this.hasCategory('platform') || this.hasCategory('trap'))) return false
 
     let row = this.getRow()
     let col = this.getCol()
@@ -1492,7 +1492,7 @@ class BaseBuilding extends BaseEntity {
   }
 
   isRemovedPlatformRoomConnector() {
-    if (!this.hasCategory('platform')) return false
+    if (!(this.hasCategory('platform') || this.hasCategory('trap'))) return false
 
     let hit = this.container.groundMap.get(this.getRow(), this.getCol())
     return !hit

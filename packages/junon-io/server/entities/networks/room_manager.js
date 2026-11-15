@@ -313,7 +313,7 @@ class RoomManager extends NetworkManager {
       if (room) {
         this.onRoomStale(room)
       }
-    } else if (options.entity.isStructure() && !isRoomPartitioner) {
+    } else if (options.entity.isStructure() && !options.entity.hasCategory("trap") && !isRoomPartitioner) {
       let hits = options.entity.getHits()
       hits.forEach((hit) => {
         this.allocateStructureToNetwork(hit)
