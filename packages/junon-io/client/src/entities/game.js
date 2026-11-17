@@ -5623,7 +5623,24 @@ arrow.style.setProperty('--arrow-color',realColor)
     this.teamMenu.renderScreenshots(this.sector)
   }
 
+  // frames per second shown in the F5 stats view, refreshed once per second
+  updateFpsCounter() {
+    const now = performance.now()
+    this.fpsFrames = (this.fpsFrames || 0) + 1
+    if (typeof this.fpsLastTime === "undefined") this.fpsLastTime = now
+    if (now - this.fpsLastTime < 1000) return
+
+    const fps = Math.round(this.fpsFrames * 1000 / (now - this.fpsLastTime))
+    this.fpsFrames = 0
+    this.fpsLastTime = now
+
+    if (!this.fpsElement) this.fpsElement = document.querySelector("#fps .value")
+    if (this.fpsElement) this.fpsElement.innerText = fps
+  }
+
   updateGame(time) {
+    this.updateFpsCounter()
+
     if (!this.player) return
 
     this.ticksSincePacket += 1
