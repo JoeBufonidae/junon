@@ -93,6 +93,13 @@ class Fire extends BaseEffect {
     this.startSmoke()
   }  
 
+  isTargetCorpse() {
+    const e = this.affectedEntity
+    if (!e) return false
+    if (typeof e.isCorpse === "function" && e.isCorpse()) return true
+    return typeof e.getGroup === "function" && e.getGroup() === "corpses"
+  }
+
   shouldEmitSmoke() {
     // buildings and floors only: not players, mobs or terrain
     return !this.isTargetLivingEntity() && !this.affectedEntity.isTerrain()
@@ -125,7 +132,7 @@ class Fire extends BaseEffect {
 
   applyBurnTint() {
     const entity = this.affectedEntity
-    if (this.isTargetLivingEntity() || entity.isTerrain()) return
+    if (this.isTargetLivingEntity() || this.isTargetCorpse() || entity.isTerrain()) return
     if (this.burnOverlay) return
     if (!entity.sprite) return
 
@@ -148,7 +155,7 @@ class Fire extends BaseEffect {
   startMapRed() {
     const entity = this.affectedEntity
     if (this.mapRedTiles) return
-    if (this.isTargetLivingEntity() || entity.isTerrain()) return
+    if (this.isTargetLivingEntity() || this.isTargetCorpse() || entity.isTerrain()) return
     const mapMenu = this.game.mapMenu
     if (!mapMenu || typeof mapMenu.flashTileStart !== "function") return
 
@@ -204,6 +211,7 @@ class Fire extends BaseEffect {
   showDamageIndicator() {
     const entity = this.affectedEntity
     if (!entity || entity.isRemoved) return
+    if (this.isTargetCorpse()) return
     if (typeof entity.dontShowHealth === "function" && entity.dontShowHealth()) return
 
     if (DAMAGE_INDICATOR.SHOW_NUMBER) HealthBar.showDamageTaken(entity, -1)

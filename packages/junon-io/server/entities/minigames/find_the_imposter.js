@@ -490,7 +490,7 @@ class FindTheImposter extends BaseMiniGame {
             then: [
               {
                 commands: [
-                  "/role @r[health=!0,c=1] imposter",
+                  "/role @r[health!=0,c=1] imposter",
                   "/give @a[role=imposter] assassins_knife",
                   "/sidebar @a[role=imposter] set 0 Role: §aImposter",
                   "/caption @a[role=imposter] title Role: Imposter"
@@ -599,7 +599,7 @@ class FindTheImposter extends BaseMiniGame {
             "/interact 286 open",
             "/setting isChatEnabled false",
             "/role @r[c=1] imposter",
-            "/role @a[role=!imposter] crew",
+            "/role @a[role!=imposter] crew",
             "/give @a radio",
             "/give @a[role=imposter] assassins_knife",
             "/give @a[role=imposter] timer_bomb",
@@ -660,7 +660,7 @@ class FindTheImposter extends BaseMiniGame {
       actions: [ 
         { 
           commands: [
-            "/map blink @b[type=PowerSwitch,health=!200]"
+            "/map blink @b[type=PowerSwitch,health!=200]"
           ]
         }
       ]

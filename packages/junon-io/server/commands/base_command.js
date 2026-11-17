@@ -130,6 +130,12 @@ caller.showChatError("/"+message.split()[0]+" command:")
       } else {
         result = this.getAllBuildings()
       }
+    } else if (range === "c") {
+      if (this.isRangeSelectorValid(condition)) {
+        result = this.getAllCorpsesMatchingCondition(condition)
+      } else {
+        result = this.getAllCorpses()
+      }
     } else if (range === "m") {
       if (this.isRangeSelectorValid(condition)) {
         result = this.getAllMobsMatchingCondition(condition)
@@ -203,9 +209,9 @@ caller.showChatError("/"+message.split()[0]+" command:")
     conditions = conditions.replace("]", "")
 
     conditions.split(",").forEach((condition) => {
-      let match = condition.match(/(.*)(<=|<|>|>=|=!|==|=)(.*)/)
+      let match = condition.match(/^(.*?)(<=|>=|!=|=!|==|<|>|=)(.*)$/)
       let key = match[1]
-      let operator = match[2]
+      let operator = match[2] === "=!" ? "!=" : match[2]
       let value = match[3]
       let object = { key: key, operator: operator, value: value }
       conditionList.push(object)
@@ -236,7 +242,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
   }
 
   regionFilter(group, operator, value) {
-    if (operator === "=!") {
+    if (operator === "!=") {
       let result = {}
 
       for (let name in this.sector.regions) {
@@ -420,7 +426,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
     let name = value
     collection.forEach((entity) => {
       let ownerNameWithoutSpace = entity.getOwnerName().replace(/\s+/g, "")
-      if (operator === "=!") {
+      if (operator === "!=") {
         if (ownerNameWithoutSpace !== name) {
           result.push(entity)
         }
@@ -428,6 +434,78 @@ caller.showChatError("/"+message.split()[0]+" command:")
         if (ownerNameWithoutSpace === name) {
           result.push(entity)
         }
+      }
+    })
+
+    return result
+  }
+
+  getAllCorpses() {
+    return Object.values(this.sector.corpses)
+  }
+
+  getInitialCorpses(conditionList) {
+    let regionCondition = conditionList.find((object) => {
+      return object.key === "region"
+    })
+
+    let corpses = []
+    if (regionCondition) {
+      corpses = this.regionFilter("corpses", regionCondition.operator, regionCondition.value)
+    } else {
+      corpses = this.getAllCorpses()
+    }
+
+    return corpses
+  }
+
+  getAllCorpsesMatchingCondition(conditions, options = {}) {
+    let conditionList = this.getConditionList(conditions)
+    let collection = this.getInitialCorpses(conditionList)
+
+    for (let index in conditionList) {
+      let object = conditionList[index]
+      let key = object.key
+      let operator = object.operator
+      let value = object.value
+
+      if (key === "c") {
+        collection = this.countFilter(collection, operator, value)
+      } else if (key === "type") {
+        collection = this.typeFilter(collection, operator, value)
+      } else if (key === "age") {
+        collection = this.ageFilter(collection, operator, value)
+      } else if (key === "effect") {
+        collection = this.effectFilter(collection, operator, value)
+      }
+    }
+
+    return collection
+  }
+
+  ageFilter(collection, operator, value) {
+    let result = []
+
+    value = parseFloat(value)
+
+    collection.forEach((entity) => {
+      if (this.logicalMatch(entity.getDecayInHours(), operator, value)) {
+        result.push(entity)
+      }
+    })
+
+    return result
+  }
+
+  effectFilter(collection, operator, value) {
+    let result = []
+
+    collection.forEach((entity) => {
+      let hasIt = entity.hasEffect(value)
+      if (operator === "!=") {
+        if (!hasIt) result.push(entity)
+      } else {
+        if (hasIt) result.push(entity)
       }
     })
 
@@ -451,7 +529,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
     targetType = this.normalizeSeedName(targetType)
 
     collection.forEach((entity) => {
-      if (operator === "=!") {
+      if (operator === "!=") {
         if (entity.getTypeName() !== targetType) {
           result.push(entity)  
         }
@@ -470,7 +548,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
 
     let targetRole = value
     collection.forEach((player) => {
-      if (operator === "=!") {
+      if (operator === "!=") {
         if (!player.getRole()) {
           result.push(player)
         } else if (player.getRole().name !== targetRole) {
@@ -491,7 +569,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
 
     let targetTeam = value
     collection.forEach((entity) => {
-      if (operator === "=!") {
+      if (operator === "!=") {
         if (!entity.getTeam()) {
           result.push(entity)
         } else if (entity.getTeam().name !== targetTeam) {
@@ -513,7 +591,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
     let locale = value
 
     collection.forEach((player) => {
-      if (operator === "=!") {
+      if (operator === "!=") {
         if (player.locale !== locale) {
           result.push(player)
         }
@@ -626,7 +704,7 @@ caller.showChatError("/"+message.split()[0]+" command:")
   }
 
   logicalMatch(left, operator, right) {
-    if (operator === "=!") {
+    if (operator === "!=") {
       return left !== right
     } else if (operator === "<") {
       return left < right
