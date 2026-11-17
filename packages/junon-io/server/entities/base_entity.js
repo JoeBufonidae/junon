@@ -5,6 +5,25 @@ const Helper = require('./../../common/helper')
 const BaseTransientEntity = require('./base_transient_entity')
 const BoundingBox = require("./../../common/interfaces/bounding_box")
 const Taintable = require("./../../common/interfaces/taintable")
+
+// Fire tuning values. Edit the numbers, then restart the server.
+const FireSettings = {
+  // Seconds between a burning thing getting hotter (fire level +1, max level 4).
+  // Also how often a fully burning thing tries to spread. Original game value: 15
+  GROW_SECONDS: 3,
+
+  // Randomness added to each burning thing's timer, plus or minus this many seconds.
+  // 0 = no randomness (everything steps in sync like before)
+  GROW_JITTER_SECONDS: 1.5,
+
+  // Chance (0 to 1) that a fully burning thing sets each flammable neighbor on fire,
+  // each time it tries. 1 = always (original behavior), 0.5 = half the time
+  SPREAD_CHANCE: 0.5,
+
+  // How many seconds a player keeps burning after stepping off a burning floor.
+  // Original game value: 2
+  PLAYER_AFTERBURN_SECONDS: 6,
+}
 const Protocol = require('../../common/util/protocol')
 const EventBus = require('eventbusjs')
 
@@ -1686,7 +1705,12 @@ if (isFiveSecondInterval) {
         this.reduceHealth(24)
       } else {
         this.reduceHealth(15)
-        this.addFire(3, undefined, this.game.timestamp - this.getEffectCreatedAt("fire"))
+        this.addFire(3, undefined, FireSettings.PLAYER_AFTERBURN_SECONDS)
+        if (this.isOnFire()) {
+          // keep the burn timer fresh while standing on the fire, so it lasts after stepping off
+          this.setEffectDuration("fire", FireSettings.PLAYER_AFTERBURN_SECONDS)
+          this.setEffectCreatedAt("fire", this.game.timestamp)
+        }
       }
     } else {
       if (this.isOnFire()) {
@@ -1735,10 +1759,17 @@ if (isFiveSecondInterval) {
     const isOneSecondInterval = this.game.timestamp % Constants.physicsTimeStep === 0
     if (!isOneSecondInterval) return
 
+    this.isFireTick = true
     this.applyFireDamage()
+    this.isFireTick = false
 
-    const isTimeToGrow = this.game.timestamp % (Constants.physicsTimeStep * this.FIRE_GROW_RATE) === 0
-    if (!isTimeToGrow) return
+    // each burning thing has its own randomized timer, so fires don't all step in sync
+    const now = this.game.timestamp
+    if (typeof this.nextFireGrowAt === "undefined") {
+      this.nextFireGrowAt = now + this.rollFireGrowDelay()
+    }
+    if (now < this.nextFireGrowAt) return
+    this.nextFireGrowAt = now + this.rollFireGrowDelay()
 
     // floors, soil, lattice and traps are not normally flamable, but once one is burning it should keep growing
     this.addFire(undefined, { forceFlamable: this.isBurnablePlatform() })
@@ -1779,6 +1810,12 @@ if (isFiveSecondInterval) {
     this.setHealth(this.health - 1)
   }
 
+  rollFireGrowDelay() {
+    const jitter = (Math.random() * 2 - 1) * FireSettings.GROW_JITTER_SECONDS
+    const seconds = Math.max(1, Math.round(FireSettings.GROW_SECONDS + jitter))
+    return seconds * Constants.physicsTimeStep
+  }
+
   canSpreadFire() {
     return this.sector.settings.isFireSpreadEnabled
   }
@@ -1790,7 +1827,7 @@ if (isFiveSecondInterval) {
   spreadFire() {
     const hits = this.getSideTiles(this.container.structureMap)
     hits.forEach((hit) => {
-      if (hit.entity && hit.entity.isFlamable() && !hit.entity.isOnFire()) {
+      if (hit.entity && hit.entity.isFlamable() && !hit.entity.isOnFire() && Math.random() < FireSettings.SPREAD_CHANCE) {
         hit.entity.addFire()
       }
     })
@@ -1799,7 +1836,7 @@ if (isFiveSecondInterval) {
     const platformHits = this.getSideTiles(this.container.platformMap)
     platformHits.forEach((hit) => {
       const platform = hit.entity
-      if (platform && typeof platform.isBurnablePlatform === "function" && platform.isBurnablePlatform() && !platform.isOnFire()) {
+      if (platform && typeof platform.isBurnablePlatform === "function" && platform.isBurnablePlatform() && !platform.isOnFire() && Math.random() < FireSettings.SPREAD_CHANCE) {
         platform.addFire(undefined, { forceFlamable: true })
       }
     })
@@ -2067,6 +2104,7 @@ Object.assign(BaseEntity.prototype, Taintable.prototype, {
   },
   onEffectRemoved(effect) {
     if (effect === "fire") {
+      this.nextFireGrowAt = undefined
       this.getContainer().removeFlame(this)
     }
 

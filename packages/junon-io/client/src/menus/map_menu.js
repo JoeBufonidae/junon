@@ -327,6 +327,7 @@ class MapMenu extends BaseMenu {
   }
 
   drawTile(row, col, color) {
+    this.markTilesRedrawn(row, col, 1, 1)
     this.getTerrainContextList().forEach((ctx) => {
       ctx.fillStyle = color
       ctx.fillRect(col * this.zoomMultiplier, row * this.zoomMultiplier, this.zoomMultiplier, this.zoomMultiplier)
@@ -334,6 +335,7 @@ class MapMenu extends BaseMenu {
   }
 
   undrawTile(row, col) {
+    this.markTilesRedrawn(row, col, 1, 1)
     this.getTerrainContextList().forEach((ctx) => {
       ctx.clearRect(col * this.zoomMultiplier, row * this.zoomMultiplier, this.zoomMultiplier, this.zoomMultiplier)
     })
@@ -352,6 +354,7 @@ class MapMenu extends BaseMenu {
   }
 
   drawStructureWithColor(ctx, entity, color) {
+    this.markTilesRedrawn(entity.getUpperLeftRow(), entity.getUpperLeftCol(), Math.ceil(entity.getRotatedHeight() / Constants.tileSize), Math.ceil(entity.getRotatedWidth() / Constants.tileSize))
     let widthInTiles = entity.getRotatedWidth() / Constants.tileSize
     let heightInTiles = entity.getRotatedHeight() / Constants.tileSize
 
@@ -401,29 +404,121 @@ class MapMenu extends BaseMenu {
     this.getTerrainContextList().forEach((ctx) => {
       this.drawStructureWithColor(ctx, entity, structureColor)
     })
+    this.repaintFlashingTiles(entity)
+  }
+
+  // Blink flash: each tile remembers what it looked like before turning red and gets it back
+  // when the last flash on it ends. If something redraws the tile in between (structure
+  // destroyed, terrain revealed), the remembered picture is dropped so it never overwrites that.
+  flashTileStart(r, c) {
+    this.flashTiles = this.flashTiles || {}
+    const key = r + "," + c
+    const size = this.zoomMultiplier
+    let entry = this.flashTiles[key]
+    if (!entry) {
+      entry = { count: 0, isRed: false, saved: [] }
+      this.flashTiles[key] = entry
+    }
+    entry.count += 1
+
+    if (!entry.isRed) {
+      entry.saved = []
+      this.getTerrainContextList().forEach((ctx) => {
+        try {
+          entry.saved.push({ ctx: ctx, x: c * size, y: r * size, size: size, image: ctx.getImageData(c * size, r * size, size, size) })
+        } catch (e) {
+          // could not save this tile, it just won't be restored
+        }
+      })
+      entry.isRed = true
+    }
+
+    this.getTerrainContextList().forEach((ctx) => {
+      ctx.fillStyle = '#ff2222' // red
+      ctx.fillRect(c * size, r * size, size, size)
+    })
+  }
+
+  flashTileEnd(r, c) {
+    if (!this.flashTiles) return
+    const key = r + "," + c
+    let entry = this.flashTiles[key]
+    if (!entry) return
+
+    entry.count -= 1
+    if (entry.count > 0) return
+
+    if (entry.isRed) {
+      entry.saved.forEach((saved) => {
+        try {
+          saved.ctx.putImageData(saved.image, saved.x, saved.y)
+        } catch (e) {}
+      })
+    }
+    delete this.flashTiles[key]
+  }
+
+  // After a structure is drawn, any of its tiles that are still burning (or flashing) go back to red.
+  repaintFlashingTiles(entity) {
+    if (!this.flashTiles) return
+    const row = entity.getUpperLeftRow()
+    const col = entity.getUpperLeftCol()
+    const rows = Math.max(1, Math.ceil(entity.getRotatedHeight() / Constants.tileSize))
+    const cols = Math.max(1, Math.ceil(entity.getRotatedWidth() / Constants.tileSize))
+
+    for (let r = row; r < row + rows; r++) {
+      for (let c = col; c < col + cols; c++) {
+        const entry = this.flashTiles[r + "," + c]
+        if (entry && entry.count > 0 && !entry.isRed) {
+          this.flashTileStart(r, c)
+          entry.count -= 1
+        }
+      }
+    }
+  }
+
+  // call whenever an area of the map is redrawn or cleared by something other than the blink
+  markTilesRedrawn(row, col, rows, cols) {
+    if (!this.flashTiles) return
+    for (let r = row; r < row + rows; r++) {
+      for (let c = col; c < col + cols; c++) {
+        let entry = this.flashTiles[r + "," + c]
+        if (entry) {
+          entry.isRed = false
+          entry.saved = []
+        }
+      }
+    }
   }
 
   getDamageTween(row, col) {
     let state = { state: 0 }
+    let started = false
+    let ended = false
+
+    const forEachTile = (cb) => {
+      for (let r = row; r < row + 2; r++) { // the flash covers 2x2 tiles
+        for (let c = col; c < col + 2; c++) {
+          cb(r, c)
+        }
+      }
+    }
+
+    const endFlash = () => {
+      if (!started || ended) return
+      ended = true
+      forEachTile((r, c) => this.flashTileEnd(r, c))
+    }
 
     let tween = new TWEEN.Tween(state)
         .to({ state: 1 }, 250)
         .delay(250)
         .onStart(() => {
-          this.getTerrainContextList().forEach((ctx) => {
-            this.drawSquareWithColor(ctx, row, col, '#ff2222') // red
-          })
+          started = true
+          forEachTile((r, c) => this.flashTileStart(r, c))
         })
-        .onComplete(() => {
-          this.getTerrainContextList().forEach((ctx) => {
-            this.drawSquareWithColor(ctx, row, col, this.STRUCTURE_COLOR) 
-          })
-        })
-        .onStop(() => {
-          this.getTerrainContextList().forEach((ctx) => {
-            this.drawSquareWithColor(ctx, row, col, this.STRUCTURE_COLOR) 
-          })
-        })
+        .onComplete(endFlash)
+        .onStop(endFlash)
 
     return tween
   }
@@ -436,6 +531,7 @@ class MapMenu extends BaseMenu {
   }
 
   removeStructure(entity) {
+    this.markTilesRedrawn(entity.getUpperLeftRow(), entity.getUpperLeftCol(), Math.ceil(entity.getRotatedHeight() / Constants.tileSize), Math.ceil(entity.getRotatedWidth() / Constants.tileSize))
     let widthInTiles = entity.getRotatedWidth() / Constants.tileSize
     let heightInTiles = entity.getRotatedHeight() / Constants.tileSize
     let upperLeftRow = entity.getUpperLeftRow()

@@ -2069,6 +2069,7 @@ Object.assign(BaseBuilding.prototype, Destroyable.prototype, {
     this.game.triggerEvent("BuildingDestroyed", data)
   },
   onHealthReduced(delta) {
+    if (this.isFireTick) return // fire ticks don't flash the map (burning buildings stay red there instead)
     if (!this.getOwner()) return
     if (this.getOwner().isTeam()) {
       this.getOwner().forEachMember((member) => {
