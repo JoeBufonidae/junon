@@ -1507,6 +1507,26 @@ class EventHandler {
     return string.slice(0,startIndex) + string.slice(startIndex + value.length);
   }
 
+  getWordCount(...values) {
+    if (values.length === 0) return 0
+    let string = values.join(" ").toString()
+    let words = string.split(" ").filter((word) => word !== "")
+    return words.length
+  }
+
+  getValueCount(...values) {
+    if (values.length < 2) return 0
+    let value = values[0].toString()
+    let string = values.slice(1).join(",").toString()
+    if (value === "") return 0
+    return string.split(value).length - 1
+  }
+
+  getLowercase(...values) {
+    if (values.length === 0) return ""
+    return values.join(",").toString().toLowerCase()
+  }
+
   getDate(...values) {
     if (values.length === 0) return undefined;
     let component = values[0].toString();
@@ -1684,6 +1704,9 @@ class EventHandler {
       "$getValueLength": true,
       "$getPushedValue": true,
       "$getRemovedValue": true,
+      "$getWordCount": true,
+      "$getValueCount": true,
+      "$getLowercase": true,
       "$getDate": true,
       "$getEntityDistance": true,
     }
