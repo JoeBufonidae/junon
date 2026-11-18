@@ -132,22 +132,36 @@ class Fire extends BaseEffect {
 
   applyBurnTint() {
     const entity = this.affectedEntity
-    if (this.isTargetLivingEntity() || this.isTargetCorpse() || entity.isTerrain()) return
+    if (this.isTargetLivingEntity() || entity.isTerrain()) return
     if (this.burnOverlay) return
     if (!entity.sprite) return
 
-    const overlay = new PIXI.Sprite(PIXI.Texture.WHITE)
+    // Prefer a copy of the building's own picture, so the red follows its real outline.
+    // The copy is a child of that sprite, so it shares its size, position and rotation.
+    // some buildings keep their picture in baseSprite and use buildingSprite as an empty container, so take the first one that has a picture
+    const hasPicture = (sprite) => sprite && sprite.texture && sprite.texture !== PIXI.Texture.EMPTY && sprite.anchor
+    const source = [entity.buildingSprite, entity.baseSprite].find(hasPicture)
+    const canCopy = !!source
+
+    let overlay
+    if (canCopy) {
+      overlay = new PIXI.Sprite(source.texture)
+      overlay.anchor.set(source.anchor.x, source.anchor.y)
+      source.addChild(overlay)
+    } else {
+      // no picture to copy: fall back to a rectangle the size of the building as it appears on screen
+      overlay = new PIXI.Sprite(PIXI.Texture.WHITE)
+      overlay.anchor.set(0.5)
+      const hasRotated = typeof entity.getRotatedWidth === "function" && typeof entity.getRotatedHeight === "function"
+      overlay.width = hasRotated ? entity.getRotatedWidth() : entity.getWidth()
+      overlay.height = hasRotated ? entity.getRotatedHeight() : entity.getHeight()
+      overlay.rotation = -entity.sprite.rotation
+      entity.sprite.addChild(overlay)
+    }
+
     overlay.name = "burnOverlay"
-    overlay.anchor.set(0.5)
-    // size it to the building as it appears on screen (rotated), and undo any rotation inherited from the parent sprite
-    const hasRotated = typeof entity.getRotatedWidth === "function" && typeof entity.getRotatedHeight === "function"
-    overlay.width = hasRotated ? entity.getRotatedWidth() : entity.getWidth()
-    overlay.height = hasRotated ? entity.getRotatedHeight() : entity.getHeight()
-    overlay.rotation = -entity.sprite.rotation
     overlay.tint = BURN_TINT.COLOR
     overlay.alpha = BURN_TINT.ALPHA
-    entity.sprite.addChild(overlay)
-
     this.burnOverlay = overlay
   }
 
