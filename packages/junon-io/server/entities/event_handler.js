@@ -309,6 +309,24 @@ class EventHandler {
     return equipment.content || "gray"
   }
 
+  getDirt(row, col) {
+    return this.getTileEffectLevel(row, col, "dirt")
+  }
+
+  getBlood(row, col) {
+    return this.getTileEffectLevel(row, col, "blood")
+  }
+
+  // blood and dirt can sit on the floor and on the ground tile under it, so report the higher of the two
+  getTileEffectLevel(row, col, effect) {
+    let floor = this.sector.platformMap.get(row, col)
+    let ground = this.sector.groundMap.get(row, col)
+    let floorLevel = floor ? floor.getEffectLevel(effect) : 0
+    let groundLevel = ground ? ground.getEffectLevel(effect) : 0
+
+    return Math.max(floorLevel, groundLevel)
+  }
+
   getPlatformByCoords(row, col) {
     let platform = this.sector.platformMap.get(row, col)
     if(!platform) return ''
@@ -1643,6 +1661,8 @@ class EventHandler {
       "$getHour": true,
       "$getContent": true,
       "$getPlatformByCoords": true,
+      "$getDirt": true,
+      "$getBlood": true,
       "$getStructureByCoords": true,
       "$hasEffect": true,
       "$getTotalMobCount": true,
