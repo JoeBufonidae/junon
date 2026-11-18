@@ -171,9 +171,9 @@ caller.showChatError("/"+message.split()[0]+" command:")
     } else if (range === "r") {
       // random
       if (this.isRangeSelectorValid(condition)) {
-        result = [this.getRandomPlayerMatchingCondition(condition)]
+        result = [this.getRandomPlayerMatchingCondition(condition)].filter(Boolean)
       } else {
-        result = [this.getRandomPlayer()]
+        result = [this.getRandomPlayer()].filter(Boolean)
 
       }
     }

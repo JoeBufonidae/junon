@@ -23,7 +23,7 @@ class Ping extends BaseCommand {
     let entities = this.getEntitiesBySelector(entityName)
     
     entities.forEach((entity) => {
-      if (typeof entity.ping === 'function') {
+      if (entity && typeof entity.ping === 'function') {
         entity.ping(pingId)
       }
     })
