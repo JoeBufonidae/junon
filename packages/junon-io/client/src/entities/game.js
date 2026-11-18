@@ -4797,6 +4797,10 @@ arrow.style.setProperty('--arrow-color',realColor)
       this.stopHudAlertTween()
       this.stopScreenWarp()
 
+      // zoom limits set by the previous world must not carry over
+      this.initConstants()
+      this.hasServerZoomOverride = false
+
       this.terminalMenu.isChoiceSubmitted = false
       TWEEN.removeAll()
 
