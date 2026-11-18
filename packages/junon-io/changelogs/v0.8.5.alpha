@@ -1,0 +1,36 @@
+{
+  "version": "v0.8.5.alpha",
+  "date": "November 18, 2026",
+  "title": "New Functions, Fire Rework, Corpse Selector, and Bug Fixes - by BigTforLife",
+  "content": {
+    "features": [
+      "Added command block functions $getSuitColor, $getDirt, $getBlood, $getWordCount, $getValueCount and $getLowercase",
+      "Signs now show who last edited them and when (or Command Blocks) in the entity menu",
+      "Added the @c selector for corpses (filter by type, age and effect)",
+      "Fire rework: burning buildings turn red and give off smoke, burning tiles show red on the map",
+      "Fire spread has some randomness",
+      "Players burn longer after standing on burning floors",
+      "ChangeRoles counts like an admin role: only the server owner and team leaders can give a ChangeRoles role or change the role of someone who has it",
+      "The server owner now always sees the ban list in the team menu",
+      "Survival raids and the messenger's menu now use the ChangeRoles permission",
+      "Big fires are much less laggy",
+      "Raised the tax cap from 5k to 100k",
+      "Added an fps counter to the F5 debug window",
+      "Increased the /stat maximum reload time from 10 seconds to 100 seconds",
+      "Halved the fire extinguisher reload time",
+      "Selectors now use != for not equal, and >= and <= parse correctly"
+    ],
+    "bugs": [
+      "Fixed /role not working in command blocks",
+      "Fixed players with the ChangeRoles permission not getting the role change dropdown",
+      "Fixed the rail tram not showing the list of destinations and the edit button not appearing consistently",
+      "Fixed players getting \"server full, try again later\" by raising the server memory limits",
+      "Fixed niche bugs that came from missing roles in permission checks and a null container",
+      "Fixed destroying spike and web traps not updating room oxygen",
+      "Fixed slaves leaving crates with one stack short",
+      "Fixed zoom limits staying after switching to another world",
+      "Fixed /ping erroring when nobody matches and stopping the rest of the command block",
+      "Fixed $getRemovedValue duplicating text when the value isn't found"
+    ]
+  }
+}
