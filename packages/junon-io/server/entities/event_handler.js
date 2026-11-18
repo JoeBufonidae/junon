@@ -1501,7 +1501,9 @@ class EventHandler {
     if (values.length < 3) return undefined;
     let value = values[1].toString();
     let string = values[2].toString();
-    let startIndex = this.getValuePosition(...values) - 1;
+    let position = this.getValuePosition(...values);
+    if (!(position >= 1)) return string;
+    let startIndex = position - 1;
     return string.slice(0,startIndex) + string.slice(startIndex + value.length);
   }
 
