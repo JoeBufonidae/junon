@@ -101,7 +101,9 @@ Dragger.prototype = {
         entityId: this.id,
         player: this.isPlayer() ? this.getName() : "",
         corpseType: corpseTypeName,
-        corpseId: this.dragTarget.id
+        corpseId: this.dragTarget.id,
+        previousRow: this.dragTarget.getRow(),
+        previousCol: this.dragTarget.getCol()
       }
 
       this.game.triggerEvent("CorpseDragged", data)

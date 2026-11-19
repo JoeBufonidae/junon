@@ -473,7 +473,9 @@
          "entityId": "id of user who dragged",
          "player": "username of player",
          "corpseType": "type of corpse",
-         "corpseId": "id of corpse"
+         "corpseId": "id of corpse",
+         "previousRow": "row where the corpse was before it was dragged",
+         "previousCol": "column where the corpse was before it was dragged"
       }
     },
     "CorpseReleased": {
