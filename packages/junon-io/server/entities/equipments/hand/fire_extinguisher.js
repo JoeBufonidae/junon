@@ -23,7 +23,7 @@ class FireExtinguisher extends HandEquipment {
     points.forEach((point) => {
       const randomWidth = Math.floor(Math.random() * (maxWidth - minWidth)) + minWidth
 
-      if (!this.isObstructed(player, point)) {
+      //if (!this.isObstructed(player, point)) {
         Projectiles.CarbonGas.build({
           weapon: this,
           source:      { x: point[0], y: point[1] },
@@ -31,7 +31,7 @@ class FireExtinguisher extends HandEquipment {
           w: randomWidth,
           h: randomWidth
         })
-      }
+      //}
     })
 
   }
