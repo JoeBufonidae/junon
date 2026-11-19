@@ -140,7 +140,9 @@ class Fire extends BaseEffect {
     // The copy is a child of that sprite, so it shares its size, position and rotation.
     // some buildings keep their picture in baseSprite and use buildingSprite as an empty container, so take the first one that has a picture
     const hasPicture = (sprite) => sprite && sprite.texture && sprite.texture !== PIXI.Texture.EMPTY && sprite.anchor
-    const source = [entity.buildingSprite, entity.baseSprite].find(hasPicture)
+    const source = [entity.buildingSprite, entity.baseSprite, entity.characterSprite].find(hasPicture)
+    // a corpse with no picture to copy gets no overlay (a plain rectangle would not match its shape)
+    if (!source && this.isTargetCorpse()) return
     const canCopy = !!source
 
     let overlay
