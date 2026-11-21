@@ -869,7 +869,7 @@ class MatchmakerServer {
     let uid = await this.getUidFromRequest(data.idToken, data.uid)
     let sectorData = environment.getActivePlayerCreatedGame(ip, uid)
     if (sectorData) {
-      LOG.info("removePlayerFromPreviousCreatedGame: ip: " + ip + " idToken: " + data.idToken + " @ sector: " + sectorData.sectorId + " host: " + sectorData.host)
+      LOG.info("removePlayerFromPreviousCreatedGame: ip: " + ip + " @ sector: " + sectorData.sectorId + " host: " + sectorData.host)
       let gameServerSocket = this.gameServerSockets[sectorData.host]
       if (gameServerSocket) {
         if (!data.stress) {
@@ -1282,6 +1282,7 @@ class MatchmakerServer {
 
       let environment = this.getEnvironment()
       await this.removePlayerFromPreviousCreatedGame(environment, ip, data)
+      LOG.info("Join request: player " + (data.username || "unknown") + " -> world " + sectorId)
 
       // check if sector is already online, can't have two instances (save file overwrite each other..)
       let onlineSector = region.getExistingSector(sectorId)

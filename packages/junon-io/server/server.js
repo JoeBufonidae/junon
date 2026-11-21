@@ -583,10 +583,12 @@ class Server {
     }
 
     LOG.info("Creating game for " + sectorId)
+    let loadStartedAt = Date.now()
 
     Profiler.start("createGame - game.init")
     await game.init(options)
     Profiler.stop("createGame - game.init")
+    LOG.info("World loaded: " + sectorId + " in " + ((Date.now() - loadStartedAt) / 1000).toFixed(1) + " s")
 
     if (!game.sector) {
       return { error: "Error in game create" }
